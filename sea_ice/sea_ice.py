@@ -3,6 +3,7 @@
 import argparse
 import json
 import numpy as np
+from polysimplify import VWSimplifier
 from scipy.ndimage import gaussian_filter1d
 import shapefile # https://github.com/GeospatialPython/pyshp
 import svgwrite
@@ -13,13 +14,13 @@ import sys
 parser = argparse.ArgumentParser()
 # input source: http://nsidc.org/data/docs/noaa/g02135_seaice_index/
 parser.add_argument('-input', dest="INPUT_FILE", default="data/extent_N_{month}_polygon_v2/extent_N_{month}_polygon_v2", help="Path to input shapefiles")
-parser.add_argument('-months', dest="MONTHS", default="199609,201609", help="Months as a list")
+parser.add_argument('-before', dest="MONTH_BEFORE", default="199609", help="Month before loss")
+parser.add_argument('-after', dest="MONTH_AFTER", default="201609", help="Months after loss")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/extent_N_polygon_v2.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-months = args.MONTHS.split(",")
 WIDTH = args.WIDTH
 
 # get boundaries
@@ -27,10 +28,9 @@ def boundaries(features):
     lngs = []
     lats = []
     for feature in features:
-        for coord in feature["geometry"]["coordinates"]:
-            for lnglat in coord:
-                lngs.append(lnglat[0])
-                lats.append(lnglat[1])
+        for lnglat in feature["coordinates"]:
+            lngs.append(lnglat[0])
+            lats.append(lnglat[1])
     minLng = min(lngs)
     maxLng = max(lngs)
     minLat = min(lats)
@@ -55,6 +55,12 @@ def lnglatToPx(lnglat, bounds, width, height):
     # return (int(round(x)), int(round(y)))
     return (x, y)
 
+# for line simplification
+def simplify(line, length=100):
+    simplifier = VWSimplifier(line)
+    simplified = simplifier.from_number(length)
+    return simplified.tolist()
+
 def smoothPoints(points, resolution=3, sigma=1.8):
     a = np.array(points)
 
@@ -73,15 +79,12 @@ def smoothPoints(points, resolution=3, sigma=1.8):
 
     return zip(x4, y4)
 
-def geojsonToSvg(geojson, svgfile):
-    # no features
-    features = geojson["features"]
+def featuresToSvg(features, svgfile):
     if not len(features):
         return False
 
     # get bounds
     bounds = boundaries(features)
-    print "Bounds %s: [%s, %s, %s, %s]" % (month, bounds[0], bounds[1], bounds[2], bounds[3])
 
     # aspect ratio: w / h
     aspect_ratio = 1.0 * abs(bounds[2]-bounds[0]) / abs(bounds[3]-bounds[1])
@@ -92,18 +95,26 @@ def geojsonToSvg(geojson, svgfile):
 
     # Add features to svg
     for i, feature in enumerate(features):
-        featureId = feature["properties"]["id"]
-        for coord in feature["geometry"]["coordinates"]:
-            points = []
-            for lnglat in coord:
-                point = lnglatToPx(lnglat, bounds, WIDTH, height)
-                points.append(point)
-            points = smoothPoints(points)
-            # add closure
+        featureId = feature["id"]
+        points = []
+        for lnglat in feature["coordinates"]:
+            point = lnglatToPx(lnglat, bounds, WIDTH, height)
+            points.append(point)
+        points = smoothPoints(points)
+        # simplify points
+        if "simplifyTo" in feature:
+            points = simplify(points, feature["simplifyTo"])
+        # polygons
+        if feature["type"] == "Polygon":
+            # add closure for polygons
             points.append((points[0][0], points[0][1]))
-            featureLine = dwg.polyline(id=featureId, points=points, stroke="#000000", stroke_width=2, fill=feature["properties"]["fillColor"])
+            featureLine = dwg.polyline(id=featureId, points=points, stroke="#000000", stroke_width=2, fill="#FFFFFF")
             dwg.add(featureLine)
-
+        # multipoints
+        elif feature["type"] == "MultiPoint":
+            dwgGroup = dwg.add(dwg.g(id=featureId))
+            for point in points:
+                dwgGroup.add(dwg.circle(center=point, r=2))
     # Save
     dwg.save()
     print "Saved svg: %s" % svgfile
@@ -126,34 +137,28 @@ def shapeToGeojson(sfname):
     return geojson
 
 features = []
-for i, month in enumerate(months):
-    # convert shapefile to geojson
-    sfname = args.INPUT_FILE.replace("{month}", month)
-    geojson = shapeToGeojson(sfname)
-    # geojsonfilename = "data/%s.geojson" % month
-    # with open(geojsonfilename, 'w') as f:
-    #     json.dump(geojson, f, indent=2)
 
-    # reduce the set to just the largest polygon
-    polygon = largestPolygon(geojson)
-    fillColor = "#000000"
-    if i > 0:
-        fillColor = "#FFFFFF"
-    features.append({
-        "type": "Feature",
-        "properties": {
-            "id": "month" + month,
-            "fillColor": fillColor
-        },
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [ polygon ]
-        }
-    })
+# convert shapefile to geojson
+sfname = args.INPUT_FILE.replace("{month}", args.MONTH_BEFORE)
+geojson = shapeToGeojson(sfname)
+# reduce the set to just the largest polygon
+polygon = largestPolygon(geojson)
+features.append({
+    "id": "month" + args.MONTH_BEFORE,
+    "type": "MultiPoint",
+    "coordinates": polygon,
+    "simplifyTo": 100
+})
 
-# create a geojson that combines all months
-combinedGeojson = {
-    "type": "FeatureCollection",
-    "features": features
-}
-geojsonToSvg(combinedGeojson, args.OUTPUT_FILE)
+# convert shapefile to geojson
+sfname = args.INPUT_FILE.replace("{month}", args.MONTH_AFTER)
+geojson = shapeToGeojson(sfname)
+# reduce the set to just the largest polygon
+polygon = largestPolygon(geojson)
+features.append({
+    "id": "month" + args.MONTH_AFTER,
+    "type": "Polygon",
+    "coordinates": polygon
+})
+
+featuresToSvg(features, args.OUTPUT_FILE)
