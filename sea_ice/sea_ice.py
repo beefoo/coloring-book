@@ -13,7 +13,7 @@ import sys
 parser = argparse.ArgumentParser()
 # input source: http://nsidc.org/data/docs/noaa/g02135_seaice_index/
 parser.add_argument('-input', dest="INPUT_FILE", default="data/extent_N_{month}_polygon_v2/extent_N_{month}_polygon_v2", help="Path to input shapefiles")
-parser.add_argument('-months', dest="MONTHS", default="199609,200609,201609", help="Months as a list")
+parser.add_argument('-months', dest="MONTHS", default="199609,201609", help="Months as a list")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/extent_N_polygon_v2.svg", help="Path to output svg file")
 
@@ -55,7 +55,7 @@ def lnglatToPx(lnglat, bounds, width, height):
     # return (int(round(x)), int(round(y)))
     return (x, y)
 
-def smoothPoints(points, resolution=2, sigma=1):
+def smoothPoints(points, resolution=3, sigma=1.8):
     a = np.array(points)
 
     x, y = a.T
@@ -101,7 +101,7 @@ def geojsonToSvg(geojson, svgfile):
             points = smoothPoints(points)
             # add closure
             points.append((points[0][0], points[0][1]))
-            featureLine = dwg.polyline(id=featureId, points=points, stroke="#000000", stroke_width=2, fill="#ffffff")
+            featureLine = dwg.polyline(id=featureId, points=points, stroke="#000000", stroke_width=2, fill=feature["properties"]["fillColor"])
             dwg.add(featureLine)
 
     # Save
@@ -126,7 +126,7 @@ def shapeToGeojson(sfname):
     return geojson
 
 features = []
-for month in months:
+for i, month in enumerate(months):
     # convert shapefile to geojson
     sfname = args.INPUT_FILE.replace("{month}", month)
     geojson = shapeToGeojson(sfname)
@@ -136,9 +136,15 @@ for month in months:
 
     # reduce the set to just the largest polygon
     polygon = largestPolygon(geojson)
+    fillColor = "#000000"
+    if i > 0:
+        fillColor = "#FFFFFF"
     features.append({
         "type": "Feature",
-        "properties": { "id": "month" + month },
+        "properties": {
+            "id": "month" + month,
+            "fillColor": fillColor
+        },
         "geometry": {
             "type": "Polygon",
             "coordinates": [ polygon ]
