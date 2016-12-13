@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import inspect
 import json
-import numpy as np
-from polysimplify import VWSimplifier
-from scipy.ndimage import gaussian_filter1d
+import math
+import os
 import shapefile # https://github.com/GeospatialPython/pyshp
 import svgwrite
 from svgwrite import inch, px
 import sys
+
+# add parent directory to sys path to import relative modules
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+
+import lib.mathutils as mu
 
 # input
 parser = argparse.ArgumentParser()
@@ -60,30 +67,6 @@ def lnglatToPx(lnglat, bounds, width, height, pad=0):
     y += pad
     return (x, y)
 
-# for line simplification
-def simplify(line, length=100):
-    simplifier = VWSimplifier(line)
-    simplified = simplifier.from_number(length)
-    return simplified.tolist()
-
-def smoothPoints(points, resolution=3, sigma=1.8):
-    a = np.array(points)
-
-    x, y = a.T
-    t = np.linspace(0, 1, len(x))
-    t2 = np.linspace(0, 1, len(y)*resolution)
-
-    x2 = np.interp(t2, t, x)
-    y2 = np.interp(t2, t, y)
-
-    x3 = gaussian_filter1d(x2, sigma)
-    y3 = gaussian_filter1d(y2, sigma)
-
-    x4 = np.interp(t, t2, x3)
-    y4 = np.interp(t, t2, y3)
-
-    return zip(x4, y4)
-
 def featuresToSvg(features, svgfile):
     if not len(features):
         return False
@@ -97,6 +80,7 @@ def featuresToSvg(features, svgfile):
 
     # Init svg
     dwg = svgwrite.Drawing(svgfile, size=((WIDTH+PAD*2)*px, (height+PAD*2)*px), profile='full')
+    center = (0.5*(WIDTH+PAD*2), 0.5*(height+PAD*2))
 
     # Add features to svg
     for i, feature in enumerate(features):
@@ -105,10 +89,10 @@ def featuresToSvg(features, svgfile):
         for lnglat in feature["coordinates"]:
             point = lnglatToPx(lnglat, bounds, WIDTH, height, PAD)
             points.append(point)
-        points = smoothPoints(points, feature["smoothResolution"], feature["smoothSigma"])
+        points = mu.smoothPoints(points, feature["smoothResolution"], feature["smoothSigma"])
         # simplify points
         if "simplifyTo" in feature:
-            points = simplify(points, feature["simplifyTo"] + 1)
+            points = mu.simplify(points, feature["simplifyTo"] + 1)
             removeLast = points.pop()
         # polygons
         if feature["type"] == "Polygon":
@@ -124,7 +108,11 @@ def featuresToSvg(features, svgfile):
             dwgTextGroup = dwg.add(dwg.g(id=featureId+"_labels"))
             if "label" in feature:
                 for j, point in enumerate(points):
-                    dwgTextGroup.add(dwg.text(str(j+1), insert=point, font_size=feature["fontSize"]))
+                    rad = mu.radiansBetweenPoints(center, point)
+                    # round to nearest X degrees
+                    rad = mu.roundToNearestDegree(rad, 45)
+                    tp = mu.translatePoint(point, rad, feature["textTranslate"])
+                    dwgTextGroup.add(dwg.text(str(j+1), insert=tp, text_anchor="middle", alignment_baseline="middle", font_size=feature["fontSize"]))
     # Save
     dwg.save()
     print "Saved svg: %s" % svgfile
@@ -170,10 +158,11 @@ features.append({
     "id": "month" + args.MONTH_BEFORE,
     "type": "MultiPoint",
     "coordinates": polygon,
-    "smoothResolution": 1.5,
+    "smoothResolution": 1.8,
     "smoothSigma": 2,
     "simplifyTo": args.SIMPLIFY,
     "label": "number",
+    "textTranslate": 15,
     "fontSize": 12
 })
 
