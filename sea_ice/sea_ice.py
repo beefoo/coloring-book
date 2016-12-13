@@ -17,11 +17,14 @@ parser.add_argument('-input', dest="INPUT_FILE", default="data/extent_N_{month}_
 parser.add_argument('-before', dest="MONTH_BEFORE", default="199609", help="Month before loss")
 parser.add_argument('-after', dest="MONTH_AFTER", default="201609", help="Months after loss")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
+parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-simplify', dest="SIMPLIFY", type=int, default=100, help="Points to simplify to")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/extent_N_polygon_v2.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
 WIDTH = args.WIDTH
+PAD = args.PAD
 
 # get boundaries
 def boundaries(features):
@@ -49,10 +52,12 @@ def largestPolygon(geojson):
     coordinates = sorted(coordinates, key=lambda c: c["length"])
     return coordinates[-1]["coordinates"]
 
-def lnglatToPx(lnglat, bounds, width, height):
+def lnglatToPx(lnglat, bounds, width, height, pad=0):
     x = 1.0 * (lnglat[0] - bounds[0]) / (bounds[2] - bounds[0]) * width
     y = (1.0 - 1.0 * (lnglat[1] - bounds[1]) / (bounds[3] - bounds[1])) * height
     # return (int(round(x)), int(round(y)))
+    x += pad
+    y += pad
     return (x, y)
 
 # for line simplification
@@ -91,19 +96,20 @@ def featuresToSvg(features, svgfile):
     height = WIDTH / aspect_ratio
 
     # Init svg
-    dwg = svgwrite.Drawing(svgfile, size=(WIDTH*px, height*px), profile='full')
+    dwg = svgwrite.Drawing(svgfile, size=((WIDTH+PAD*2)*px, (height+PAD*2)*px), profile='full')
 
     # Add features to svg
     for i, feature in enumerate(features):
         featureId = feature["id"]
         points = []
         for lnglat in feature["coordinates"]:
-            point = lnglatToPx(lnglat, bounds, WIDTH, height)
+            point = lnglatToPx(lnglat, bounds, WIDTH, height, PAD)
             points.append(point)
-        points = smoothPoints(points)
+        points = smoothPoints(points, feature["smoothResolution"], feature["smoothSigma"])
         # simplify points
         if "simplifyTo" in feature:
-            points = simplify(points, feature["simplifyTo"])
+            points = simplify(points, feature["simplifyTo"] + 1)
+            removeLast = points.pop()
         # polygons
         if feature["type"] == "Polygon":
             # add closure for polygons
@@ -114,7 +120,11 @@ def featuresToSvg(features, svgfile):
         elif feature["type"] == "MultiPoint":
             dwgGroup = dwg.add(dwg.g(id=featureId))
             for point in points:
-                dwgGroup.add(dwg.circle(center=point, r=2))
+                dwgGroup.add(dwg.circle(center=point, r=3))
+            dwgTextGroup = dwg.add(dwg.g(id=featureId+"_labels"))
+            if "label" in feature:
+                for j, point in enumerate(points):
+                    dwgTextGroup.add(dwg.text(str(j+1), insert=point, font_size=feature["fontSize"]))
     # Save
     dwg.save()
     print "Saved svg: %s" % svgfile
@@ -139,6 +149,19 @@ def shapeToGeojson(sfname):
 features = []
 
 # convert shapefile to geojson
+sfname = args.INPUT_FILE.replace("{month}", args.MONTH_AFTER)
+geojson = shapeToGeojson(sfname)
+# reduce the set to just the largest polygon
+polygon = largestPolygon(geojson)
+features.append({
+    "id": "month" + args.MONTH_AFTER,
+    "type": "Polygon",
+    "coordinates": polygon,
+    "smoothResolution": 3,
+    "smoothSigma": 1.8
+})
+
+# convert shapefile to geojson
 sfname = args.INPUT_FILE.replace("{month}", args.MONTH_BEFORE)
 geojson = shapeToGeojson(sfname)
 # reduce the set to just the largest polygon
@@ -147,18 +170,11 @@ features.append({
     "id": "month" + args.MONTH_BEFORE,
     "type": "MultiPoint",
     "coordinates": polygon,
-    "simplifyTo": 100
-})
-
-# convert shapefile to geojson
-sfname = args.INPUT_FILE.replace("{month}", args.MONTH_AFTER)
-geojson = shapeToGeojson(sfname)
-# reduce the set to just the largest polygon
-polygon = largestPolygon(geojson)
-features.append({
-    "id": "month" + args.MONTH_AFTER,
-    "type": "Polygon",
-    "coordinates": polygon
+    "smoothResolution": 1.5,
+    "smoothSigma": 2,
+    "simplifyTo": args.SIMPLIFY,
+    "label": "number",
+    "fontSize": 12
 })
 
 featuresToSvg(features, args.OUTPUT_FILE)
