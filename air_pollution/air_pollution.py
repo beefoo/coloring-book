@@ -37,7 +37,7 @@ AQI = [
     {"max": 200, "label": "Unhealthy", "color": "Red", "meaning": "Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects."},
     {"max": 300, "label": "Very Unhealthy", "color": "Purple", "meaning": "Health alert: everyone may experience more serious health effects."},
     {"max": 500, "label": "Hazardous", "color": "Maroon", "meaning": "Health warnings of emergency conditions. The entire population is more likely to be affected."},
-    {"max": 9999, "label": "Off The Charts", "color": "Black", "meaning": "Air quality is so bad it exceeds the maximum allowed value on the Air Quality Index."}
+    {"max": 9999, "label": "Beyond Index", "color": "Black", "meaning": "Air quality is so bad it exceeds the maximum defined value on the Air Quality Index."}
 ]
 
 def dayOfWeek(date):
