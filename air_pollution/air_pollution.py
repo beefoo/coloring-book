@@ -18,7 +18,7 @@ parser.add_argument('-reduce', dest="REDUCE", default="max", help="How to reduce
 parser.add_argument('-wpr', dest="WEEKS_PER_ROW", type=int, default=2, help="Amount of weeks to display per row")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
-parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=4, help="Padding around each day")
+parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=2, help="Padding around each day")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/Beijing_2015_DailyPM25.svg", help="Path to output svg file")
 
 # init input
@@ -80,7 +80,7 @@ with open(args.INPUT_FILE, 'rb') as f:
                 queue.append(value)
             elif current_date != date:
                 readings.append({
-                    'date': date,
+                    'date': current_date,
                     'value': reduceData(queue)
                 })
                 queue = []
@@ -89,9 +89,12 @@ with open(args.INPUT_FILE, 'rb') as f:
                 queue.append(value)
     if len(queue) > 0:
         readings.append({
-            'date': date,
+            'date': current_date,
             'value': reduceData(queue)
         })
+
+# sort chronologically
+readings = sorted(readings, key=lambda k: k['date'])
 
 # Show a chart
 # y = [r['value'] for r in readings]
@@ -113,6 +116,8 @@ dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=((WIDTH+PAD*2)*px, (height+PAD*2)*
 day_r = (cell_w - DAY_PAD * 2) * 0.5
 dwgShapes = dwg.add(dwg.g(id="shapes"))
 dwgLabels = dwg.add(dwg.g(id="labels"))
+# dwgMonths = dwg.add(dwg.g(id="months"))
+# currentMonth = ""
 for i, r in enumerate(readings):
     weekday = dayOfWeek(r['date'])
     j = i + offset
@@ -121,8 +126,15 @@ for i, r in enumerate(readings):
     col = 7 * (week % WEEKS_PER_ROW) + weekday
     x = col * cell_w + cell_w * 0.5 + PAD
     y = row * cell_h + cell_h * 0.5 + PAD
+    # add circle
     dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=2, fill="none"))
+    # add value as label
     dwgLabels.add(dwg.text(str(r['value']), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=10))
+    # add month label
+    # month = r['date'].strftime("%b")
+    # if currentMonth != month:
+    #     dwgMonths.add(dwg.text(month, insert=(x-day_r, y-day_r), text_anchor="middle", alignment_baseline="middle", font_size=10))
+    #     currentMonth = month
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
