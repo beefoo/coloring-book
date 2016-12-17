@@ -61,6 +61,14 @@ def reduceData(data):
     else:
         return mean(data)
 
+def getValue(value, index):
+    v = len(index)
+    for i, r in enumerate(index):
+        if value < r["max"]:
+            v = i + 1
+            break
+    return v
+
 # Read file
 readings = []
 with open(args.INPUT_FILE, 'rb') as f:
@@ -129,7 +137,8 @@ for i, r in enumerate(readings):
     # add circle
     dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=2, fill="none"))
     # add value as label
-    dwgLabels.add(dwg.text(str(r['value']), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=10))
+    value = getValue(r['value'], AQI)
+    dwgLabels.add(dwg.text(str(value), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=18))
     # add month label
     # month = r['date'].strftime("%b")
     # if currentMonth != month:
