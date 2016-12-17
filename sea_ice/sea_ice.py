@@ -7,7 +7,6 @@ import math
 import os
 import shapefile # https://github.com/GeospatialPython/pyshp
 import svgwrite
-from svgwrite import inch, px
 import sys
 
 # add parent directory to sys path to import relative modules
@@ -79,7 +78,7 @@ def featuresToSvg(features, svgfile):
     height = WIDTH / aspect_ratio
 
     # Init svg
-    dwg = svgwrite.Drawing(svgfile, size=((WIDTH+PAD*2)*px, (height+PAD*2)*px), profile='full')
+    dwg = svgwrite.Drawing(svgfile, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
     center = (0.5*(WIDTH+PAD*2), 0.5*(height+PAD*2))
 
     # Add features to svg

@@ -8,7 +8,6 @@ import math
 import matplotlib.pyplot as plt
 import os
 import svgwrite
-from svgwrite import inch, px
 
 # input
 parser = argparse.ArgumentParser()
@@ -118,7 +117,7 @@ rows = math.ceil((365.0 + offset) / days_per_row)
 cell_w = 1.0 * WIDTH / days_per_row
 cell_h = cell_w
 height = cell_h * rows
-dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=((WIDTH+PAD*2)*px, (height+PAD*2)*px), profile='full')
+dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
 
 # add days to svg
 day_r = (cell_w - DAY_PAD * 2) * 0.5
