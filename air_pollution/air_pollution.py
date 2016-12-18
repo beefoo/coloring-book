@@ -134,7 +134,7 @@ for i, r in enumerate(readings):
     x = col * cell_w + cell_w * 0.5 + PAD
     y = row * cell_h + cell_h * 0.5 + PAD
     # add circle
-    dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=2, fill="none"))
+    dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=3, fill="none"))
     # add value as label
     value = getValue(r['value'], AQI)
     dwgLabels.add(dwg.text(str(value), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=18))
