@@ -17,6 +17,7 @@ parser.add_argument('-reduce', dest="REDUCE", default="max", help="How to reduce
 parser.add_argument('-wpr', dest="WEEKS_PER_ROW", type=int, default=2, help="Amount of weeks to display per row")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-osc', dest="OSCILLATE", type=float, default=40.0, help="Amount to oscillate")
 parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=2, help="Padding around each day")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/Beijing_2015_DailyPM25.svg", help="Path to output svg file")
 
@@ -24,7 +25,8 @@ parser.add_argument('-output', dest="OUTPUT_FILE", default="data/Beijing_2015_Da
 args = parser.parse_args()
 WEEKS_PER_ROW = args.WEEKS_PER_ROW
 WIDTH = args.WIDTH
-PAD = args.PAD
+OSCILLATE = args.OSCILLATE
+PAD = args.PAD + OSCILLATE
 DAY_PAD = args.DAY_PAD
 
 # Config Air Quality Index
@@ -53,6 +55,11 @@ def mean(data):
         return 0
     else:
         return sum(data) / n
+
+def oscillate(p, amount, f=2.0):
+    radians = p * (math.pi * f)
+    m = math.sin(radians)
+    return m * amount
 
 def reduceData(data):
     if args.REDUCE == "max":
@@ -132,7 +139,8 @@ for i, r in enumerate(readings):
     row = int((i + offset) / days_per_row)
     col = 7 * (week % WEEKS_PER_ROW) + weekday
     x = col * cell_w + cell_w * 0.5 + PAD
-    y = row * cell_h + cell_h * 0.5 + PAD
+    osc = oscillate(1.0*col/(WEEKS_PER_ROW*7), OSCILLATE)
+    y = row * cell_h + cell_h * 0.5 + PAD + osc
     # add circle
     dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=3, fill="none"))
     # add value as label
