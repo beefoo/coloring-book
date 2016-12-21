@@ -29,9 +29,9 @@ parser.add_argument('-wavex', dest="WAVELENGTH_X", type=float, default=30.0, hel
 parser.add_argument('-wavey', dest="WAVELENGTH_Y", type=float, default=15.0, help="Wavelength to oscillate y")
 parser.add_argument('-freqx', dest="FREQUENCY_X", type=float, default=4.0, help="Frequency to oscillate x")
 parser.add_argument('-freqy', dest="FREQUENCY_Y", type=float, default=2.0, help="Frequency to oscillate y")
-parser.add_argument('-edge', dest="EDGE", type=float, default=10.0, help="Jagged edge height")
+parser.add_argument('-edge', dest="EDGE", type=float, default=15.0, help="Jagged edge height")
 parser.add_argument('-ylabel', dest="YLABEL_WIDTH", type=float, default=100.0, help="Y-label width")
-parser.add_argument('-xlabel', dest="XLABEL_HEIGHT", type=float, default=40.0, help="X-label height")
+parser.add_argument('-xlabel', dest="XLABEL_HEIGHT", type=float, default=50.0, help="X-label height")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/188001-201611_land_ocean.svg", help="Path to output svg file")
 
 # init input
@@ -116,7 +116,21 @@ for month in range(13):
         y = PAD + XLABEL_HEIGHT + year * cellH
         oscx = mu.oscillate(1.0*yp/yearCount, WAVELENGTH_X, FREQUENCY_X)
         points.append((x+oscx, y+oscy))
-    dwgXGrid.add(dwg.polyline(points=points, stroke="#000000", stroke_width=1, fill="none"))
+    dwgXGrid.add(dwg.polyline(points=points, stroke="#000000", stroke_width=2, fill="none"))
+
+# y grid
+# dwgYGrid = dwg.add(dwg.g(id="ygrid"))
+# for year in range(yearCount+1):
+#     points = []
+#     y = PAD + XLABEL_HEIGHT + year * cellH
+#     yp = year % yearCount
+#     oscx = mu.oscillate(1.0*yp/yearCount, WAVELENGTH_X, FREQUENCY_X)
+#     for month in range(13):
+#         xp = month % 11
+#         x = PAD + YLABEL_WIDTH + month * cellW
+#         oscy = mu.oscillate(1.0*xp/11, WAVELENGTH_Y, FREQUENCY_Y)
+#         points.append((x+oscx, y+oscy))
+#     dwgYGrid.add(dwg.polyline(points=points, stroke="#000000", stroke_width=1, fill="none"))
 
 # y grid
 dwgYGrid = dwg.add(dwg.g(id="ygrid"))
@@ -125,10 +139,14 @@ for year in range(yearCount+1):
     y = PAD + XLABEL_HEIGHT + year * cellH
     yp = year % yearCount
     oscx = mu.oscillate(1.0*yp/yearCount, WAVELENGTH_X, FREQUENCY_X)
+    oscx2 = mu.oscillate(1.0*(yp-0.5)/yearCount, WAVELENGTH_X, FREQUENCY_X)
     for month in range(13):
         xp = month % 11
         x = PAD + YLABEL_WIDTH + month * cellW
         oscy = mu.oscillate(1.0*xp/11, WAVELENGTH_Y, FREQUENCY_Y)
+        if month > 0:
+            oscy2 = mu.oscillate(1.0*(xp-0.5)/11, WAVELENGTH_Y, FREQUENCY_Y)
+            points.append((x+oscx-0.5*cellW, y+oscy2-EDGE))
         points.append((x+oscx, y+oscy))
     dwgYGrid.add(dwg.polyline(points=points, stroke="#000000", stroke_width=1, fill="none"))
 
@@ -147,7 +165,7 @@ for i, v in enumerate(values):
             oscx = mu.oscillate(1.0*(v["year"] - YEAR_START + 0.5)/yearCount, WAVELENGTH_X, FREQUENCY_X)
             oscy = mu.oscillate(1.0*(v["month"]+0.5)/11, WAVELENGTH_Y, FREQUENCY_Y)
 
-            dwgLabels.add(dwg.text(label, insert=(cx+oscx, cy+oscy), text_anchor="middle", alignment_baseline="middle", font_size=14))
+            dwgLabels.add(dwg.text(label, insert=(cx+oscx, cy+oscy-EDGE*0.5), text_anchor="middle", alignment_baseline="middle", font_size=14))
 
 
 dwg.save()
