@@ -5,6 +5,19 @@ import numpy as np
 from polysimplify import VWSimplifier
 from scipy.ndimage import gaussian_filter1d
 
+# Mean of list
+def mean(data):
+    n = len(data)
+    if n < 1:
+        return 0
+    else:
+        return sum(data) / n
+
+def oscillate(p, amount, f=2.0):
+    radians = p * (math.pi * f)
+    m = math.sin(radians)
+    return m * amount
+
 def radiansBetweenPoints(p1, p2):
     deltaX = p2[0] - p1[0]
     deltaY = p2[1] - p1[1]

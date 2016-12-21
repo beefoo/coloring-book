@@ -4,10 +4,19 @@ import argparse
 import csv
 import datetime
 import glob
+import inspect
 import math
 import matplotlib.pyplot as plt
 import os
 import svgwrite
+import sys
+
+# add parent directory to sys path to import relative modules
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+
+import lib.mathutils as mu
 
 # input
 parser = argparse.ArgumentParser()
@@ -48,24 +57,11 @@ def dayOfWeek(date):
         weekday = 0
     return weekday
 
-# Mean of list
-def mean(data):
-    n = len(data)
-    if n < 1:
-        return 0
-    else:
-        return sum(data) / n
-
-def oscillate(p, amount, f=2.0):
-    radians = p * (math.pi * f)
-    m = math.sin(radians)
-    return m * amount
-
 def reduceData(data):
     if args.REDUCE == "max":
         return max(data)
     else:
-        return mean(data)
+        return mu.mean(data)
 
 def getValue(value, index):
     v = len(index)
@@ -139,7 +135,7 @@ for i, r in enumerate(readings):
     row = int((i + offset) / days_per_row)
     col = 7 * (week % WEEKS_PER_ROW) + weekday
     x = col * cell_w + cell_w * 0.5 + PAD
-    osc = oscillate(1.0*col/(WEEKS_PER_ROW*7), OSCILLATE)
+    osc = mu.oscillate(1.0*col/(WEEKS_PER_ROW*7), OSCILLATE)
     y = row * cell_h + cell_h * 0.5 + PAD + osc
     # add circle
     dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=3, fill="none"))
