@@ -3,8 +3,10 @@
 import argparse
 import colorsys
 import inspect
+import matplotlib.pyplot as plt
 import os
 from PIL import Image
+from skimage import measure
 import svgwrite
 import sys
 
@@ -31,9 +33,11 @@ PAD = args.PAD
 DEGREES = [2, 4]
 ALPHA_THRESHOLD = 0.5
 
+def inBounds(x, y, w, h):
+    return x >= 0 and y >= 0 and x < w and y < h
+
 def isLand(data, x, y, w, h):
-    # out of bounds
-    if x < 0 or y < 0 or x >= w or y >= h:
+    if not inBounds(x, y, w, h):
         return False
     land = False
     (r,g,b,a) = data[y*w+x]
@@ -65,63 +69,66 @@ def isEdge(data, x, y, w, h):
                 break
     return edge
 
-shape = []
+def isShape(data, x, y, w, h):
+    (r,g,b,a) = data[y*w+x]
+    # check alpha
+    if a > 0:
+        return True
+    return False
+
+def isWater(data, x, y, w, h):
+    # out of bounds
+    if not inBounds(x, y, w, h):
+        return False
+    (r,g,b,a) = data[y*w+x]
+    return a > ALPHA_THRESHOLD and not isLand(data, x, y, w, h)
+
+def showContours(img, contours):
+    # Display the image and plot all contours found
+    fig, ax = plt.subplots()
+    ax.imshow(img, interpolation='nearest', cmap=plt.cm.gray)
+    for n, contour in enumerate(contours):
+        ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
+        break
+    ax.axis('image')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.show()
+
+# retrieve contours
+contours = []
 for i,d in enumerate(DEGREES):
     # get image data
     im = Image.open(INPUT_FILE % d)
     data = list(im.getdata())
     (w,h) = im.size
-    edgeData = [(0,0,0) for r in range(w*h)]
 
     # get shape
     if i <= 0:
-        for x in range(w):
-            # go from top to bottom
-            for y in range(h):
-                (r,g,b,a) = data[y*w+x]
-                if a > ALPHA_THRESHOLD:
-                    shape.append((x,y))
-                    edgeData[y*w+x] = (255,0,0)
-                    break
-            # go from bottom to top
-            for y in range(h):
-                (r,g,b,a) = data[(h-1-y)*w+x]
-                if a > ALPHA_THRESHOLD:
-                    shape.append((x,(h-1-y)))
-                    edgeData[(h-1-y)*w+x] = (255,0,0)
-                    break
+        shape = [[0.0]*w for n in range(h)]
         for y in range(h):
-            # go from left to right
             for x in range(w):
-                (r,g,b,a) = data[y*w+x]
-                if a > ALPHA_THRESHOLD:
-                    shape.append((x,y))
-                    edgeData[y*w+x] = (255,0,0)
-                    break
-            # go from right to left
-            for x in range(w):
-                (r,g,b,a) = data[y*w+(w-1-x)]
-                if a > ALPHA_THRESHOLD:
-                    shape.append(((w-1-x),y))
-                    edgeData[y*w+(w-1-x)] = (255,0,0)
-                    break
-        # remove duplicates
-        shape = list(set(shape))
-        # simplify shape
-        # shape = mu.simplify(shape, 1000)
+                if isShape(data, x, y, w, h):
+                    shape[y][x] = 1.0
+        shapeContours = measure.find_contours(shape, 0.2)
+        contours.append({
+            "label": "0d",
+            "contours": shapeContours
+        })
+        # showContours(shape, shapeContours)
 
-    # look for white shapes
-    edges = [0] * (w*h)
+    # get land
+    land = [[0.0]*w for n in range(h)]
     for y in range(h):
         for x in range(w):
-            if isEdge(data, x, y, w, h):
-                edges[y*w+x] = 255
+            if isLand(data, x, y, w, h):
+                land[y][x] = 1.0
 
-    edgeImg = Image.new("RGB", im.size)
-    for index,px in enumerate(edgeData):
-        if edges[index] > 0:
-            edgeData[index] = (255,255,255)
-    edgeImg.putdata(edgeData)
-    edgeImg.show()
+    landContours = measure.find_contours(land, 0.2)
+    # showContours(land, landContours)
+    contours.append({
+        "label": "%sd" % d,
+        "contours": landContours
+    })
 
-    break
+# Draw contours
