@@ -23,6 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-input', dest="INPUT_FILE", default="data/slr_%sd.png", help="Path to input file")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-mpa', dest="MIN_POLY_AREA", type=float, default=0.005, help="Minimum polygon area to match")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/manhattan_slr.svg", help="Path to output svg file")
 
 # init input
@@ -30,6 +31,7 @@ args = parser.parse_args()
 INPUT_FILE = args.INPUT_FILE
 WIDTH = args.WIDTH
 PAD = args.PAD
+MIN_POLY_AREA = args.MIN_POLY_AREA
 DEGREES = [2, 4]
 ALPHA_THRESHOLD = 0.5
 
@@ -95,27 +97,29 @@ def showContours(img, contours):
     ax.set_yticks([])
     plt.show()
 
-# retrieve contours
 contours = []
+
+# get overall shape
+im = Image.open(INPUT_FILE % DEGREES[0])
+data = list(im.getdata())
+(w,h) = im.size
+area = w*h
+shape = [[0.0]*w for n in range(h)]
+for y in range(h):
+    for x in range(w):
+        if isShape(data, x, y, w, h):
+            shape[y][x] = 1.0
+shapeContours = measure.find_contours(shape, 0.2)
+contours.append({
+    "label": "0d",
+    "shapes": shapeContours
+})
+# showContours(shape, shapeContours)
+
 for i,d in enumerate(DEGREES):
     # get image data
     im = Image.open(INPUT_FILE % d)
     data = list(im.getdata())
-    (w,h) = im.size
-
-    # get shape
-    if i <= 0:
-        shape = [[0.0]*w for n in range(h)]
-        for y in range(h):
-            for x in range(w):
-                if isShape(data, x, y, w, h):
-                    shape[y][x] = 1.0
-        shapeContours = measure.find_contours(shape, 0.2)
-        contours.append({
-            "label": "0d",
-            "contours": shapeContours
-        })
-        # showContours(shape, shapeContours)
 
     # get land
     land = [[0.0]*w for n in range(h)]
@@ -128,7 +132,14 @@ for i,d in enumerate(DEGREES):
     # showContours(land, landContours)
     contours.append({
         "label": "%sd" % d,
-        "contours": landContours
+        "shapes": landContours
     })
 
 # Draw contours
+for contour in contours:
+    for i, points in enumerate(contour["shapes"]):
+        polyArea = mu.polygonArea(points)
+        p = polyArea / area
+        if p > MIN_POLY_AREA:
+            print p
+    print "----"

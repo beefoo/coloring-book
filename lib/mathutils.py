@@ -18,6 +18,12 @@ def oscillate(p, amount, f=2.0):
     m = math.sin(radians)
     return m * amount
 
+# http://stackoverflow.com/a/30408825
+def polygonArea(points):
+    x = [p[0] for p in points]
+    y = [p[1] for p in points]
+    return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
+
 def radiansBetweenPoints(p1, p2):
     deltaX = p2[0] - p1[0]
     deltaY = p2[1] - p1[1]
