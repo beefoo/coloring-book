@@ -23,7 +23,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-input', dest="INPUT_FILE", default="data/slr_%sd.png", help="Path to input file")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
-parser.add_argument('-mpa', dest="MIN_POLY_AREA", type=float, default=0.005, help="Minimum polygon area to match")
+parser.add_argument('-mpa', dest="MIN_POLY_AREA", type=float, default=0.002, help="Minimum polygon area to match")
+parser.add_argument('-image', dest="SHOW_IMAGE", type=bool, default=False, help="Show image")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/manhattan_slr.svg", help="Path to output svg file")
 
 # init input
@@ -35,6 +36,7 @@ PAD = args.PAD
 MIN_POLY_AREA = args.MIN_POLY_AREA
 DEGREES = [2, 4]
 ALPHA_THRESHOLD = 0.5
+SHOW_IMAGE = args.SHOW_IMAGE
 
 def inBounds(x, y, w, h):
     return x >= 0 and y >= 0 and x < w and y < h
@@ -52,39 +54,12 @@ def isLand(data, x, y, w, h):
             land = True
     return land
 
-def isEdge(data, x, y, w, h):
-    edge = False
-    neighbors = [
-        # (x-1, y-1),
-        (x, y-1),
-        # (x+1, y-1),
-        (x-1, y),
-        (x+1, y),
-        # (x-1, y+1),
-        (x, y+1),
-        # (x+1, y+1)
-    ]
-    if isLand(data, x, y, w, h):
-        matches = 0
-        for n in neighbors:
-            if not isLand(data, n[0], n[1], w, h):
-                edge = True
-                break
-    return edge
-
 def isShape(data, x, y, w, h):
     (r,g,b,a) = data[y*w+x]
     # check alpha
     if a > 0:
         return True
     return False
-
-def isWater(data, x, y, w, h):
-    # out of bounds
-    if not inBounds(x, y, w, h):
-        return False
-    (r,g,b,a) = data[y*w+x]
-    return a > ALPHA_THRESHOLD and not isLand(data, x, y, w, h)
 
 def showContours(img, contours):
     # Display the image and plot all contours found
@@ -101,7 +76,8 @@ def showContours(img, contours):
 contours = []
 
 # get overall shape
-im = Image.open(INPUT_FILE % DEGREES[0])
+referenceFile = INPUT_FILE % DEGREES[0]
+im = Image.open(referenceFile)
 data = list(im.getdata())
 (w,h) = im.size
 area = w*h
@@ -113,13 +89,15 @@ for y in range(h):
 shapeContours = measure.find_contours(shape, 0.2)
 contours.append({
     "label": "land_0d",
+    "image": referenceFile.split("/")[1],
     "shapes": shapeContours
 })
 # showContours(shape, shapeContours)
 
 for i,d in enumerate(DEGREES):
     # get image data
-    im = Image.open(INPUT_FILE % d)
+    filename = INPUT_FILE % d
+    im = Image.open(filename)
     data = list(im.getdata())
 
     # get land
@@ -133,21 +111,26 @@ for i,d in enumerate(DEGREES):
     # showContours(land, landContours)
     contours.append({
         "label": "land_%sd" % d,
+        "image": filename.split("/")[1],
         "shapes": landContours
     })
 
 # Init SVG
-dwg = svgwrite.Drawing(OUTPUT_FILE, size=(w, h), profile='full')
+dwg = svgwrite.Drawing(OUTPUT_FILE, size=(w*len(contours), h), profile='full')
 
 # Draw contours
+xoffset = 0
 for contour in contours:
     dwgGroup = dwg.add(dwg.g(id=contour["label"]))
+    # image as bg
+    if SHOW_IMAGE:
+        dwgGroup.add(dwg.image(contour["image"], insert=(xoffset, 0), size=(w, h)))
     for i, points in enumerate(contour["shapes"]):
         polyArea = mu.polygonArea(points)
         p = polyArea / area
         # area is big enough to show
         if p > MIN_POLY_AREA:
-            points = [(p[1],p[0]) for p in points]
+            points = [(p[1]+xoffset,p[0]) for p in points]
             # simplify polygon
             points = mu.simplify(points, 250)
             # smooth polygon
@@ -157,8 +140,9 @@ for contour in contours:
             # add closure for polygons
             points.append((points[0][0], points[0][1]))
             # add polygon as polyline
-            line = dwg.polyline(id=contour["label"]+str(i), points=points, stroke="#000000", stroke_width=2, fill="#FFFFFF")
+            line = dwg.polyline(id=contour["label"]+str(i), points=points, stroke="#000000", stroke_width=2, fill="none")
             dwgGroup.add(line)
+    xoffset += w
 # Save
 dwg.save()
 print "Saved svg: %s" % OUTPUT_FILE
