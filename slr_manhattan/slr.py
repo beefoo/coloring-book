@@ -29,6 +29,7 @@ parser.add_argument('-output', dest="OUTPUT_FILE", default="data/manhattan_slr.s
 # init input
 args = parser.parse_args()
 INPUT_FILE = args.INPUT_FILE
+OUTPUT_FILE = args.OUTPUT_FILE
 WIDTH = args.WIDTH
 PAD = args.PAD
 MIN_POLY_AREA = args.MIN_POLY_AREA
@@ -111,7 +112,7 @@ for y in range(h):
             shape[y][x] = 1.0
 shapeContours = measure.find_contours(shape, 0.2)
 contours.append({
-    "label": "0d",
+    "label": "land_0d",
     "shapes": shapeContours
 })
 # showContours(shape, shapeContours)
@@ -131,15 +132,33 @@ for i,d in enumerate(DEGREES):
     landContours = measure.find_contours(land, 0.2)
     # showContours(land, landContours)
     contours.append({
-        "label": "%sd" % d,
+        "label": "land_%sd" % d,
         "shapes": landContours
     })
 
+# Init SVG
+dwg = svgwrite.Drawing(OUTPUT_FILE, size=(w, h), profile='full')
+
 # Draw contours
 for contour in contours:
+    dwgGroup = dwg.add(dwg.g(id=contour["label"]))
     for i, points in enumerate(contour["shapes"]):
         polyArea = mu.polygonArea(points)
         p = polyArea / area
+        # area is big enough to show
         if p > MIN_POLY_AREA:
-            print p
-    print "----"
+            points = [(p[1],p[0]) for p in points]
+            # simplify polygon
+            points = mu.simplify(points, 250)
+            # smooth polygon
+            points = mu.smoothPoints(points)
+            # simplify polygon
+            points = mu.simplify(points, 500)
+            # add closure for polygons
+            points.append((points[0][0], points[0][1]))
+            # add polygon as polyline
+            line = dwg.polyline(id=contour["label"]+str(i), points=points, stroke="#000000", stroke_width=2, fill="#FFFFFF")
+            dwgGroup.add(line)
+# Save
+dwg.save()
+print "Saved svg: %s" % OUTPUT_FILE
