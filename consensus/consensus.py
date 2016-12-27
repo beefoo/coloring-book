@@ -92,6 +92,7 @@ def makeSVG(filename, amount):
             # step
             x += halfcell
             direction *= -1
+        # y += cellh * (scale+(1.0-scale)*0.5)
         y += cellh * scale
 
     dwg.save()

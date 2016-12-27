@@ -132,11 +132,12 @@ for contour in contours:
         if p > MIN_POLY_AREA:
             points = [(p[1]+xoffset,p[0]) for p in points]
             # simplify polygon
-            points = mu.simplify(points, 250)
+            target = 0.1 * len(points)
+            points = mu.simplify(points, target)
             # smooth polygon
             points = mu.smoothPoints(points)
             # simplify polygon
-            points = mu.simplify(points, 500)
+            points = mu.simplify(points, target)
             # add closure for polygons
             points.append((points[0][0], points[0][1]))
             # add polygon as polyline
