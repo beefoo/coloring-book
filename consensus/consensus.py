@@ -45,6 +45,7 @@ def makeSVG(filename, amount):
     # create stable shuffled array
     total = 100
     seed = 0.5
+    scale = 0.8
     labels = ["yes" for l in range(amount)]
     labels += ["no" for l in range((total-amount))]
     random.shuffle(labels, lambda: seed)
@@ -78,7 +79,7 @@ def makeSVG(filename, amount):
             rotate = 0
             if direction < 0:
                 rotate = 180
-            t = "translate(%s,%s) rotate(%s %s %s)" % (x+PAD, y+PAD, rotate, halfcell, halfcell)
+            t = "translate(%s,%s) scale(%s) rotate(%s %s %s)" % (x+PAD+(1.0-scale)*halfcell, y+PAD+(1.0-scale)*halfcell, scale, rotate, halfcell, halfcell)
             g = dwg.add(dwg.g(id="triangle%s" % i, transform=t))
             g.add(dwg.use("#triangle"))
             trianglesGroup.add(g)
@@ -91,7 +92,7 @@ def makeSVG(filename, amount):
             # step
             x += halfcell
             direction *= -1
-        y += cellh
+        y += cellh * scale
 
     dwg.save()
     print "Saved svg: %s" % filename
