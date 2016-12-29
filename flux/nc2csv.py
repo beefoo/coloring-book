@@ -3,6 +3,7 @@
 import csv
 import math
 from netCDF4 import Dataset
+from PIL import Image
 import sys
 
 # source: ftp://aftp.cmdl.noaa.gov/products/carbontracker/co2/fluxes/monthly/
@@ -13,6 +14,8 @@ import sys
 
 INPUT_FILE = 'data/CT2015.flux1x1.longterm.nc'
 OUTPUT_FILE = 'data/CT2015_flux1x1_longterm.csv'
+# INPUT_FILE = 'data/CT2015.flux1x1.2014-mean.nc'
+# OUTPUT_FILE = 'data/CT2015_flux1x1_2014-mean.csv'
 
 def ncdump(nc_fid, verb=True):
     def print_ncattr(key):
@@ -69,6 +72,7 @@ def latLonArea(lat1, lon1, lat2, lon2):
     return A
 
 rows = []
+maxValue = 0
 for y, lat in enumerate(lats):
     for x, lon in enumerate(lons):
         # print "%s, %s, %s" % (lat, lon, fffs[y][x])
@@ -80,17 +84,35 @@ for y, lat in enumerate(lats):
         g_m_2_y_1 = mol_m_2_y_1 * 44.009
         # CO2 exchange in grams per square kilometer per year
         g_km_2_y_1 = g_m_2_y_1 * 1000000
+        # CO2 exchange in metric tons per square kilometer per year
+        ton_km_2_y_1 = g_km_2_y_1 / 1000000
         # # area of lat/lon in km^2
         # lat_lon_km2 = latLonArea(math.floor(lat), math.floor(lon), math.ceil(lat), math.ceil(lon))
         # # square kilometer to 1x1-degree
         # g_degree_2_y_1 = g_km_2_y_1 * lat_lon_km2
-        # # grams to tons
-        # ton_km_2_y_1 = g_km_2_y_1 / 1000000
         # # CO2 exchange in metric tons per 1x1-degree per year
         # ton_degree_2_y_1 = g_degree_2_y_1 / 1000000
-        rows.append([lat, lon, g_km_2_y_1])
+        rows.append([lat, lon, ton_km_2_y_1])
+        if ton_km_2_y_1 > maxValue:
+            maxValue = ton_km_2_y_1
 
+print "Max value: %s" % maxValue
 print "Printing %s rows to file" % len(rows)
+
+# show image
+im = Image.new("RGB", (360, 180))
+w = len(lons)
+h = len(lats)
+pixeldata = [(0,0,0) for n in range(len(rows))]
+for y, lat in enumerate(lats):
+    for x, lon in enumerate(lons):
+        r = y * w + x
+        value = int(rows[r][2] / maxValue * 255)
+        if rows[r][2] > 0 and value < 10:
+            value = 10
+        pixeldata[(h-1-y) * w + x] = (value,0,0)
+im.putdata(pixeldata)
+im.show()
 
 header = ["lat", "lon", "ff_flux"]
 
