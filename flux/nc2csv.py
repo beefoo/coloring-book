@@ -78,16 +78,17 @@ for y, lat in enumerate(lats):
         mol_m_2_y_1 = mol_m_2_s_1 * 3600 * 24 * 365.25
         # mols to grams
         g_m_2_y_1 = mol_m_2_y_1 * 44.009
-        # square meter to square kilometer
+        # CO2 exchange in grams per square kilometer per year
         g_km_2_y_1 = g_m_2_y_1 * 1000000
-        # area of lat/lon in km^2
-        lat_lon_km2 = latLonArea(math.floor(lat), math.floor(lon), math.ceil(lat), math.ceil(lon))
-        # square kilometer to 1x1-degree
-        g_degree_2_y_1 = g_km_2_y_1 * lat_lon_km2
-        # grams to tons
-        ton_km_2_y_1 = g_degree_2_y_1 / 1000000
-        # CO2 exchange in metric tons per 1x1-degree per year
-        rows.append([lat, lon, ton_km_2_y_1])
+        # # area of lat/lon in km^2
+        # lat_lon_km2 = latLonArea(math.floor(lat), math.floor(lon), math.ceil(lat), math.ceil(lon))
+        # # square kilometer to 1x1-degree
+        # g_degree_2_y_1 = g_km_2_y_1 * lat_lon_km2
+        # # grams to tons
+        # ton_km_2_y_1 = g_km_2_y_1 / 1000000
+        # # CO2 exchange in metric tons per 1x1-degree per year
+        # ton_degree_2_y_1 = g_degree_2_y_1 / 1000000
+        rows.append([lat, lon, g_km_2_y_1])
 
 print "Printing %s rows to file" % len(rows)
 
