@@ -13,9 +13,12 @@ import sys
 # conversions: http://cdiac.ornl.gov/pns/convert.html
 
 INPUT_FILE = 'data/CT2015.flux1x1.longterm.nc'
+LAND_WATER_FILE = 'data/land_water.dat'
 OUTPUT_FILE = 'data/CT2015_flux1x1_longterm.csv'
+IMAGE_FILE = 'data/CT2015_flux1x1_longterm.png'
 # INPUT_FILE = 'data/CT2015.flux1x1.2014-mean.nc'
 # OUTPUT_FILE = 'data/CT2015_flux1x1_2014-mean.csv'
+# IMAGE_FILE = 'data/CT2015_flux1x1_2014-mean.png'
 
 def ncdump(nc_fid, verb=True):
     def print_ncattr(key):
@@ -60,6 +63,8 @@ ds = Dataset(INPUT_FILE, 'r')
 lats = ds.variables['lat'][:]
 lons = ds.variables['lon'][:]
 fffs = ds.variables['fossil_flux_imp'][:][0]
+w = len(lons)
+h = len(lats)
 
 # Source: http://www.pmel.noaa.gov/maillists/tmap/ferret_users/fu_2004/msg00023.html
 def latLonArea(lat1, lon1, lat2, lon2):
@@ -70,6 +75,9 @@ def latLonArea(lat1, lon1, lat2, lon2):
     lon2 = math.radians(lon2)
     A = math.pow(R, 2) * abs(math.sin(lat1)-math.sin(lat2)) * abs(lon1-lon2)
     return A
+
+# land/water data
+land = [int(line) for line in open(LAND_WATER_FILE)]
 
 rows = []
 maxValue = 0
@@ -92,7 +100,10 @@ for y, lat in enumerate(lats):
         # g_degree_2_y_1 = g_km_2_y_1 * lat_lon_km2
         # # CO2 exchange in metric tons per 1x1-degree per year
         # ton_degree_2_y_1 = g_degree_2_y_1 / 1000000
-        rows.append([lat, lon, ton_km_2_y_1])
+        value = ton_km_2_y_1
+        if land[(h-y-1) * w + x] <= 0:
+            value = -1
+        rows.append([lat, lon, value])
         if ton_km_2_y_1 > maxValue:
             maxValue = ton_km_2_y_1
 
@@ -101,18 +112,19 @@ print "Printing %s rows to file" % len(rows)
 
 # show image
 im = Image.new("RGB", (360, 180))
-w = len(lons)
-h = len(lats)
 pixeldata = [(0,0,0) for n in range(len(rows))]
 for y, lat in enumerate(lats):
     for x, lon in enumerate(lons):
         r = y * w + x
-        value = int(rows[r][2] / maxValue * 255)
-        if rows[r][2] > 0 and value < 10:
-            value = 10
-        pixeldata[(h-1-y) * w + x] = (value,0,0)
+        v = rows[r][2]
+        red = int(v / maxValue * 255)
+        color = (red, 0, 0)
+        if v < 0:
+            color = (0,0,20)
+        pixeldata[(h-1-y) * w + x] = color
 im.putdata(pixeldata)
 im.show()
+im.save(IMAGE_FILE)
 
 header = ["lat", "lon", "ff_flux"]
 
