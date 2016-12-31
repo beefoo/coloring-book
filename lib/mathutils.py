@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import math
+import matplotlib.path as mplPath
 import numpy as np
 from polysimplify import VWSimplifier
 from scipy.ndimage import gaussian_filter1d
+
+def containsPoint(points, point):
+    bbPath = mplPath.Path(np.array(points))
+    return bbPath.contains_point(point)
 
 # Mean of list
 def mean(data):
