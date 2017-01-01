@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# Usage:
+#   python flux.py
+#   python flux.py -geo data/CHN.geo.json -color True
+
 import argparse
 from collections import Counter
 import csv
@@ -26,12 +30,14 @@ parser.add_argument('-in', dest="INPUT_FILE", default="data/CT2015_flux1x1_longt
 parser.add_argument('-geo', dest="GEO_FILE", default="data/USA.geo.json", help="Input geojson file")
 parser.add_argument('-width', dest="WIDTH", type=int, default=1600, help="Width of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=20, help="Padding of output file")
+parser.add_argument('-color', dest="SHOW_COLOR", type=bool, default=False, help="Whether or not to display color")
 parser.add_argument('-out', dest="OUTPUT_FILE", default="data/flux_%s.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
 WIDTH = args.WIDTH
 PAD = args.PAD
+SHOW_COLOR = args.SHOW_COLOR
 
 LATS = 180
 LONS = 360
@@ -138,7 +144,10 @@ labelsGroup = dwg.add(dwg.g(id="labels"))
 for d in data:
     x = (d["x"]-minX) * cellW + PAD
     y = (d["y"]-minY) * cellH + PAD
-    cellsGroup.add(dwg.rect(insert=(x, y), size=(cellW, cellH), fill=d["group"]["color"]))
+    color = "none"
+    if SHOW_COLOR:
+        color = d["group"]["color"]
+    cellsGroup.add(dwg.rect(insert=(x, y), size=(cellW, cellH), fill=color, stroke="#000000", stroke_width=1))
     labelsGroup.add(dwg.text(d["group"]["key"], insert=(x+halfW, y+halfH), text_anchor="middle", alignment_baseline="middle", font_size=12))
 dwg.save()
 print "Saved svg: %s" % filename
