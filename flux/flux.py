@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-in', dest="INPUT_FILE", default="data/CT2015_flux1x1_longterm.csv", help="Input data file")
 parser.add_argument('-geo', dest="GEO_FILE", default="data/USA.geo.json", help="Input geojson file")
 parser.add_argument('-width', dest="WIDTH", type=int, default=1600, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=20, help="Padding of output file")
+parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
 parser.add_argument('-color', dest="SHOW_COLOR", type=bool, default=False, help="Whether or not to display color")
 parser.add_argument('-out', dest="OUTPUT_FILE", default="data/flux_%s.svg", help="Path to output svg file")
 
@@ -88,8 +88,13 @@ geodata = {}
 with open(args.GEO_FILE) as f:
     geodata = json.load(f)
 coordinates = []
-for coordinate in geodata["features"][0]["geometry"]["coordinates"]:
-    coordinates.append(coordinate[0])
+for feature in geodata["features"]:
+    t = feature["geometry"]["type"]
+    for coordinate in feature["geometry"]["coordinates"]:
+        if t == "MultiPolygon":
+            coordinates.append(coordinate[0])
+        else:
+            coordinates.append(coordinate)
 
 def withinCoordinates(coords, p):
     within = False
