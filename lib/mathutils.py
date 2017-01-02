@@ -10,6 +10,19 @@ def containsPoint(points, point):
     bbPath = mplPath.Path(np.array(points))
     return bbPath.contains_point(point)
 
+def halton(index, base=3):
+    result = 0
+    f = 1.0 / base
+    i = index
+    while i > 0:
+      result += f * float(i % base)
+      i = math.floor(i / base)
+      f = f / float(base)
+    return result
+
+def lerp(a, b, amount):
+    return (b-a) * amount + a
+
 # Mean of list
 def mean(data):
     n = len(data)
