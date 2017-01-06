@@ -10,7 +10,7 @@ import sys
 parser = argparse.ArgumentParser()
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=60, help="Padding of output file")
-parser.add_argument('-output', dest="OUTPUT_FILE", default="data/re_%s.svg", help="Path to output svg file")
+parser.add_argument('-output', dest="OUTPUT_FILE", default="data/re_actual_potential.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
@@ -105,13 +105,13 @@ def writeSvg(filename, data):
     diagonalPattern.add(dwg.rect(insert=(0,0), size=(20,20), fill="#FFFFFF"))
     diagonalPattern.add(dwg.path(d="M 0,20 l 20,-20 M -5,5 l 10,-10 M 15,25 l 10,-10", stroke_width=1, stroke="#000000"))
     dwg.defs.add(diagonalPattern)
-    circlesPattern = dwg.pattern(id="circles", patternUnits="userSpaceOnUse", size=(20,20))
-    circlesPattern.add(dwg.rect(insert=(0,0), size=(20,20), fill="#FFFFFF"))
-    circlesPattern.add(dwg.circle(center=(10,10), r=5, fill="none", stroke_width=1, stroke="#000000"))
+    circlesPattern = dwg.pattern(id="circles", patternUnits="userSpaceOnUse", size=(6,6))
+    circlesPattern.add(dwg.rect(insert=(0,0), size=(6,6), fill="#FFFFFF"))
+    circlesPattern.add(dwg.circle(center=(3,3), r=1, fill="#000000"))
     dwg.defs.add(circlesPattern)
-    wavesPattern = dwg.pattern(id="waves", patternUnits="userSpaceOnUse", size=(10,10))
-    wavesPattern.add(dwg.rect(insert=(0,0), size=(10,10), fill="#FFFFFF"))
-    wavesPattern.add(dwg.path(d="M 0 5 c 1.25 -2.5 , 3.75 -2.5 , 5 0 c 1.25 2.5 , 3.75 2.5 , 5 0 M -5 5 c 1.25 2.5 , 3.75 2.5 , 5 0 M 10 5 c 1.25 -2.5 , 3.75 -2.5 , 5 0", stroke_width=1, stroke="#000000", stroke_linecap="square", fill="none"))
+    wavesPattern = dwg.pattern(id="waves", patternUnits="userSpaceOnUse", size=(20,20))
+    wavesPattern.add(dwg.rect(insert=(0,0), size=(20,20), fill="#FFFFFF"))
+    wavesPattern.add(dwg.path(d="M 0 10 c 2.5 -5 , 7.5 -5 , 10 0 c 2.5 5 , 7.5 5 , 10 0 M -10 10 c 2.5 5 , 7.5 5 , 10 0 M 20 10 c 2.5 -5 , 7.5 -5 , 10 0", stroke_width=1, stroke="#000000", stroke_linecap="square", fill="none"))
     dwg.defs.add(wavesPattern)
 
     minRadius = 10
@@ -134,16 +134,11 @@ def writeSvg(filename, data):
     dwg.save()
     print "Saved svg: %s" % filename
 
-maxValue = max([totalEnergyConsumption, windProduction, solarProduction])
-writeSvg(args.OUTPUT_FILE % "actual", [
-    {"label": "Total energy consumption", "value": totalEnergyConsumption / maxValue, "width": 2, "pattern": "circles"},
-    {"label": "Wind energy production", "value": windProduction / maxValue, "width": 2, "pattern": "waves"},
-    {"label": "Solar energy production", "value": solarProduction / maxValue, "width": 2, "pattern": "diagonal"}
-])
-
-maxValue = max([totalEnergyConsumption, windPotential, solarPotential])
-writeSvg(args.OUTPUT_FILE % "potential", [
-    {"label": "Total energy consumption", "value": totalEnergyConsumption / maxValue, "width": 2, "pattern": "circles"},
-    {"label": "Wind energy technical potential", "value": windPotential / maxValue, "width": 2, "pattern": "waves"},
-    {"label": "Solar energy technical potential", "value": solarPotential / maxValue, "width": 2, "pattern": "diagonal"}
+actualRenewable = windProduction + solarProduction
+potentialRenewable = windPotential + solarPotential
+maxValue = max([totalEnergyConsumption, actualRenewable, potentialRenewable])
+writeSvg(args.OUTPUT_FILE, [
+    {"label": "Total energy consumption", "value": totalEnergyConsumption / maxValue, "width": 2, "pattern": "diagonal"},
+    {"label": "Wind and solar production", "value": actualRenewable / maxValue, "width": 2, "pattern": "circles"},
+    {"label": "Wind and solar potential", "value": potentialRenewable / maxValue, "width": 2, "pattern": "waves"}
 ])
