@@ -15,6 +15,7 @@ import lib.mathutils as mu
 
 # input
 parser = argparse.ArgumentParser()
+# Source: http://cdiac.ornl.gov/trends/emis/tre_glob_2013.htm
 parser.add_argument('-in', dest="INPUT_FILE", default="data/global.1751_2013.csv", help="Input file")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width")
 parser.add_argument('-height', dest="HEIGHT", type=int, default=1035, help="Height")
