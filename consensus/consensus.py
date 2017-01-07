@@ -42,13 +42,21 @@ def lerp(v1, v2, amount):
     return (v2-v1) * amount + v1
 
 def makeSVG(filename, amount):
-    # create stable shuffled array
+    # rows
     total = 100
-    seed = 0.5
     scale = 0.8
-    labels = ["yes" for l in range(amount)]
-    labels += ["no" for l in range((total-amount))]
-    random.shuffle(labels, lambda: seed)
+    rows = int(math.ceil(1.0 * total / PER_ROW))
+
+    # create labels
+    yes = ["yes" for l in range(amount)]
+    no = ["no" for l in range((total-amount))]
+    labels = []
+    for row in range(rows):
+        for col in range(PER_ROW):
+            if not len(no) or len(yes) and row % 2 == 0 and col % 2 == 0 or len(yes) and row % 2 > 0 and col % 2 > 0:
+                labels.append(yes.pop())
+            else:
+                labels.append(no.pop())
 
     # make equalateral triangle
     cellw = 1.0 * WIDTH / (PER_ROW/2+1)
@@ -56,7 +64,6 @@ def makeSVG(filename, amount):
     halfcell = cellw / 2
 
     # init svg
-    rows = int(math.ceil(1.0 * total / PER_ROW))
     height = rows * cellh
     dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
 
