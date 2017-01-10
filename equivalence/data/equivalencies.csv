@@ -1,0 +1,8 @@
+name,label,metric tons CO2
+vehicle,Passenger vehicle per year,4.73
+bulbs,Incandescent bulb switched to LED bulb per year,-0.0282
+tree,Urban tree seedlings grown for 10 years,-0.039
+forest,One acre of average U.S. forest per year,-1.06
+recycle,Ton of waste recycled instead of landfilled,-3.15
+recycle_truck,Garbage truck of waste recycled instead of landfilled,-22.06
+wind,Wind turbine installed per year,-3960
