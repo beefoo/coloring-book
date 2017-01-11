@@ -1,56 +1,82 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+from bs4 import BeautifulSoup
 import csv
 from datetime import datetime
 import os
+from pprint import pprint
+import re
 import sys
-import urllib2
 
 # input
 parser = argparse.ArgumentParser()
-parser.add_argument('-url', dest="URL", default="https://tidesandcurrents.noaa.gov/inundation/Analysis?datum=MHHW&userReferrence=&beginDate=%s&endDate=%s&submit=+Submit++", help="URL pattern")
-parser.add_argument('-stations', dest="STATIONS", default="8534720,8575512,8658120,8665530", help="List of stations")
-parser.add_argument('-y0', dest="START_YEAR", type=int, default=1951, help="Start year")
-parser.add_argument('-y1', dest="END_YEAR", type=int, default=2015, help="End year")
-parser.add_argument('-yi', dest="YEAR_INCR", type=int, default=5, help="Years to increment by")
+parser.add_argument('-dir', dest="HTML_DIR", default="html", help="URL pattern")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/%s_InundationAnalysis.csv", help="Output file pattern")
 
 # init input
 args = parser.parse_args()
-URL = args.URL
-STATIONS = args.STATIONS.split(",")
-START_YEAR = args.START_YEAR
-END_YEAR = args.END_YEAR
-YEAR_INCR = args.YEAR_INCR
+HTML_DIR = args.HTML_DIR
 OUTPUT_FILE = args.OUTPUT_FILE
 
-HEADERS = ["Period Start", "Period End", "Time of High Tide", "Elevation (Meters) Above Datum", "Tide Type", "Duration (Hours)"]
+# config
+HEADER = ["Station", "Period Start", "Period End", "Time of High Tide", "Elevation (Meters) Above Datum", "Tide Type", "Duration (Hours)"]
+
+def isNumber(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 def readCSV(filename):
     data = []
     if os.path.isfile(filename):
         with open(filename, 'rb') as f:
-            reader = csv.DictReader(f)
+            reader = csv.reader(f)
             data = list(reader)
     return data
 
-for station in STATIONS:
-    year = START_YEAR
-    filename = OUTPUT_FILE % station
-    stationData = []
-    while year < END_YEAR:
-        beginDate = "%s0101" % year
-        endDate =  "%s1231" % (year + YEAR_INCR - 1)
-        print URL % (beginDate, endDate)
-        # getUrl = URL % (station, beginDate, endDate)
-        # # Download HTML if it doesn't exist
-        # htmlFilename = "html/%s_%s_%s.html" % (station, beginDate, endDate)
-        # if not os.path.isfile(htmlFilename):
-        #     with open(htmlFilename, 'wb') as f:
-        #         print "Downloading: %s" % getUrl
-        #         f.write(urllib2.urlopen(getUrl).read())
-        #         f.close()
-        #         print "Downloaded: %s" % htmlFilename
-        year += YEAR_INCR
-    break
+def saveCSV(filename, data):
+    with open(filename, 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerow(HEADER)
+        for row in data:
+            writer.writerow(row)
+        print "Wrote %s rows to file: %s" % (len(data), filename)
+
+# Go through each html file
+for fname in os.listdir(HTML_DIR):
+    if not fname.endswith('.html'):
+        continue
+
+    # Retrieve station data if it exists
+    station = fname[:7]
+    stationFilename = OUTPUT_FILE % station
+    stationData = readCSV(stationFilename)
+
+    with open(HTML_DIR + "/" + fname,'rb') as f:
+        contents = BeautifulSoup(f, 'html.parser')
+        rows = contents.findAll(True, {'class':['tableRowEven', 'tableRowOdd']})
+        for i, row in enumerate(rows):
+            cols = row.findAll('td')
+            if (len(cols)+1) != len(HEADER):
+                print "Warning: %s row %s does not match header cols" % (station, i+1)
+                continue
+            thisRow = [station]
+            for j, col in enumerate(cols):
+                thisCol = col.get_text()
+                thisCol = re.sub(r'&[a-z]+;', '', thisCol)
+                thisCol = thisCol.strip()
+                thisRow.append(thisCol)
+            # Check if row already exists
+            exists = [d for d in stationData if d[0]==thisRow[0] and d[1]==thisRow[1] and d[2]==thisRow[2]]
+            if not len(exists):
+                stationData.append(thisRow)
+
+    # Sort station data
+    stationData = sorted(stationData, key=lambda k: k[1]) # Sort by date
+    stationData = sorted(stationData, key=lambda k: k[0]) # Then sort by station
+
+    # Write to csv
+    saveCSV(stationFilename, stationData)
