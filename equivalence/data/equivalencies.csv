@@ -1,8 +1,9 @@
-name,label,metric tons CO2
-vehicle,Passenger vehicle per year,4.73
-bulbs,Incandescent bulb switched to LED bulb per year,-0.0282
-tree,Urban tree seedlings grown for 10 years,-0.039
-forest,One acre of average U.S. forest per year,-1.06
-recycle,Ton of waste recycled instead of landfilled,-3.15
-recycle_truck,Garbage truck of waste recycled instead of landfilled,-22.06
-wind,Wind turbine installed per year,-3960
+name,label,metric tons co2,ratio,inv_ratio,source
+vehicle,Emissions per passenger vehicle per year,4.73,1,1,https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references
+bulbs,Offset per incandescent bulb switched to LED bulb per year,0.0282,168,0,https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references
+tree,Offset per urban tree seedlings grown for 10 years,0.039,121,0,https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references
+forest,Offset per one acre of average U.S. forest per year,1.06,4,0,https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references
+recycle,Offset per ton of waste recycled instead of landfilled,3.15,2,1,https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references
+recycle_truck,Offset per garbage truck of waste recycled instead of landfilled,22.06,0,5,https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references
+wind,Offset per wind turbine installed per year,3960,0,837,https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references
+bulbs_household,Offset per household switching incandescent bulb to LED bulb per year,1.128,4,0,https://www.energystar.gov/ia/partners/manuf_res/CFL_PRG_FINAL.pdf
