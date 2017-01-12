@@ -34,6 +34,7 @@ def readCSV(filename):
     if os.path.isfile(filename):
         with open(filename, 'rb') as f:
             reader = csv.reader(f)
+            next(reader, None) # skip header
             data = list(reader)
     return data
 
