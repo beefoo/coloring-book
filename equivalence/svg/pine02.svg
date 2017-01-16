@@ -1,1 +1,47 @@
-<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" x="0px" y="0px" viewBox="0 0 100 125"><path style="" d="m 49.973517,21.902555 c -0.231707,0 -0.38783,0.400976 -0.38783,0.400976 L 30.625343,77.147585 c 0,0 -0.411277,0.815341 -0.09117,1.264657 0.316752,0.4446 1.18825,0.299622 1.18825,0.299622 l 37.411576,0 c 0,0 0.366904,0.02448 0.516419,-0.185382 0.149516,-0.209862 0.01502,-0.537479 0.01502,-0.537479 L 50.377294,22.323512 c 0,0 -0.171594,-0.420958 -0.403777,-0.420957 z" fill="#000000" fill-opacity="1" stroke="#000000" stroke-width="1.29999995" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="13.80000019" stroke-opacity="1" stroke-dasharray="none"/><rect style="" width="8.2395916" height="32.658745" x="45.815609" y="63.676598" fill="#000000" fill-opacity="1" stroke="none"/><path style="" d="m 49.944805,12.554354 c -0.202995,0 -0.339773,0.351289 -0.339773,0.351289 L 32.994153,60.953719 c 0,0 -0.360314,0.714308 -0.07987,1.107947 0.277502,0.389508 1.041008,0.262495 1.041008,0.262495 l 32.775736,0 c 0,0 0.321439,0.02144 0.452427,-0.16241 0.130989,-0.183858 0.01316,-0.470878 0.01316,-0.470878 L 50.298548,12.923147 c 0,0 -0.150331,-0.368794 -0.353743,-0.368793 z" fill="#000000" fill-opacity="1" stroke="#000000" stroke-width="1.13891101" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="13.80000019" stroke-opacity="1" stroke-dasharray="none"/><path style="" d="m 49.94722,4.7463634 c -0.17175,0 -0.287475,0.2972181 -0.287475,0.2972181 L 35.605635,45.696034 c 0,0 -0.304854,0.604361 -0.06758,0.93741 0.234789,0.329555 0.880775,0.222092 0.880775,0.222092 l 27.730852,0 c 0,0 0.271962,0.01814 0.382788,-0.137412 0.110827,-0.155558 0.01114,-0.3984 0.01114,-0.3984 L 50.246514,5.0583922 c 0,0 -0.127191,-0.3120296 -0.299294,-0.3120288 z" fill="#000000" fill-opacity="1" stroke="#000000" stroke-width="0.96360832" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="13.80000019" stroke-opacity="1" stroke-dasharray="none"/><text x="0" y="115" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">Created by Bintang Anandhiya</text><text x="0" y="120" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">from the Noun Project</text></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg3711"
+   viewBox="0 0 100 125"
+   y="0px"
+   x="0px"
+   version="1.1">
+  <metadata
+     id="metadata3717">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs3715" />
+  <path
+     id="path3699"
+     d="m 49.826488,0.28558585 c -0.250432,0 -0.418641,0.4033169 -0.418641,0.4033169 L 28.91447,55.916897 c 0,0 -0.44565,0.821173 -0.09967,1.273635 0.34235,0.447715 1.284397,0.30249 1.284397,0.30249 h 2.113131 l -7.105472,19.152284 c 0,0 -0.525686,0.972359 -0.116765,1.507136 0.404631,0.529163 1.517923,0.355556 1.517923,0.355556 h 2.617206 l -7.472849,20.139356 c 0,0 -0.600605,1.10633 -0.133851,1.716746 0.461862,0.60401 1.734361,0.40597 1.734361,0.40597 h 20.550332 v 23.94434 h 12.012378 v -23.94434 h 21.988516 c 0,0 0.533832,0.0357 0.751842,-0.24942 0.218012,-0.28511 0.02279,-0.732336 0.02279,-0.732336 L 70.664458,78.507998 h 3.633902 c 0,0 0.469712,0.02954 0.660709,-0.220234 0.190997,-0.249778 0.01993,-0.63947 0.01993,-0.63947 L 67.483372,57.493022 h 3.052932 c 0,0 0.396587,0.02559 0.558184,-0.18574 0.1616,-0.211332 0.01424,-0.541293 0.01424,-0.541295 L 50.262214,0.71013055 c 0,0 -0.18478,-0.4245459 -0.435726,-0.4245447 z"
+     style="stroke-width:1.4074502" />
+  <text
+     id="text3707"
+     font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+     font-weight="bold"
+     font-size="5px"
+     fill="#000000"
+     y="115"
+     x="0">Created by Bintang Anandhiya</text>
+  <text
+     id="text3709"
+     font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
+     font-weight="bold"
+     font-size="5px"
+     fill="#000000"
+     y="120"
+     x="0">from the Noun Project</text>
+</svg>
