@@ -45,7 +45,7 @@ with open(args.INPUT_FILE) as f:
 
 def makeSVG(filename, value):
     dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
-    dwg.defs.add(dwg.circle(id="circle", center=(0, 0), r=RADIUS, fill="none", stroke="#000000", stroke_width=1))
+    dwg.defs.add(dwg.circle(id="circle", center=(0, 0), r=RADIUS, fill="#FFFFFF", stroke="#000000", stroke_width=1))
     for index in range(value):
         hx = mu.halton(index, 3)
         hy = mu.halton(index, 5)
