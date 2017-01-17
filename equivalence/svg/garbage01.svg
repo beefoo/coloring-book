@@ -1,1 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><g><path d="M32.133,36.017H13.397l-6.341,9.951v13.836H5.004v4.453h2.053h0.35h4.054c-0.001-0.031-0.005-0.061-0.005-0.092   c0-3.922,3.19-7.113,7.113-7.113s7.114,3.191,7.114,7.113c0,0.031-0.004,0.061-0.005,0.092h6.455V36.017z M21.492,46.382h-0.024   v0.02H10.359v-0.424h0.048l4.771-7.488v-0.139h5.89v-0.004h0.424V46.382z"/></g><path d="M67.973,70.932c-3.205,0-5.811-2.605-5.811-5.811c0-3.203,2.605-5.809,5.811-5.809c3.204,0,5.81,2.605,5.81,5.809  C73.782,68.326,71.177,70.932,67.973,70.932z M67.973,61.797c-1.834,0-3.325,1.492-3.325,3.324c0,1.834,1.491,3.326,3.325,3.326  c1.833,0,3.324-1.492,3.324-3.326C71.297,63.289,69.806,61.797,67.973,61.797z"/><path d="M18.567,70.066c-3.203,0-5.81-2.605-5.81-5.809s2.606-5.811,5.81-5.811c3.204,0,5.811,2.607,5.811,5.811  S21.771,70.066,18.567,70.066z M18.567,60.932c-1.833,0-3.324,1.492-3.324,3.326s1.491,3.324,3.324,3.324  c1.834,0,3.326-1.49,3.326-3.324S20.401,60.932,18.567,60.932z"/><g><path d="M66.325,29.069H33.834v36.052h26.981c0.229-3.717,3.317-6.674,7.092-6.674s6.863,2.957,7.092,6.674h10.445"/></g><path d="M94.996,57.264c0-1.955-0.717-3.738-1.897-5.113h0.003L75.439,32.25l0,0c-1.432-1.927-3.719-3.181-6.304-3.181  c-0.265,0-0.525,0.015-0.783,0.04l19.099,36.012l-0.008-0.014C91.641,64.943,94.996,61.5,94.996,57.264z"/><text x="0" y="115" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">Created by Rob Armes</text><text x="0" y="120" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">from the Noun Project</text></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   height="41.862999"
+   width="89.991997"
+   id="svg20"
+   xml:space="preserve"
+   enable-background="new 0 0 100 100"
+   viewBox="0 0 89.991997 41.862999"
+   y="0px"
+   x="0px"
+   version="1.1"><metadata
+     id="metadata26"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs24" /><g
+     transform="translate(-5.004,-29.069)"
+     id="g4"><path
+       id="path2"
+       d="M 32.133,36.017 H 13.397 L 7.056,45.968 V 59.804 H 5.004 v 4.453 h 2.053 0.35 4.054 c -10e-4,-0.031 -0.005,-0.061 -0.005,-0.092 0,-3.922 3.19,-7.113 7.113,-7.113 3.923,0 7.114,3.191 7.114,7.113 0,0.031 -0.004,0.061 -0.005,0.092 h 6.455 z M 21.492,46.382 h -0.024 v 0.02 H 10.359 v -0.424 h 0.048 l 4.771,-7.488 v -0.139 h 5.89 v -0.004 h 0.424 z" /></g><path
+     id="path6"
+     d="m 62.969,41.863 c -3.205,0 -5.811,-2.605 -5.811,-5.811 0,-3.203 2.605,-5.809 5.811,-5.809 3.204,0 5.81,2.605 5.81,5.809 -10e-4,3.205 -2.606,5.811 -5.81,5.811 z m 0,-9.135 c -1.834,0 -3.325,1.492 -3.325,3.324 0,1.834 1.491,3.326 3.325,3.326 1.833,0 3.324,-1.492 3.324,-3.326 0,-1.832 -1.491,-3.324 -3.324,-3.324 z" /><path
+     id="path8"
+     d="m 13.563,40.997 c -3.203,0 -5.81,-2.605 -5.81,-5.809 0,-3.204 2.606,-5.811 5.81,-5.811 3.204,0 5.811,2.607 5.811,5.811 0,3.204 -2.607,5.809 -5.811,5.809 z m 0,-9.134 c -1.833,0 -3.324,1.492 -3.324,3.326 0,1.834 1.491,3.324 3.324,3.324 1.834,0 3.326,-1.49 3.326,-3.324 0,-1.834 -1.492,-3.326 -3.326,-3.326 z" /><g
+     transform="translate(-5.004,-29.069)"
+     id="g12"><path
+       id="path10"
+       d="M 66.325,29.069 H 33.834 v 36.052 h 26.981 c 0.229,-3.717 3.317,-6.674 7.092,-6.674 3.775,0 6.863,2.957 7.092,6.674 h 10.445" /></g><path
+     id="path14"
+     d="m 89.992,28.195 c 0,-1.955 -0.717,-3.738 -1.897,-5.113 h 0.003 L 70.435,3.181 v 0 C 69.003,1.254 66.716,0 64.131,0 63.866,0 63.606,0.015 63.348,0.04 l 19.099,36.012 -0.008,-0.014 c 4.198,-0.164 7.553,-3.607 7.553,-7.843 z" /><text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text16"
+     font-weight="bold"
+     font-size="5px"
+     y="115"
+     x="0">Created by Rob Armes</text>
+<text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text18"
+     font-weight="bold"
+     font-size="5px"
+     y="120"
+     x="0">from the Noun Project</text>
+</svg>

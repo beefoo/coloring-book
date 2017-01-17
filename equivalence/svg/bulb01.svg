@@ -1,1 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><path d="M38.975,66.124v5.722H61.03v-5.722c0-6.158,2.551-12.046,7.164-16.572c5.029-4.931,7.802-11.518,7.802-18.559  C75.995,16.653,64.342,5,50.003,5c-0.981,0-1.975,0.049-2.956,0.159c-11.984,1.325-21.614,10.991-22.89,23  c-0.871,8.145,2.024,16.045,7.924,21.663C36.46,53.993,38.975,59.93,38.975,66.124z"/><polygon points="38.975,74.3 38.975,88.585 42.998,88.585 42.998,95 56.896,95 56.896,88.585 61.03,88.585 61.03,74.3 "/><text x="0" y="115" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">Created by Maxim Kulikov</text><text x="0" y="120" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">from the Noun Project</text></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   height="90"
+   width="51.991283"
+   id="svg10"
+   xml:space="preserve"
+   enable-background="new 0 0 100 100"
+   viewBox="0 0 51.991283 90"
+   y="0px"
+   x="0px"
+   version="1.1"><metadata
+     id="metadata16"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs14" /><path
+     id="path2"
+     d="m 14.970282,61.124 v 5.722 h 22.055 v -5.722 c 0,-6.158 2.551,-12.046 7.164,-16.572 5.029,-4.931 7.802,-11.518 7.802,-18.559 C 51.990282,11.653 40.337282,0 25.998282,0 c -0.981,0 -1.975,0.049 -2.956,0.159 -11.984,1.325 -21.6140005,10.991 -22.89000049,23 -0.871,8.145 2.02399999,16.045 7.92399999,21.663 4.3790005,4.171 6.8940005,10.108 6.8940005,16.302 z" /><polygon
+     transform="translate(-24.004718,-5)"
+     id="polygon4"
+     points="56.896,95 56.896,88.585 61.03,88.585 61.03,74.3 38.975,74.3 38.975,88.585 42.998,88.585 42.998,95 " /><text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text6"
+     font-weight="bold"
+     font-size="5px"
+     y="115"
+     x="1.9997317e-009">Created by Maxim Kulikov</text>
+<text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text8"
+     font-weight="bold"
+     font-size="5px"
+     y="120"
+     x="1.9997317e-009">from the Noun Project</text>
+</svg>
