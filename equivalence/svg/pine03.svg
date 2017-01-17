@@ -5,11 +5,13 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   id="svg3738"
-   viewBox="0 0 100 125"
-   y="0px"
+   height="125.00069"
+   width="71.885773"
+   version="1.1"
    x="0px"
-   version="1.1">
+   y="0px"
+   viewBox="0 0 71.885773 125.00069"
+   id="svg3738">
   <metadata
      id="metadata3744">
     <rdf:RDF>
@@ -25,23 +27,21 @@
   <defs
      id="defs3742" />
   <path
-     style="stroke-width:1.65173984"
+     d="M 35.839544,0 C 35.525182,0 35.310829,0.4253405 35.310829,0.4253405 L 9.5896075,58.504761 c 0,0 -0.559337,0.8643 -0.125035,1.340116 0.429743,0.470824 1.6111475,0.31755 1.6111475,0.31755 h 4.494069 L 0.39069648,96.348447 c 0,0 -0.753291,1.231016 -0.167908,1.908207 0.579263,0.670083 2.17201402,0.45156 2.17201402,0.45156 H 28.16961 V 125.0007 H 43.23796 V 98.708214 h 27.575292 c 0,0 0.669684,0.03662 0.943111,-0.279676 0.273429,-0.316297 0.02859,-0.809895 0.02859,-0.809895 L 56.037846,60.162427 h 5.79442 c 0,0 0.500915,0.02413 0.703762,-0.198105 0.202852,-0.222242 0.01793,-0.568092 0.01793,-0.568092 L 36.386119,0.44573374 C 36.386119,0.44573374 36.154547,0 35.839544,0 Z"
      id="path3728"
-     d="m 49.896658,-3.4634112e-4 c -0.314362,0 -0.528715,0.42534050112 -0.528715,0.42534050112 L 23.646721,58.504415 c 0,0 -0.559337,0.8643 -0.125035,1.340116 0.429743,0.470824 1.611148,0.31755 1.611148,0.31755 h 4.494069 L 14.44781,96.348101 c 0,0 -0.753291,1.231016 -0.167908,1.908207 0.579263,0.670083 2.172014,0.45156 2.172014,0.45156 h 25.774808 v 26.292482 h 15.06835 V 98.707868 h 27.575292 c 0,0 0.669684,0.03662 0.943111,-0.279676 0.273429,-0.316297 0.02859,-0.809895 0.02859,-0.809895 L 70.09496,60.162081 h 5.79442 c 0,0 0.500915,0.02413 0.703762,-0.198105 0.202852,-0.222242 0.01793,-0.568092 0.01793,-0.568092 L 50.443233,0.4453874 c 0,0 -0.231572,-0.44573374112 -0.546575,-0.44573374112 z" />
+     style="stroke-width:1.65173984" />
   <text
-     id="text3734"
-     font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-     font-weight="bold"
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     x="4.9614607e-010"
+     y="115.00034"
      font-size="5px"
-     fill="#000000"
-     y="115"
-     x="0">Created by Bintang Anandhiya</text>
+     font-weight="bold"
+     id="text3734">Created by Bintang Anandhiya</text>
   <text
-     id="text3736"
-     font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif"
-     font-weight="bold"
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     x="4.9614607e-010"
+     y="120.00034"
      font-size="5px"
-     fill="#000000"
-     y="120"
-     x="0">from the Noun Project</text>
+     font-weight="bold"
+     id="text3736">from the Noun Project</text>
 </svg>

@@ -16,14 +16,14 @@ def getDataFromSVG(filename):
             print "Warning: could not find dimensions for %s" % filename
 
         # find the path data
-        matches = re.findall(r'\sd="(.+)"/>', contents)
+        matches = re.findall(r'\sd="([^"]+)"\s', contents)
         if matches and len(matches):
             paths = list(matches)
         else:
             print "Warning: couldn't find paths in %s" % filename
 
         # find the polygon data
-        matches = re.findall(r'\spoints="(.+)"/>', contents)
+        matches = re.findall(r'\spoints="([^"]+)"\s', contents)
         if matches and len(matches):
             polygons = list(matches)
 
@@ -41,3 +41,13 @@ def getDataFromSVGs(filenames):
         fileData = getDataFromSVG(filename)
         data.append(fileData)
     return data
+
+def getTransformString(w, h, x, y, sx=1, sy=1, r=0):
+    hw = w * 0.5
+    hh = h * 0.5
+    tx = x - hw * (sx-1)
+    ty = y - hh * (sy-1)
+    transform = "translate(%s,%s) scale(%s, %s) rotate(%s, %s, %s)" % (tx, ty, sx, sy, r, hw, hh)
+    if r==0:
+        transform = "translate(%s,%s) scale(%s, %s)" % (tx, ty, sx, sy)
+    return transform
