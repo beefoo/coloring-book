@@ -31,6 +31,9 @@ def mean(data):
     else:
         return sum(data) / n
 
+def norm(value, a, b):
+    return 1.0 * (value - a) / (b - a)
+
 def oscillate(p, amount, f=2.0):
     radians = p * (math.pi * f)
     m = math.sin(radians)

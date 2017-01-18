@@ -82,6 +82,10 @@ for stationId in STATIONS:
         years[year]["mean"] = mu.mean(years[year]["data"])
         if not len(years[year]["data"]):
             print "Warning: no slr data in station(%s) and year(%s)" % (stationId, year)
+    # normalize SLR to minumum year
+    minMean = min([d["mean"] for year, d in years.iteritems()])
+    for year in years:
+        years[year]["mean"] = years[year]["mean"] - minMean
     stationData[stationId]["slrData"] = years
 print "Processed mean sea level data"
 
