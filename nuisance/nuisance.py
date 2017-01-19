@@ -71,7 +71,7 @@ stationData = {}
 with open(args.INPUT_FILE) as f:
     d = json.load(f)
     for stationId in STATIONS:
-        stationData[stationId] = d[stationId]
+        stationData[stationId] = d["stationData"][stationId]
 
 # Init svg
 width = WIDTH+PAD*2
@@ -123,11 +123,11 @@ for i, stationId in enumerate(STATIONS):
     data = station["slrData"]
     points = []
     for year in range(YEAR_START, YEAR_END+1):
-        d = data[str(year)]
-        if len(d["data"]):
+        value = data[str(year)]
+        if value >= 0:
             py = mu.norm(year, YEAR_START, YEAR_END)
             y = PAD + py * HEIGHT
-            px = mu.norm(d["mean"], minValue, maxValue)
+            px = mu.norm(value, minValue, maxValue)
             x = PAD + axisW - px * axisW
             points.append((x,y))
     points = mu.smoothPoints(points)
@@ -162,10 +162,10 @@ for i, stationId in enumerate(STATIONS):
     data = station["inundationData"]
     points = []
     for year in range(YEAR_START, YEAR_END+1):
-        d = data[str(year)]
+        value = data[str(year)]
         py = mu.norm(year, YEAR_START, YEAR_END)
         y = PAD + py * HEIGHT
-        px = mu.norm(d["dayCount"], minValue, maxValue)
+        px = mu.norm(value, minValue, maxValue)
         x = PAD + axisW + YEAR_LABELS_WIDTH + px * axisW
         points.append((x,y))
     points = mu.smoothPoints(points)

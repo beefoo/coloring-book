@@ -31,7 +31,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-sli', dest="SEA_LEVEL_INPUT", default="data/%s_MeanSeaLevelTrends.csv", help="Input sea level data file")
 parser.add_argument('-iai', dest="INUNDATION_INPUT", default="data/%s_InundationAnalysis.csv", help="Input inundation analysis data file")
 parser.add_argument('-ni', dest="NUISANCE_INPUT", default="data/nuisance_flood_levels.csv", help="Input nuisance flood levels data file")
-parser.add_argument('-stations', dest="STATIONS", default="8534720,8575512,8658120,8665530,8670870", help="List of stations")
+parser.add_argument('-stations', dest="STATIONS", default="8534720,8575512,8658120,8665530", help="List of stations")
 parser.add_argument('-y0', dest="YEAR_START", type=int, default=1951, help="Year start")
 parser.add_argument('-y1', dest="YEAR_END", type=int, default=2015, help="Year end")
 parser.add_argument('-data', dest="DATA_FILE", default="data/nuisance.json", help="Path to output data file to cache data")
@@ -84,9 +84,13 @@ for stationId in STATIONS:
             print "Warning: no slr data in station(%s) and year(%s)" % (stationId, year)
     # normalize SLR to minumum year
     minMean = min([d["mean"] for year, d in years.iteritems()])
+    data = {}
     for year in years:
-        years[year]["mean"] = years[year]["mean"] - minMean
-    stationData[stationId]["slrData"] = years
+        if len(years[year]["data"]):
+            data[year] = years[year]["mean"] - minMean
+        else:
+            data[year] = -1
+    stationData[stationId]["slrData"] = data
 print "Processed mean sea level data"
 
 # Retrieve inundation data
@@ -107,19 +111,29 @@ for stationId in STATIONS:
                 day = dateStart.strftime("%Y-%m-%d")
                 if value > station["nuisanceLevel"] and day not in years[year]["days"]:
                     years[year]["days"].append(day)
+    data = {}
     for year in years:
-        years[year]["dayCount"] = len(years[year]["days"])
-    stationData[stationId]["inundationData"] = years
+        data[year] = len(years[year]["days"])
+    stationData[stationId]["inundationData"] = data
 print "Processed inundation data"
 
 # Calculate stats
 for stationId in stationData:
     station = stationData[stationId]
-    slrData = [d["mean"] for year, d in station["slrData"].iteritems()]
-    inundationData = [d["dayCount"] for year, d in station["inundationData"].iteritems()]
+    slrData = [value for year, value in station["slrData"].iteritems() if value >= 0]
+    inundationData = [value for year, value in station["inundationData"].iteritems() if value >= 0]
     stationData[stationId]["slrRange"] = (min(slrData), max(slrData))
     stationData[stationId]["inundationRange"] = (min(inundationData), max(inundationData))
 
+# Find ranges
+slrData = [d["slrRange"][0] for stationId, d in stationData.iteritems()] + [d["slrRange"][1] for stationId, d in stationData.iteritems()]
+inundationData = [d["inundationRange"][0] for stationId, d in stationData.iteritems()] + [d["inundationRange"][1] for stationId, d in stationData.iteritems()]
+data = {
+    "stationData": stationData,
+    "slrRange": [min(slrData), max(slrData)],
+    "inundationRange": [min(inundationData), max(inundationData)]
+}
+
 with open(args.DATA_FILE, 'w') as f:
-    json.dump(stationData, f)
+    json.dump(data, f)
     print "Wrote data to %s" % args.DATA_FILE
