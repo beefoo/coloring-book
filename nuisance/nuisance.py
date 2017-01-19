@@ -122,10 +122,10 @@ for i, stationId in enumerate(STATIONS):
     dashArray = DASHARRAYS[i % len(DASHARRAYS)]
     data = station["slrData"]
     points = []
-    for year in range(YEAR_START, YEAR_END+1):
-        value = data[str(year)]
+    for d in data:
+        value = d["value"]
         if value >= 0:
-            py = mu.norm(year, YEAR_START, YEAR_END)
+            py = mu.norm(d["year"], YEAR_START, YEAR_END)
             y = PAD + py * HEIGHT
             px = mu.norm(value, minValue, maxValue)
             x = PAD + axisW - px * axisW
@@ -161,11 +161,10 @@ for i, stationId in enumerate(STATIONS):
     dashArray = DASHARRAYS[i % len(DASHARRAYS)]
     data = station["inundationData"]
     points = []
-    for year in range(YEAR_START, YEAR_END+1):
-        value = data[str(year)]
-        py = mu.norm(year, YEAR_START, YEAR_END)
+    for d in data:
+        py = mu.norm(d["year"], YEAR_START, YEAR_END)
         y = PAD + py * HEIGHT
-        px = mu.norm(value, minValue, maxValue)
+        px = mu.norm(d["value"], minValue, maxValue)
         x = PAD + axisW + YEAR_LABELS_WIDTH + px * axisW
         points.append((x,y))
     points = mu.smoothPoints(points)

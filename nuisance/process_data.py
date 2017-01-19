@@ -84,12 +84,12 @@ for stationId in STATIONS:
             print "Warning: no slr data in station(%s) and year(%s)" % (stationId, year)
     # normalize SLR to minumum year
     minMean = min([d["mean"] for year, d in years.iteritems()])
-    data = {}
+    data = []
     for year in years:
         if len(years[year]["data"]):
-            data[year] = years[year]["mean"] - minMean
+            data.append({"year": int(year), "value": years[year]["mean"] - minMean})
         else:
-            data[year] = -1
+            data.append({"year": int(year), "value": -1})
     stationData[stationId]["slrData"] = data
 print "Processed mean sea level data"
 
@@ -111,17 +111,17 @@ for stationId in STATIONS:
                 day = dateStart.strftime("%Y-%m-%d")
                 if value > station["nuisanceLevel"] and day not in years[year]["days"]:
                     years[year]["days"].append(day)
-    data = {}
+    data = []
     for year in years:
-        data[year] = len(years[year]["days"])
+        data.append({"year": int(year), "value": len(years[year]["days"])})
     stationData[stationId]["inundationData"] = data
 print "Processed inundation data"
 
 # Calculate stats
 for stationId in stationData:
     station = stationData[stationId]
-    slrData = [value for year, value in station["slrData"].iteritems() if value >= 0]
-    inundationData = [value for year, value in station["inundationData"].iteritems() if value >= 0]
+    slrData = [d["value"] for d in station["slrData"] if d["value"] >= 0]
+    inundationData = [d["value"] for d in station["inundationData"] if d["value"] >= 0]
     stationData[stationId]["slrRange"] = (min(slrData), max(slrData))
     stationData[stationId]["inundationRange"] = (min(inundationData), max(inundationData))
 
