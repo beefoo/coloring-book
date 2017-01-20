@@ -23,6 +23,11 @@ def halton(index, base=3):
 def lerp(a, b, amount):
     return (b-a) * amount + a
 
+def lerp2D(a, b, amount):
+    x = a[0] + (b[0] - a[0]) * amount
+    y = a[1] + (b[1] - a[1]) * amount
+    return (x, y)
+
 # Mean of list
 def mean(data):
     n = len(data)
