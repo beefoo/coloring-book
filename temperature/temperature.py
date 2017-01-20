@@ -18,8 +18,8 @@ import lib.mathutils as mu
 
 # input
 parser = argparse.ArgumentParser()
-# input source: http://www.stateair.net/web/historical/1/1.html
-parser.add_argument('-input', dest="INPUT_FILE", default="data/188001-201611_land_ocean.csv", help="Path to input file")
+# input source: https://www.ncdc.noaa.gov/monitoring-references/faq/anomalies.php
+parser.add_argument('-input', dest="INPUT_FILE", default="data/188001-201612_land_ocean.csv", help="Path to input file")
 parser.add_argument('-ys', dest="YEAR_START", type=int, default=1986, help="Year start on viz")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-height', dest="HEIGHT", type=int, default=1200, help="Height of output file")
@@ -32,7 +32,7 @@ parser.add_argument('-freqy', dest="FREQUENCY_Y", type=float, default=2.0, help=
 parser.add_argument('-edge', dest="EDGE", type=float, default=15.0, help="Jagged edge height")
 parser.add_argument('-ylabel', dest="YLABEL_WIDTH", type=float, default=100.0, help="Y-label width")
 parser.add_argument('-xlabel', dest="XLABEL_HEIGHT", type=float, default=50.0, help="X-label height")
-parser.add_argument('-output', dest="OUTPUT_FILE", default="data/188001-201611_land_ocean.svg", help="Path to output svg file")
+parser.add_argument('-output', dest="OUTPUT_FILE", default="data/188001-201612_land_ocean.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
