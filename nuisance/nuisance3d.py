@@ -33,7 +33,7 @@ parser.add_argument('-in', dest="INPUT_FILE", default="data/nuisance.json", help
 parser.add_argument('-width', dest="WIDTH", type=int, default=1000, help="Width")
 parser.add_argument('-height', dest="HEIGHT", type=int, default=647, help="Height")
 parser.add_argument('-pad', dest="PAD", type=int, default=200, help="Year start")
-parser.add_argument('-stations', dest="STATIONS", default="8658120,8575512,8665530,8534720", help="List of stations")
+parser.add_argument('-stations', dest="STATIONS", default="8575512,8665530,8658120", help="List of stations")
 parser.add_argument('-y0', dest="YEAR_START", type=int, default=1951, help="Year start")
 parser.add_argument('-y1', dest="YEAR_END", type=int, default=2015, help="Year end")
 parser.add_argument('-out', dest="OUTPUT_FILE", default="data/nuisance_%s.svg", help="Path to output svg file")
@@ -52,7 +52,7 @@ STATION_COUNT = len(STATIONS)
 # config bounds
 X_OFFSET = 0.2
 Y_OFFSET = 0.1
-Z_MARGIN = 0.2
+Z_MARGIN = 0.25
 BOUNDS = {
     "tl": (0.0 * WIDTH + PAD, 0.5 * HEIGHT + PAD),
     "tr": ((0.5+X_OFFSET) * WIDTH + PAD, (0.0+Y_OFFSET) * HEIGHT + PAD),
@@ -62,17 +62,18 @@ BOUNDS = {
 }
 
 # config labels
-YEAR_LABELS = [
-    {"value": 1951, "label": "1950"},
-    {"value": 2015, "label": "2015"}
+LABELS = {}
+LABELS["years"] = [
+    {"stationId": "8658120", "value": 1951, "label": "1950"},
+    {"stationId": "8658120", "value": 2015, "label": "2015"}
 ]
-SLR_LABELS = [
-    {"value": 0.127, "label": "5''"},
-    {"value": 0.254, "label": "10''"}
+LABELS["slrData"] = [
+    {"stationId": "8658120", "value": 0.127, "label": "5'' rise"},
+    {"stationId": "8658120", "value": 0.254, "label": "10'' rise"}
 ]
-INUNDATION_LABELS = [
-    {"value": 40, "label": "40"},
-    {"value": 80, "label": "80"}
+LABELS["inundationData"] = [
+    {"stationId": "8658120", "value": 40, "label": "40 days"},
+    {"stationId": "8658120", "value": 80, "label": "80 days"}
 ]
 
 # load data
@@ -108,13 +109,15 @@ def polylinesForBox(x0, y0, d1, d2, h):
 
 def makeSVG(dataKey, dataRange, filename):
     global stationData
+    global LABELS
 
     # Init svg
     width = WIDTH+PAD*2
     height = HEIGHT+PAD*2
     dwg = svgwrite.Drawing(filename, size=(width, height), profile='full')
     dwgLabels = dwg.g(id="labels")
-    dwgData = dwg.g(id="axis")
+    dwgTicks = dwg.g(id="ticks")
+    dwgData = dwg.g(id="data")
     pw = 1.0 / YEAR_COUNT
     pz = (1.0 - (Z_MARGIN * (STATION_COUNT-1))) / STATION_COUNT
     (x0, y0) = BOUNDS["tl"]
@@ -134,17 +137,21 @@ def makeSVG(dataKey, dataRange, filename):
     d2 = (abs(dx2 - x0), abs(dy2 - y0))
 
     for i, stationId in enumerate(STATIONS):
-        d = stationData[stationId][dataKey]
+        station = stationData[stationId]
+        # draw the data
+        d = station[dataKey]
         # reverse the list
         d = sorted(d, key=lambda k: -k['year'])
+        sdx = i * dx
+        sdy = i * dy
         for item in d:
             if item["value"] < 0:
                 continue
             px = mu.norm(item["year"], YEAR_START, YEAR_END)
             py = mu.norm(item["value"], dataRange[0], dataRange[1])
             (x, y) = mu.lerp2D((x0, y0), (x1, y1), px)
-            x += i * dx
-            y += i * dy
+            x += sdx
+            y += sdy
             h = BOUNDS["h"] * py
             # dwgData.add(dwg.circle(center=(x,y), r=2))
             # dwgData.add(dwg.line(start=(x, y), end=(x, y-h), stroke="#000000", stroke_width=1))
@@ -152,12 +159,49 @@ def makeSVG(dataKey, dataRange, filename):
             for line in polylines:
                 dwgData.add(dwg.polyline(points=line, stroke="#000000", stroke_width=1, fill="#FFFFFF"))
 
+        # draw station labels
+        (x, y) = BOUNDS["tl"]
+        x += sdx
+        y += sdy + d1[1] * 0.667
+        dwgLabels.add(dwg.text(station["label"], insert=(x, y), text_anchor="end", alignment_baseline="middle", font_size=16))
+
+        # draw year labels
+        for label in LABELS["years"]:
+            if label["stationId"] != stationId:
+                continue
+            px = mu.norm(label["value"], YEAR_START, YEAR_END)
+            (x, y) = mu.lerp2D((x0, y0), (x1, y1), px)
+            x += sdx + d1[0]
+            y += sdy + d1[1]
+            if px >= 1:
+                x += d2[0]
+                y -= d2[1]
+            x2 = x + dx*0.1
+            y2 = y + dy*0.1
+            dwgTicks.add(dwg.line(start=(x, y), end=(x2, y2), stroke="#000000", stroke_width=1))
+            dwgLabels.add(dwg.text(label["label"], insert=(x2+5, y2), alignment_baseline="before-edge", font_size=16))
+
+        # draw data labels
+        for label in LABELS[dataKey]:
+            if label["stationId"] != stationId:
+                continue
+            py = mu.norm(label["value"], dataRange[0], dataRange[1])
+            h = BOUNDS["h"] * py
+            (x, y) = mu.lerp2D((x0, y0), (x1, y1), 1.0)
+            x += sdx + d1[0] + d2[0]
+            y += sdy + d1[1] - d2[1] - h
+            x2 = x+dx*0.1
+            y2 = y
+            dwgTicks.add(dwg.line(start=(x, y), end=(x2, y2), stroke="#000000", stroke_width=1))
+            dwgLabels.add(dwg.text(label["label"], insert=(x2+5, y2), alignment_baseline="middle", font_size=16))
+
     # dwgData.add(dwg.line(start=(x0, y0), end=(x0 + d1[0], y0 + d1[1]), stroke="#000000", stroke_width=1))
     # dwgData.add(dwg.line(start=(x0, y0), end=(x0 + d2[0], y0 - d2[1]), stroke="#000000", stroke_width=1))
 
     # Save svg
-    dwg.add(dwgLabels)
     dwg.add(dwgData)
+    dwg.add(dwgTicks)
+    dwg.add(dwgLabels)
     dwg.save()
     print "Saved svg: %s" % filename
 
