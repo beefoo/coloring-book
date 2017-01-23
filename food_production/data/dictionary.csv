@@ -1,0 +1,157 @@
+Data filenames,Example,Description
+BLS_2_Countries_(SRES)_ABBREVNAME,Australia,country name
+Fips_code,AS,country code
+WH_2000,"20,069,730",wheat production average 2000 to 2006 in t (FAO)
+RI_2000,"891,259",rice production average 2000 to 2006 in t (FAO)
+MZ_2000,"367,102",maize production average 2000 to 2006 in t (FAO)
+WHA1F2020,2.668252046,wheat yield change (%) from baseline under the SRES A1FI 2020 scenario
+RIA1F2020,0.542,rice yield change (%) from baseline under the SRES A1FI 2020 scenario
+MZA1F2020,-0.331747954,maize yield change (%) from baseline under the SRES A1FI 2020 scenario
+ActChWHA1F2020,535510.9928,wheat total production changes in 2020 applying the SRES A1FI 2020 scenario yield change to the 1990 production
+ActChRIAIF2020,4830.621457,rice total production changes in 2020 applying the SRES A1FI 2020 scenario yield change to the 1990 production
+ActChMZA1F2020,-1217.853848,maize total production changes in 2020 applying the SRES A1FI 2020 scenario yield change to the 1990 production
+WHA1F2050,6.286352645,wheat yield change (%) from baseline under the SRES A1FI 2050 scenario
+RIA1F2050,6.054,rice yield change (%) from baseline under the SRES A1FI 2050 scenario
+MZA1F2050,-0.7136473553,maize yield change (%) from baseline under the SRES A1FI 2050 scenario
+ActChWHA1F2050,1261654.03,wheat total production changes in 2050 applying the SRES A1FI scenario yield change to the 1990 production
+ActChRIAIF2050,53956.79391,rice total production changes in 2050 applying the SRES A1FI scenario yield change to the 1990 production
+ActChMZA1F2050,-2619.814734,maize  total production changes in 2050 applying the SRES A1FI  scenario yield change to the 1990 production
+WHA1F2080,-0.4360714715,wheat yield change (%) from baseline under the SRES A1FI 2080 scenario
+RIA1F2080,8.95,rice yield change (%) from baseline under the SRES A1FI 2080 scenario
+MZA1F2080,-10.43607147,maize yield change (%) from baseline under the SRES A1FI 2080 scenario
+ActChWHA1F2080,-87518.36881,wheat total production changes in 2080 applying the SRES A1FI scenario yield change to the 1990 production
+ActChRIAIF2080,79767.64214,rice total production changes in 2080 applying the SRES A1FI scenario yield change to the 1990 production
+ActChMZA1F2080,-38311.042,maize total production changes in 2080 applying the SRES A1FI scenario yield change to the 1990 production
+WHA2a2020,1.490716931,wheat yield change (%) from baseline under the SRES A2a 2020 scenario
+RIA2a2020,0.605,rice yield change (%) from baseline under the SRES A2a 2020 scenario
+MZA2a2020,-1.509283069,maize yield change (%) from baseline under the SRES A2a 2020 scenario
+ActChWHA2a2020,299182.8695,wheat total production changes in 2020 applying the SRES A2a 2020 scenario yield change to the 1990 production
+ActChRIA2a2020,5392.114357,rice total production changes in 2020 applying the SRES A2a 2020 scenario yield change to the 1990 production
+ActChMZA2a2020,-5540.610487,maize  total production changes in 2020 applying the SRES A2a 2020 scenario yield change to the 1990 production
+WHA2a2050,10.21830026,wheat yield change (%) from baseline under the SRES A2a 2050 scenario
+RIA2a2050,4.342,rice yield change (%) from baseline under the SRES A2a 2050 scenario
+MZA2a2050,3.218300262,maize yield change (%) from baseline under the SRES A2a 2050 scenario
+ActChWHA2a2050,2050785.317,wheat total production changes in 2050 applying the SRES A2a 2050 scenario yield change to the 1990 production
+ActChRIA2a2050,38698.44717,rice total production changes in 2050 applying the SRES A2a 2050 scenario yield change to the 1990 production
+ActChMZA2a2050,11814.44922,maize total production changes in 2050 applying the SRES A2a 2050 scenario yield change to the 1990 production
+WHA2a2080,8.516207337,wheat yield change (%) from baseline under the SRES A2a 2080 scenario
+RIA2a2080,10.645,rice yield change (%) from baseline under the SRES A2a 2080 scenario
+MZA2a2080,-2.483792663,maize yield change (%) from baseline under the SRES A2a 2080 scenario
+ActChWHA2a2080,1709179.855,wheat total production changes in 2080 applying the SRES A2a 2080 scenario yield change to the 1990 production
+ActChRIA2a2080,94874.47493,rice total production changes in 2080 applying the SRES A2a 2080 scenario yield change to the 1990 production
+ActChMZA2a2080,-9118.056092,maize total production changes in 2080 applying the SRES A2a 2080 scenario yield change to the 1990 production
+WHA2b2020,3.098196577,wheat yield change (%) from baseline under the SRES A2b 2020 scenario
+RIA2b2020,0.073,rice yield change (%) from baseline under the SRES A2b 2020 scenario
+MZA2b2020,0.09819657711,maize yield change (%) from baseline under the SRES A2b 2020 scenario
+ActCHWHA2b2020,621799.7012,wheat total production changes in 2020 applying the SRES A2b 2020 scenario yield change to the 1990 production
+ActChRIA2b2020,650.6187571,rice total production changes in 2020 applying the SRES A2b 2020 scenario yield change to the 1990 production
+ActChMZA2b2020,360.4817388,maize total production changes in 2020 applying the SRES A2b 2020 scenario yield change to the 1990 production
+WHA2b2050,7.294386712,wheat yield change (%) from baseline under the SRES A2b 2050 scenario
+RIA2b2050,4.419,rice yield change (%) from baseline under the SRES A2b 2050 scenario
+MZA2b2050,0.2943867124,maize yield change (%) from baseline under the SRES A2b 2050 scenario
+ActCHWHA2b2050,1463963.75,wheat total production changes in 2050 applying the SRES A2b 2050 scenario yield change to the 1990 production
+ActChRIA2b2050,39384.71627,rice total production changes in 2050 applying the SRES A2b 2050 scenario yield change to the 1990 production
+ActChMZA2b2050,1080.699929,maize total production changes in 2050 applying the SRES A2b 2050 scenario yield change to the 1990 production
+WHA2b2080,5.38709152,wheat yield change (%) from baseline under the SRES A2b 2080 scenario
+RIA2b2080,11.442,rice yield change (%) from baseline under the SRES A2b 2080 scenario
+MZA2b2080,-5.61290848,maize yield change (%) from baseline under the SRES A2b 2080 scenario
+ActChWHA2b2080,1081174.746,wheat total production changes in 2080 applying the SRES A2b 2080 scenario yield change to the 1990 production
+ActChRIA2b2080,101977.8057,rice total production changes in 2080 applying the SRES A2b 2080 scenario yield change to the 1990 production
+ActChMZA2b2080,-20605.10731,maize total production changes in 2080 applying the SRES A2b 2080 scenario yield change to the 1990 production
+WHA2c2020,4.99018886,wheat yield change (%) from baseline under the SRES A2c 2020 scenario
+RIA2c2020,0.437,rice yield change (%) from baseline under the SRES A2c 2020 scenario
+MZA2c2020,1.99018886,maize yield change (%) from baseline under the SRES A2c 2020 scenario
+ActChWHA2c2020,1001517.452,wheat total production changes in 2020 applying the SRES A2c 2020 scenario yield change to the 1990 production
+ActChRIA2c2020,3894.799957,rice total production changes in 2020 applying the SRES A2c 2020 scenario yield change to the 1990 production
+ActChMZA2c2020,7306.025952,maize total production changes in 2020 applying the SRES A2c 2020 scenario yield change to the 1990 production
+WHA2c2050,8.329104637,wheat yield change (%) from baseline under the SRES A2c 2050 scenario
+RIA2c2050,4.986,rice yield change (%) from baseline under the SRES A2c 2050 scenario
+MZA2c2050,1.329104637,maize yield change (%) from baseline under the SRES A2c 2050 scenario
+ActChWHA2c2050,1671628.848,wheat total production changes in 2050 applying the SRES A2c 2050 scenario yield change to the 1990 production
+ActChRIA2c2050,44438.15237,rice total production changes in 2050 applying the SRES A2c 2050 scenario yield change to the 1990 production
+ActChMZA2c2050,4879.171604,maize total production changes in 2050 applying the SRES A2c 2050 scenario yield change to the 1990 production
+WHA2c2080,7.047900783,wheat yield change (%) from baseline under the SRES A2c 2080 scenario
+RIA2c2080,10.736,rice yield change (%) from baseline under the SRES A2c 2080 scenario
+MZA2c2080,-3.952099217,maize yield change (%) from baseline under the SRES A2c 2080 scenario
+ActChWHA2c2080,1414494.688,wheat total production changes in 2080 applying the SRES A2c 2080 scenario yield change to the 1990 production
+ActChRIA2c2080,95685.52023,rice total production changes in 2080 applying the SRES A2c 2080 scenario yield change to the 1990 production
+ActChMZA2c2080,-14508.24091,maize total production changes in 2080 applying the SRES A2c 2080 scenario yield change to the 1990 production
+WHB1a2020,-0.2408729409,wheat yield change (%) from baseline under the SRES B1a 2020 scenario
+RIB1a2020,-0.171,rice yield change (%) from baseline under the SRES B1a 2020 scenario
+MZB1a2020,-3.240872941,maize yield change (%) from baseline under the SRES B1a 2020 scenario
+ActChWHB1a2020,-48342.54992,wheat total production changes in 2020 applying the SRES B1a 2020 scenario yield change to the 1990 production
+ActChRIB1a2020,-1524.052157,rice total production changes in 2020 applying the SRES B1a 2020 scenario yield change to the 1990 production
+ActChMZB1a2020,-11897.31401,maize total production changes in 2020 applying the SRES B1a 2020 scenario yield change to the 1990 production
+WHB1a2050,3.462033802,wheat yield change (%) from baseline under the SRES B1a 2050 scenario
+RIB1a2050,2.197,rice yield change (%) from baseline under the SRES B1a 2050 scenario
+MZB1a2050,-1.537966198,maize yield change (%) from baseline under the SRES B1a 2050 scenario
+ActChWHB1a2050,694820.8514,wheat total production changes in 2050 applying the SRES B1a 2050 scenario yield change to the 1990 production
+ActChRIB1a2050,19580.95081,rice total production changes in 2050 applying the SRES B1a 2050 scenario yield change to the 1990 production
+ActChMZB1a2050,-5645.906869,maize total production changes in 2050 applying the SRES B1a 2050 scenario yield change to the 1990 production
+WHB1a2080,4.163321813,wheat yield change (%) from baseline under the SRES B1a 2080 scenario
+RIB1a2080,1.16,rice yield change (%) from baseline under the SRES B1a 2080 scenario
+MZB1a2080,-1.836678187,maize yield change (%) from baseline under the SRES B1a 2080 scenario
+ActChWHB1a2080,835567.4647,wheat total production changes in 2080 applying the SRES B1a 2080 scenario yield change to the 1990 production
+ActChRIB1a2080,10338.59943,rice total production changes in 2080 applying the SRES B1a 2080 scenario yield change to the 1990 production
+ActChMZB1a2080,-6742.484983,maize total production changes in 2080 applying the SRES B1a 2080 scenario yield change to the 1990 production
+WHB2a2020,5.600379408,wheat yield change (%) from baseline under the SRES B2a 2020 scenario
+RIB2a2020,-0.227,rice yield change (%) from baseline under the SRES B2a 2020 scenario
+MZB2a2020,2.600379408,maize yield change (%) from baseline under the SRES B2a 2020 scenario
+ActChWHB2a2020,1123981.05,wheat total production changes in 2020 applying the SRES B2a 2020 scenario yield change to the 1990 production
+ActChRIB2a2020,-2023.156957,rice total production changes in 2020 applying the SRES B2a 2020 scenario yield change to the 1990 production
+ActChMZB2a2020,9546.048528,maize total production changes in 2020 applying the SRES B2a 2020 scenario yield change to the 1990 production
+WHB2a2050,3.308622014,wheat yield change (%) from baseline under the SRES B2a 2050 scenario
+RIB2a2050,2.399,rice yield change (%) from baseline under the SRES B2a 2050 scenario
+MZB2a2050,-1.691377986,maize yield change (%) from baseline under the SRES B2a 2050 scenario
+ActChWHB2a2050,664031.5191,wheat total production changes in 2050 applying the SRES B2a 2050 scenario yield change to the 1990 production
+ActChRIB2a2050,21381.29313,rice total production changes in 2050 applying the SRES B2a 2050 scenario yield change to the 1990 production
+ActChMZB2a2050,-6209.084831,maize total production changes in 2050 applying the SRES B2a 2050 scenario yield change to the 1990 production
+WHB2a2080,5.541208724,wheat yield change (%) from baseline under the SRES B2a 2080 scenario
+RIB2a2080,5.733,rice yield change (%) from baseline under the SRES B2a 2080 scenario
+MZB2a2080,-1.458791276,maize yield change (%) from baseline under the SRES B2a 2080 scenario
+ActChWHB2a2080,1112105.653,wheat total production changes in 2080 applying the SRES B2a 2080 scenario yield change to the 1990 production
+ActChRIB2a2080,51095.8539,rice total production changes in 2080 applying the SRES B2a 2080 scenario yield change to the 1990 production
+ActChMZB2a2080,-5355.254034,maize total production changes in 2080 applying the SRES B2a 2080 scenario yield change to the 1990 production
+WHB2b2020,1.257353262,wheat yield change (%) from baseline under the SRES B2b 2020 scenario
+RIB2b2020,-0.556,rice yield change (%) from baseline under the SRES B2b 2020 scenario
+MZB2b2020,-1.742646738,maize yield change (%) from baseline under the SRES B2b 2020 scenario
+ActChWHB2b2020,252347.4102,wheat total production changes in 2020 applying the SRES B2b 2020 scenario yield change to the 1990 production
+ActChRIB2b2020,-4955.397657,rice total production changes in 2020 applying the SRES B2b 2020 scenario yield change to the 1990 production
+ActChMZB2b2020,-6397.293517,maize total production changes in 2020 applying the SRES B2b 2020 scenario yield change to the 1990 production
+WHB2b2050,0.4320263984,wheat yield change (%) from baseline under the SRES B2b 2050 scenario
+RIB2b2050,2.357,rice yield change (%) from baseline under the SRES B2b 2050 scenario
+MZB2b2050,-4.567973602,maize yield change (%) from baseline under the SRES B2b 2050 scenario
+ActChWHB2b2050,86706.53353,wheat total production changes in 2050 applying the SRES B2b 2050 scenario yield change to the 1990 production
+ActChRIB2b2050,21006.96453,rice total production changes in 2050 applying the SRES B2b 2050 scenario yield change to the 1990 production
+ActChMZB2b2050,-16769.12898,maize total production changes in 2050 applying the SRES B2b 2050 scenario yield change to the 1990 production
+WHB2b2080,4.855765325,wheat yield change (%) from baseline under the SRES B2b 2080 scenario
+RIB2b2080,5.697,rice yield change (%) from baseline under the SRES B2b 2080 scenario
+MZB2b2080,-2.144234675,maize yield change (%) from baseline under the SRES B2b 2080 scenario
+ActChWHB2b2080,974539.0109,wheat total production changes in 2080 applying the SRES B2b 2080 scenario yield change to the 1990 production
+ActChRIB2b2080,50775.00081,rice total production changes in 2080 applying the SRES B2b 2080 scenario yield change to the 1990 production
+ActChMZB2b2080,-7871.531441,maize total production changes in 2080 applying the SRES B2b 2080 scenario yield change to the 1990 production
+COUNTRY,Australia,country name
+WH%GR,94.88855279,percent of total grain production from wheat
+RI%GR,3.865797753,percent of total grain production from rice
+MZ%GR,1.245649457,percent of total grain production from maize
+A1FI2020,0.8495619862,weighted average yield change for grain crops under the A1FI2020 scenario based on the percent share of total grain production from the three crops
+A1FI2050,2.063391633,weighted average yield change for grain crops under the A1FI2050 scenario based on the percent share of total grain production from the three crops
+A1FI2080,-0.06592995905,weighted average yield change for grain crops under the A1FI2080 scenario based on the percent share of total grain production from the three crops
+A2A2020,0.4730358074,weighted average yield change for grain crops under the A2aI2020 scenario based on the percent share of total grain production from the three crops
+A2A2050,3.301312972,weighted average yield change for grain crops under the A2a2050 scenario based on the percent share of total grain production from the three crops
+A2A2080,2.820493572,weighted average yield change for grain crops under the A2a2080 scenario based on the percent share of total grain production from the three crops
+A2B2020,0.9812930374,weighted average yield change for grain crops under the A2b2020 scenario based on the percent share of total grain production from the three crops
+A2B2050,2.365344872,weighted average yield change for grain crops under the A2b2050 scenario based on the percent share of total grain production from the three crops
+A2B2080,1.828046865,weighted average yield change for grain crops under the A2b2080 scenario based on the percent share of total grain production from the three crops
+A2C2020,1.592267435,weighted average yield change for grain crops under the A2c2020 scenario based on the percent share of total grain production from the three crops
+A2C2050,2.704223837,weighted average yield change for grain crops under the A2c2050 scenario based on the percent share of total grain production from the three crops
+A2C2080,2.351151266,weighted average yield change for grain crops under the A2c2080 scenario based on the percent share of total grain production from the three crops
+B1A2020,-0.09184709268,weighted average yield change for grain crops under the B1a2020 scenario based on the percent share of total grain production from the three crops
+B1A2050,1.116949227,weighted average yield change for grain crops under the B1a2050 scenario based on the percent share of total grain production from the three crops
+B1A2080,1.324160166,weighted average yield change for grain crops under the B1a2080 scenario based on the percent share of total grain production from the three crops
+B2A2020,1.779245074,weighted average yield change for grain crops under the B2a2020 scenario based on the percent share of total grain production from the three crops
+B2A2050,1.070391798,weighted average yield change for grain crops under the B2a2050 scenario based on the percent share of total grain production from the three crops
+B2A2080,1.820475842,weighted average yield change for grain crops under the B2a2080 scenario based on the percent share of total grain production from the three crops
+B2B2020,0.3832944029,weighted average yield change for grain crops under the B2b2020 scenario based on the percent share of total grain production from the three crops
+B2B2050,0.1480531706,weighted average yield change for grain crops under the B2b2050 scenario based on the percent share of total grain production from the three crops
+B2B2080,1.600363431,weighted average yield change for grain crops under the B2b2080 scenario based on the percent share of total grain production from the three crops
