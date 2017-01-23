@@ -34,6 +34,22 @@ def lerp2D(a, b, amount):
     y = a[1] + (b[1] - a[1]) * amount
     return (x, y)
 
+def lineIntersection(line1, line2):
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1]) #Typo was here
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+       raise Exception('Lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return (x, y)
+
 # Mean of list
 def mean(data):
     n = len(data)
@@ -95,3 +111,18 @@ def translatePoint(p, radians, distance):
     x2 = p[0] + distance * math.cos(radians)
     y2 = p[1] + distance * math.sin(radians)
     return (x2, y2)
+
+def xIntersect(points, x):
+    if len(points) < 2:
+        raise Exception('Not enough points in line')
+    pointsLeft = sorted([p for p in points if p[0] <= x], key=lambda point: abs(point[0]-x))
+    pointsRight = sorted([p for p in points if p[0] > x], key=lambda point: abs(point[0]-x))
+    # we have an exact match
+    if len(pointsLeft) and pointsLeft[0][0] == x:
+        return pointsLeft[0]
+    # no intersection
+    elif not len(pointsLeft) or not len(pointsRight):
+        raise Exception('Lines do not intersect')
+    y0 = min(pointsLeft[0][1], pointsRight[0][1]) - 1
+    y1 = max(pointsLeft[0][1], pointsRight[0][1]) + 1
+    return lineIntersection((pointsLeft[0], pointsRight[0]), ((x,y0), (x,y1)))

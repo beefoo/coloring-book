@@ -1,6 +1,6 @@
-Global Ocean Temperature Anomalies
-Units: Degrees Celsius
-Base Period: 1901-2000
+#Global Ocean Temperature Anomalies
+#Units: Degrees Celsius
+#Base Period: 1901-2000
 Year,Value
 188001,0.0261
 188002,-0.0366
