@@ -6,9 +6,15 @@ import numpy as np
 from polysimplify import VWSimplifier
 from scipy.ndimage import gaussian_filter1d
 
+def ceilToNearest(x, nearest):
+    return math.ceil(1.0 * x / nearest) * nearest
+
 def containsPoint(points, point):
     bbPath = mplPath.Path(np.array(points))
     return bbPath.contains_point(point)
+
+def floorToNearest(x, nearest):
+    return math.floor(1.0 * x / nearest) * nearest
 
 def halton(index, base=3):
     result = 0

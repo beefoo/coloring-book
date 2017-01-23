@@ -15,7 +15,7 @@ import sys
 
 # input
 parser = argparse.ArgumentParser()
-parser.add_argument('-input', dest="INPUT_FILE", default="data/global_food_production _data.csv", help="Path to input data file")
+parser.add_argument('-input', dest="INPUT_FILE", default="data/global_food_production_data.csv", help="Path to input data file")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=100, help="Padding of output file")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/food_production.svg", help="Path to output svg file")
