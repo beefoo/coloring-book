@@ -90,7 +90,7 @@ totals["value"] = sum([d["value"] for d in data])
 totalProjections = []
 groups = set([p["group"] for p in PROJECTED_DATA])
 for groupKey in groups:
-    pitem = {"label": "Total production " + groupKey}
+    pitem = {"label": "Total production " + groupKey, "group": groupKey}
     pTotal = 0
     for d in data:
         pTotal += sum([p["value"] for p in d["projections"] if p["group"]==groupKey])
@@ -102,9 +102,9 @@ data.append(totals)
 
 # print report
 for d in data:
-    print "For %s: %s" % (d["label"], "{:,}".format(d["value"]))
+    print "%s: %s" % (d["label"], "{:,}".format(d["value"]))
     for p in d["projections"]:
         sign = "+"
         if p["percent"] < 0:
             sign = ""
-        print " - %s: %s%s%%" % (p["label"], sign, round(p["percent"]*100, 2))
+        print " - %s: %s%s%%" % (p["group"], sign, round(p["percent"]*100, 2))
