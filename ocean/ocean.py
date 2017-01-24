@@ -205,6 +205,8 @@ for month in range(12):
 # draw data
 lineDelta = LINE_HEIGHT * 0.5
 prevPoints = None
+prevIntersections = None
+prevIntersectionsC = None
 for yi, d in enumerate(plotData):
     points = []
     for month, dm in enumerate(d["months"]):
@@ -217,23 +219,45 @@ for yi, d in enumerate(plotData):
     for point in points:
         dwgGuides.add(dwg.circle(center=point, r=3, fill="#000000"))
 
-    # draw ta data
+    # init prev intersections
+    if prevIntersections is None:
+        prevIntersections = []
+        prevIntersectionsC = []
+        for month, dm in enumerate(d["months"]):
+            x = month * monthWidth + PAD
+            y = PAD + HEIGHT
+            prevIntersections.append((x, y))
+            prevIntersectionsC.append((x+0.5*monthWidth, y))
+
+    # retrieve intersections
+    intersections = []
+    intersectionsC = []
     for month, dm in enumerate(d["months"]):
         x = month * monthWidth + PAD
         # find intersections
         intersection = mu.xIntersect(points, x)
-        y1 = intersection[1]
-        y0 = PAD + HEIGHT
-        if prevPoints is not None:
-            intersection = mu.xIntersect(prevPoints, x)
-            y0 = intersection[1]
+        intersections.append((x, intersection[1]))
+        # find intersections at center
+        xc = x+0.5*monthWidth
+        intersectionC = mu.xIntersect(points, xc)
+        intersectionsC.append((xc, intersectionC[1]))
+
+    # draw ta data
+    for month, dm in enumerate(d["months"]):
+        x = month * monthWidth + PAD
+        y1 = intersections[month][1]
+        y0 = prevIntersections[month][1]
+
         # draw divider lines
         if month > 0:
             dwgData.add(dwg.line(start=(x, y0-6), end=(x, y1+6), stroke_width=2, stroke="#000000", stroke_dasharray="5,2"))
+
         # draw color label
         pt = mu.norm(dm["ta"], taMin, taMax)
         ci = min(int(pt * colorCount), colorCount-1)
         color = COLORS[ci]
+        y1 = intersectionsC[month][1]
+        y0 = prevIntersectionsC[month][1]
         xc = x + monthWidth * 0.5
         yc = y1 + (y0 - y1) * 0.5
         dwgLabels.add(dwg.text(color, insert=(xc, yc), text_anchor="middle", alignment_baseline="middle", font_size=16))
@@ -242,6 +266,8 @@ for yi, d in enumerate(plotData):
     dwgData.add(dwg.path(d=pathCurve, stroke_width=2, stroke="#000000", fill="none"))
 
     prevPoints = points[:]
+    prevIntersections = intersections[:]
+    prevIntersectionsC = intersectionsC[:]
 
 y = HEIGHT + PAD
 dwgAxis.add(dwg.polyline(points=[prevPoints[0], (PAD, y), (PAD+WIDTH, y), prevPoints[-1]], stroke_width=2, stroke="#000000", fill="none"))
