@@ -181,7 +181,6 @@ dwgData = dwg.g(id="data")
 dwgGuides = dwg.g(id="guides")
 
 # draw axis
-dwgAxis.add(dwg.rect(insert=(PAD, PAD), size=(WIDTH, HEIGHT), stroke_width=2, stroke="#000000", fill="none"))
 axisValue = axisMin + AXIS_ROUND_TO_NEAREST
 x = PAD+WIDTH
 monthWidth = WIDTH / 12.0
@@ -251,6 +250,9 @@ for yi, d in enumerate(plotData):
     # dwgData.add(dwg.path(d=pathCurve, stroke_width=2, stroke="#000000", fill="none"))
 
     prevPoints = points[:]
+
+y = HEIGHT + PAD
+dwgAxis.add(dwg.polyline(points=[prevPoints[0], (PAD, y), (PAD+WIDTH, y), prevPoints[-1]], stroke_width=2, stroke="#000000", fill="none"))
 
 # save svg
 dwg.add(dwgAxis)
