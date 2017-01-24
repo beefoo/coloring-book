@@ -30,6 +30,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 import lib.mathutils as mu
+import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
@@ -216,12 +217,6 @@ for yi, d in enumerate(plotData):
     for point in points:
         dwgGuides.add(dwg.circle(center=point, r=3, fill="#000000"))
 
-    # smooth lines
-    firstPoint = points[0]
-    lastPoint = points[-1]
-    points = mu.smoothPoints(points)
-    points = [firstPoint] + points + [lastPoint]
-
     # draw ta data
     for month, dm in enumerate(d["months"]):
         x = month * monthWidth + PAD
@@ -243,11 +238,8 @@ for yi, d in enumerate(plotData):
         yc = y1 + (y0 - y1) * 0.5
         dwgLabels.add(dwg.text(color, insert=(xc, yc), text_anchor="middle", alignment_baseline="middle", font_size=16))
 
-    # make lines
-    dwgData.add(dwg.polyline(points=points, stroke_width=2, stroke="#000000", fill="none"))
-
-    # pathCurve = pointsToCurve(points)
-    # dwgData.add(dwg.path(d=pathCurve, stroke_width=2, stroke="#000000", fill="none"))
+    pathCurve = svgu.pointsToCurve(points)
+    dwgData.add(dwg.path(d=pathCurve, stroke_width=2, stroke="#000000", fill="none"))
 
     prevPoints = points[:]
 
