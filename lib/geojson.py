@@ -17,10 +17,12 @@ class GeoJSONUtil:
             self.features = geojson["features"]
             if key is not None and value is not None:
                 self.filterFeatures(key, value)
-            self.getShapes()
+            else:
+                self.getShapes()
 
     def filterFeatures(self, key, value):
         self.features = [f for f in self.features if key in f["properties"] and f["properties"][key] == value]
+        self.getShapes()
         if not len(self.features):
             print "Warning: no feature with %s=%s found" % (key, value)
 
@@ -68,6 +70,12 @@ class GeoJSONUtil:
         x = [p[0] for p in points]
         y = [p[1] for p in points]
         return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
+
+    def rejectFeatures(self, key, value):
+        self.features = [f for f in self.features if key not in f["properties"] or f["properties"][key] != value]
+        self.getShapes()
+        if not len(self.features):
+            print "Warning: features reduced to zero"
 
     def shapefileToGeojson(self, filename):
         # convert shapefile to geojson
