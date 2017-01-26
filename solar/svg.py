@@ -46,8 +46,8 @@ destGeo.rejectFeatures("name", "Treasure Island/YBI")
 patterns = {
     "house": {
         "filename": "data/electric_house.svg",
-        "width": 60,
-        "margin": 6
+        "width": 30,
+        "margin": 3
     },
     "solar": {
         "filename": "data/solar_house.svg",
