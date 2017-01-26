@@ -25,6 +25,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 import lib.geojson as geo
+import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
@@ -42,16 +43,30 @@ sourceGeo = geo.GeoJSONUtil("data/CA.geo.json", "CITY", "Fresno")
 destGeo = geo.GeoJSONUtil("data/san-francisco.geojson")
 destGeo.rejectFeatures("name", "Treasure Island/YBI")
 
+patterns = {
+    "house": {
+        "filename": "data/electric_house.svg",
+        "width": 60,
+        "margin": 6
+    },
+    "solar": {
+        "filename": "data/solar_house.svg",
+        "width": 60,
+        "margin": 6
+    }
+}
+
 geos = [
     # http://www.zillow.com/howto/api/neighborhood-boundaries.htm
-    {"name": "fresno", "geo": sourceGeo},
+    {"name": "fresno", "geo": sourceGeo, "pattern": "solar"},
     # https://github.com/codeforamerica/click_that_hood/blob/master/public/data/san-francisco.geojson
-    {"name": "san_francisco", "geo": destGeo}
+    {"name": "san_francisco", "geo": destGeo, "pattern": "house"}
 ]
 
 for g in geos:
     geo = g["geo"]
     filename = args.OUTPUT_FILE % g["name"]
+    pattern = patterns[g["pattern"]]
 
     # determine height
     (w, h) = geo.getDimensions()
@@ -64,14 +79,28 @@ for g in geos:
     # init svg
     dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
 
+    # make pattern
+    svgData = svgu.getDataFromSVG(pattern["filename"])
+    patternScale = 1.0 * pattern["width"] / svgData["width"]
+    patternHeight = svgData["height"] * patternScale
+    patternDef = dwg.pattern(id=g["pattern"], patternUnits="userSpaceOnUse", size=(pattern["width"] + pattern["margin"], patternHeight * 2 + pattern["margin"] * 2))
+    for path in svgData["paths"]:
+        patternDef.add(dwg.path(d=path, transform="scale(%s)" % patternScale, stroke_width=1, stroke="#000000", fill="none"))
+        y = patternHeight + pattern["margin"]
+        x = pattern["width"] * 0.5 + pattern["margin"] * 0.5
+        patternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, patternScale), stroke_width=1, stroke="#000000", fill="none"))
+        x = -1 * (pattern["width"] + pattern["margin"] - x)
+        patternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, patternScale), stroke_width=1, stroke="#000000", fill="none"))
+    dwg.defs.add(patternDef)
+
     # draw polygon
     if isinstance(unionedPoly, Polygon):
-        dwg.add(dwg.polygon(points=unionedPoly.exterior.coords, stroke_width=1, stroke="#000000", fill="none"))
+        dwg.add(dwg.polygon(points=unionedPoly.exterior.coords, stroke_width=1, stroke="#000000", fill="url(#%s)" % g["pattern"]))
 
     # assume multi poly
     else:
         for poly in unionedPoly:
-            dwg.add(dwg.polygon(points=poly.exterior.coords, stroke_width=1, stroke="#000000", fill="none"))
+            dwg.add(dwg.polygon(points=poly.exterior.coords, stroke_width=1, stroke="#000000", fill="url(#%s)" % g["pattern"]))
 
     dwg.save()
     print "Saved svg: %s" % filename
