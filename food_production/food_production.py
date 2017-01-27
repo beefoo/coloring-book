@@ -15,11 +15,19 @@
 
 import argparse
 import csv
+import inspect
 import math
 import os
 from pprint import pprint
 import svgwrite
 import sys
+
+# add parent directory to sys path to import relative modules
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+
+import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
@@ -27,7 +35,7 @@ parser.add_argument('-input', dest="INPUT_FILE", default="data/global_food_produ
 parser.add_argument('-popest', dest="POPULATION_ESTIMATES", default="data/population_estimates.csv", help="Path to input population estimates data file")
 parser.add_argument('-popproj', dest="POPULATION_PROJECTIONS", default="data/population_projections.csv", help="Path to input population projections data file")
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-height', dest="HEIGHT", type=int, default=1035, help="Height of output file")
+parser.add_argument('-height', dest="HEIGHT", type=int, default=1100, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=100, help="Padding of output file")
 parser.add_argument('-report', dest="REPORT", type=bool, default=False, help="Output report")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/food_production.svg", help="Path to output svg file")
@@ -161,12 +169,16 @@ if REPORT:
         print " - Projection %s: %s (+%s%%)" % (year, "{:,}".format(p), percent)
 
 # svg config
-LABEL_HEIGHT = 50
+LABEL_HEIGHT = 40
 LABEL_PAD = 10
 yearLabels = PROJECTIONS[:]
 yearLabelW = 1.0 * WIDTH / len(yearLabels)
 dataHeight = (HEIGHT - LABEL_HEIGHT) * 0.5
-dataWidth = 0.92 * yearLabelW
+dataWidth = 0.96 * yearLabelW
+arrowHeight = 50
+arrowWidth = yearLabelW
+xOffset = 0.5 * (arrowWidth - dataWidth)
+yOffset = arrowHeight
 
 # init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
@@ -174,7 +186,54 @@ dwgAxis = dwg.g(id="axis")
 dwgLabels = dwg.g(id="labels")
 dwgData = dwg.g(id="data")
 
-# TODO: define fill patterns
+# define people pattern
+personH = 80
+patternSpace = 12
+svgMan = svgu.getDataFromSVG("svg/man.svg")
+svgWoman = svgu.getDataFromSVG("svg/woman.svg")
+manScale = 1.0 * personH / svgMan["height"]
+womanScale = 1.0 * personH / svgWoman["height"]
+manWidth = svgMan["width"] * manScale
+womanWidth = svgWoman["width"] * womanScale
+personW = max(manWidth, womanWidth)
+patternW = personW * 2 + patternSpace * 2
+patternH = personH + patternSpace
+personPatternDef = dwg.pattern(id="people", patternUnits="userSpaceOnUse", size=(patternW, patternH), patternTransform="rotate(45)")
+for path in svgMan["paths"]:
+    strokeWidth = 1.0 / manScale
+    hw = svgMan["width"] * 0.5
+    hh = svgMan["height"] * 0.5
+    personPatternDef.add(dwg.path(d=path, transform="scale(%s) rotate(180,%s,%s)" % (manScale, hw, hh), stroke_width=strokeWidth, stroke="#000000", fill="none"))
+for path in svgWoman["paths"]:
+    strokeWidth = 1.0 / womanScale
+    x = personW + patternSpace
+    y = personH * 0.5 + patternSpace * 0.5
+    personPatternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, womanScale), stroke_width=strokeWidth, stroke="#000000", fill="none"))
+    y = -1 * (patternH - y)
+    personPatternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, womanScale), stroke_width=strokeWidth, stroke="#000000", fill="none"))
+dwg.defs.add(personPatternDef)
+
+# define corn pattern
+cornH = 80
+patternSpace = 8
+svgCorn = svgu.getDataFromSVG("svg/corn_01.svg")
+scale = 1.0 * personH / svgCorn["height"]
+cornW = svgCorn["width"] * scale
+patternW = cornW * 2 + patternSpace * 2
+patternH = cornH + patternSpace
+cornPatternDef = dwg.pattern(id="corn", patternUnits="userSpaceOnUse", size=(patternW, patternH), patternTransform="rotate(135)")
+for path in svgCorn["paths"]:
+    strokeWidth = 1.0 / scale
+    hw = svgCorn["width"] * 0.5
+    hh = svgCorn["height"] * 0.5
+    # t = svgu.getTransformString(w, h, x, y, sx=1, sy=1, r=0)
+    cornPatternDef.add(dwg.path(d=path, transform="scale(%s) rotate(180,%s,%s)" % (scale, hw, hh), stroke_width=strokeWidth, stroke="#000000", fill="none"))
+    x = cornW + patternSpace
+    y = cornH * 0.5 + patternSpace * 0.5
+    cornPatternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, scale), stroke_width=strokeWidth, stroke="#000000", fill="none"))
+    y = -1 * (patternH - y)
+    cornPatternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, scale), stroke_width=strokeWidth, stroke="#000000", fill="none"))
+dwg.defs.add(cornPatternDef)
 
 # draw year labels
 x = PAD + yearLabelW * 0.5
@@ -197,7 +256,18 @@ for year in yearLabels:
         label = "+ " + str(label) + "B people"
     else:
         label = "+ " + str(label) + "M people"
-    dwgData.add(dwg.rect(insert=(x, y), size=(dataWidth, h), stroke_width=2, stroke="#000000", fill="none"))
+
+    # draw arrow
+    p1 = (x+dataWidth*0.5, y)
+    # p2 = (x-xOffset, y+yOffset)
+    p3 = (x, y+yOffset)
+    p4 = (x, y+h)
+    p5 = (x+dataWidth, y+h)
+    p6 = (x+dataWidth, y+yOffset)
+    # p7 = (x+dataWidth+xOffset, y+yOffset)
+    arrow = [p1, p3, p4, p5, p6]
+
+    dwgData.add(dwg.polygon(points=arrow, stroke_width=2, stroke="#000000", fill="url(#people)"))
     dwgLabels.add(dwg.text(label, insert=(x+dataWidth*0.5, y-LABEL_PAD), text_anchor="middle", alignment_baseline="after-edge", font_size=20))
     x += yearLabelW
 
@@ -215,7 +285,18 @@ for year in yearLabels:
     h = ph * dataHeight
     label = int(round(delta / 1000000.0))
     label = "- " + str(label) + "M tons of corn"
-    dwgData.add(dwg.rect(insert=(x, y), size=(dataWidth, h), stroke_width=2, stroke="#000000", fill="none"))
+
+    # draw arrow
+    p1 = (x+dataWidth*0.5, y+h)
+    # p2 = (x-xOffset, y+h-yOffset)
+    p3 = (x, y+h-yOffset)
+    p4 = (x, y)
+    p5 = (x+dataWidth, y)
+    p6 = (x+dataWidth, y+h-yOffset)
+    # p7 = (x+dataWidth+xOffset, y+h-yOffset)
+    arrow = [p1, p3, p4, p5, p6]
+
+    dwgData.add(dwg.polygon(points=arrow, stroke_width=2, stroke="#000000", fill="url(#corn)"))
     dwgLabels.add(dwg.text(label, insert=(x+dataWidth*0.5, y+h+LABEL_PAD), text_anchor="middle", alignment_baseline="before-edge", font_size=20))
     x += yearLabelW
 

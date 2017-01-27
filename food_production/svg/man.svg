@@ -1,4 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"><svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 37.207 100" enable-background="new 0 0 37.207 100" xml:space="preserve"><circle cx="18.118" cy="8.159" r="8.159"></circle><path d="M8.472,95.426c0,2.524,2.05,4.574,4.574,4.574c2.529,0,4.576-2.05,4.576-4.574l0.004-38.374h2.037L19.65,95.426
-	c0,2.524,2.048,4.574,4.574,4.574s4.573-2.05,4.573-4.574l0.02-66.158h2.006v24.38c0,4.905,6.398,4.905,6.384,0v-24.9
-	c0-5.418-3.184-10.728-9.523-10.728L9.396,18.012C3.619,18.012,0,22.722,0,28.599v25.05c0,4.869,6.433,4.869,6.433,0v-24.38h2.048
-	L8.472,95.426z"></path></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg2"
+   xml:space="preserve"
+   enable-background="new 0 0 37.207 100"
+   viewBox="0 0 37.207 100"
+   y="0px"
+   x="0px"
+   version="1.0"><metadata
+     id="metadata12"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs10" /><path
+     id="circle4"
+     d="M 26.277,8.1590004 A 8.1590004,8.1590004 0 0 1 18.118,16.318001 8.1590004,8.1590004 0 0 1 9.9589996,8.1590004 8.1590004,8.1590004 0 0 1 18.118,0 8.1590004,8.1590004 0 0 1 26.277,8.1590004 Z"
+     style="" /><path
+     id="path6"
+     d="M8.472,95.426c0,2.524,2.05,4.574,4.574,4.574c2.529,0,4.576-2.05,4.576-4.574l0.004-38.374h2.037L19.65,95.426  c0,2.524,2.048,4.574,4.574,4.574s4.573-2.05,4.573-4.574l0.02-66.158h2.006v24.38c0,4.905,6.398,4.905,6.384,0v-24.9  c0-5.418-3.184-10.728-9.523-10.728L9.396,18.012C3.619,18.012,0,22.722,0,28.599v25.05c0,4.869,6.433,4.869,6.433,0v-24.38h2.048  L8.472,95.426z" /></svg>

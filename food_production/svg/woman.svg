@@ -1,4 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"><svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 45.833 100" enable-background="new 0 0 45.833 100" xml:space="preserve"><path d="M29.775,18.047c5.697,0,8.008,4.695,8.871,7.283l6.999,23.008c1.396,4.949-4.899,6.998-6.4,2.175l-6.298-21.125h-1.833
-	L42.03,66.966H31.973v29.296c0,4.996-7.514,4.971-7.514,0V66.774h-3.063l0.005,29.447c0,5.037-7.545,5.037-7.545,0l-0.002-29.255
-	H3.765l10.831-37.578h-1.694l-6.299,21.2c-1.5,4.621-7.85,2.724-6.396-2.228L7.2,25.33c0.749-2.625,3.045-7.283,8.795-7.283H29.775z
-	"></path><circle cx="22.925" cy="8.164" r="8.164"></circle></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg2"
+   xml:space="preserve"
+   enable-background="new 0 0 45.833 100"
+   viewBox="0 0 45.833 100"
+   y="0px"
+   x="0px"
+   version="1.0"><metadata
+     id="metadata12"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs10" /><path
+     id="path4"
+     d="M29.775,18.047c5.697,0,8.008,4.695,8.871,7.283l6.999,23.008c1.396,4.949-4.899,6.998-6.4,2.175l-6.298-21.125h-1.833  L42.03,66.966H31.973v29.296c0,4.996-7.514,4.971-7.514,0V66.774h-3.063l0.005,29.447c0,5.037-7.545,5.037-7.545,0l-0.002-29.255  H3.765l10.831-37.578h-1.694l-6.299,21.2c-1.5,4.621-7.85,2.724-6.396-2.228L7.2,25.33c0.749-2.625,3.045-7.283,8.795-7.283H29.775z  " /><path
+     id="circle6"
+     d="m 31.088999,8.1639996 a 8.1639996,8.1639996 0 0 1 -8.164,8.1639994 A 8.1639996,8.1639996 0 0 1 14.761,8.1639996 8.1639996,8.1639996 0 0 1 22.924999,0 a 8.1639996,8.1639996 0 0 1 8.164,8.1639996 z"
+     style="" /></svg>
