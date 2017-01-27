@@ -84,13 +84,14 @@ for g in geos:
     patternScale = 1.0 * pattern["width"] / svgData["width"]
     patternHeight = svgData["height"] * patternScale
     patternDef = dwg.pattern(id=g["pattern"], patternUnits="userSpaceOnUse", size=(pattern["width"] + pattern["margin"], patternHeight * 2 + pattern["margin"] * 2))
+    strokeWidth = 1.0 / patternScale
     for path in svgData["paths"]:
-        patternDef.add(dwg.path(d=path, transform="scale(%s)" % patternScale, stroke_width=1, stroke="#000000", fill="none"))
+        patternDef.add(dwg.path(d=path, transform="scale(%s)" % patternScale, stroke_width=strokeWidth, stroke="#000000", fill="none"))
         y = patternHeight + pattern["margin"]
         x = pattern["width"] * 0.5 + pattern["margin"] * 0.5
-        patternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, patternScale), stroke_width=1, stroke="#000000", fill="none"))
+        patternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, patternScale), stroke_width=strokeWidth, stroke="#000000", fill="none"))
         x = -1 * (pattern["width"] + pattern["margin"] - x)
-        patternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, patternScale), stroke_width=1, stroke="#000000", fill="none"))
+        patternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, patternScale), stroke_width=strokeWidth, stroke="#000000", fill="none"))
     dwg.defs.add(patternDef)
 
     # draw polygon
