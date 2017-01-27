@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   height="57.230469"
+   width="61.819889"
+   id="svg10"
+   xml:space="preserve"
+   enable-background="new 0 0 100 100"
+   viewBox="0 0 61.819889 57.230469"
+   y="0px"
+   x="0px"
+   version="1.1"><metadata
+     id="metadata16"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs14" /><path
+     id="path2"
+     d="M 30.909733,0 0.24371651,31.416015 c -0.33,0.336 -0.324328,0.879031 0.013672,1.207031 0.16,0.156001 0.37661,0.244141 0.59961,0.244141 H 7.0972325 V 57.230468 H 54.724186 V 32.865234 h 6.240235 c 0.471999,0 0.855468,-0.382469 0.855468,-0.855469 0,-0.223 -0.08819,-0.435703 -0.242187,-0.595703 L 53.019108,22.648437 V 7.353515 h -7.519531 v 7.591797 z m -5.181641,19.970703 h 12 l -5,11 h 8 l -15,19 3,-14 h -7 z" /><text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text6"
+     font-weight="bold"
+     font-size="5px"
+     y="115"
+     x="4.2162913e-009">Created by Aldric Rodríguez</text>
+<text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text8"
+     font-weight="bold"
+     font-size="5px"
+     y="120"
+     x="4.2162913e-009">from the Noun Project</text>
+</svg>

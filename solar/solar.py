@@ -82,3 +82,4 @@ destination = data["san_francisco"]
 percentSupplied = int(round(1.0 * source["forHouseholds"] / destination["households"] * 100))
 print "%s creates energy for %s households" % (source["label"], "{:,}".format(source["forHouseholds"]))
 print "%s has %s households (%s%% supplied w/ energy from %s)" % (destination["label"], "{:,}".format(destination["households"]), percentSupplied, source["label"])
+print "%s has %s%% households of %s" % (destination["label"], int(round(1.0*destination["households"]/source["households"]*100)), source["label"])
