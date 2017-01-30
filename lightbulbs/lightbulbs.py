@@ -19,7 +19,7 @@ import lib.svgutils as svgu
 # input
 parser = argparse.ArgumentParser()
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-height', dest="HEIGHT", type=int, default=1000, help="Height of output file")
+parser.add_argument('-height', dest="HEIGHT", type=int, default=1100, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
 parser.add_argument('-count', dest="COUNT", type=int, default=50, help="Lightbulbs per group")
 parser.add_argument('-cols', dest="COLS", type=int, default=5, help="Columns")
@@ -112,11 +112,12 @@ for l in lightbulbs:
 # config svg
 lightMargin = 0
 groupMargin = 20
-calculationHeight = 100
+calculationHeight = 150
 
 # init svg
 rows = COUNT / COLS
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
+dwgLabels = dwg.g(id="labels")
 
 # definitions
 for i, l in enumerate(lightbulbs):
@@ -148,5 +149,32 @@ for l in lightbulbs:
     xOffset += groupW + groupMargin
     dwg.add(dwgLightgroup)
 
+# multiplication
+mw = 5
+mh = 20
+mc = mh * 0.5
+mm = mc - mw * 0.5
+xGroup = dwg.g(id="multiply", transform="rotate(45, %s, %s)" % (mc, mc))
+xGroup.add(dwg.rect(insert=(mm, 0), size=(mw, mh), fill="#000000"))
+xGroup.add(dwg.rect(insert=(0, mm), size=(mh, mw), fill="#000000"))
+dwg.defs.add(xGroup)
+
+# draw calculations
+dwgCalc = dwg.g(id="calculations")
+xOffset = PAD
+yOffset = PAD + groupH + 30
+for l in lightbulbs:
+    savings = int(round(l["annualSavingsIfReplaced"]))
+    if savings <= 0:
+        continue
+    y = yOffset
+    x = xOffset
+    dwgCalc.add(dwg.use("#multiply", transform="translate(%s, %s)" % (x, y)))
+    x += 40
+    dwgLabels.add(dwg.text("$%s" % savings, insert=(x, y), font_weight="bold", font_size=36, alignment_baseline="mathematical"))
+    xOffset += groupW + groupMargin
+dwg.add(dwgCalc)
+
+dwg.add(dwgLabels)
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
