@@ -45,12 +45,20 @@ TREE_SEQUESTERED = 0.039
 # Based on 2 hrs/day of usage, an electricity rate of 11 cents per kilowatt-hour, shown in U.S. dollars.
 # Lasts ~1000 hours
 # https://energy.gov/energysaver/how-energy-efficient-light-bulbs-compare-traditional-incandescents
+# $6.12 on Amazon for 4 GE 60W bulbs (1/29/2017)
+# https://www.amazon.com/GE-Lighting-41028-60-Watt-4-Pack/dp/B01CTUERCU/
 INCANDESCENT_COST = 4.8
+INCANDESCENT_LIFE = 1000
+INCANDESCENT_BULB_COST = 6.12 / 4
 
 # $1.00 annual cost per LED lightbulb
 # https://energy.gov/energysaver/how-energy-efficient-light-bulbs-compare-traditional-incandescents
 # Lasts ~25,000 hours
+# $7.97 at Home Depot for 4 Philips 60W bulbs (1/29/2017)
+# http://www.homedepot.com/p/Philips-60W-Equivalent-Daylight-A19-LED-Light-Bulb-4-Pack-460329/206557595
 LED_COST = 1.0
+LED_LIFE = 25000
+LED_BULB_COST = 7.97 / 4
 
 householdReductions = LIGHTBULB_REDUCTIONS * LIGHTBULBS_PER_HOUSEHOLD
 treeEquivalent = int(round(householdReductions / TREE_SEQUESTERED))
@@ -60,7 +68,21 @@ print "Replacing lightbulbs in one household is equivelent to planting %s urban 
 beforeSavings = int(round(INCANDESCENT_COST * LIGHTBULBS_PER_HOUSEHOLD))
 afterSavings = int(round(LED_COST * LIGHTBULBS_PER_HOUSEHOLD))
 savings = int(round(beforeSavings - afterSavings))
-print "Replacing lightbulbs in one household will save about $%s ($%s vs $%s)" % (savings, beforeSavings, afterSavings)
+
+lifeTimes = int(round(1.0 * LED_LIFE / INCANDESCENT_LIFE))
+ledYearsLifetime = 1.0 * LED_LIFE / (365.25 * 24)
+incandescentsYearsLifetime = 1.0 * INCANDESCENT_LIFE / (365.25 * 24)
+lightbulbSavings = int(round(INCANDESCENT_BULB_COST / incandescentsYearsLifetime * LIGHTBULBS_PER_HOUSEHOLD - LED_BULB_COST * LIGHTBULBS_PER_HOUSEHOLD))
+
+print "Replacing lightbulbs in one household will save about $%s ($%s vs $%s) worth of energy and $%s worth of incandescent lightbulbs for a total of $%s in savings per year" % (savings, beforeSavings, afterSavings, lightbulbSavings, savings + lightbulbSavings)
+
+incandescentLifetimeCost = lifeTimes * INCANDESCENT_BULB_COST + ledYearsLifetime * INCANDESCENT_COST
+ledLifetimeCost = LED_BULB_COST + ledYearsLifetime * LED_COST
+lifetimeSaves = incandescentLifetimeCost - ledLifetimeCost
+
+print "LED lightulbs last %s times longer than incandescents" % lifeTimes
+print "LED lightulbs last for %s years (%s months for incandescents) if used 2 hours/day" % (round(ledYearsLifetime, 2), round(incandescentsYearsLifetime*12, 1))
+print "In it's lifetime, an LED light will save $%s compared to incandescent" % round(lifetimeSaves, 2)
 
 # config svg
 svgMargin = 10
