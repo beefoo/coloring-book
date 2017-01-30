@@ -19,97 +19,134 @@ import lib.svgutils as svgu
 # input
 parser = argparse.ArgumentParser()
 parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=int, default=1000, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
-parser.add_argument('-row', dest="PER_ROW", type=int, default=8, help="Columns")
+parser.add_argument('-count', dest="COUNT", type=int, default=50, help="Lightbulbs per group")
+parser.add_argument('-cols', dest="COLS", type=int, default=5, help="Columns")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/lightbulbs.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
 WIDTH = args.WIDTH
+HEIGHT = args.HEIGHT
 PAD = args.PAD
-PER_ROW = args.PER_ROW
+COUNT = args.COUNT
+COLS = args.COLS
 
-# 2.82 x 10-2 metric tons CO2 / bulb replaced
-# https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references#incanbulb
-LIGHTBULB_REDUCTIONS = 0.0282
-
-# 40 lightbulbs per U.S. household
-# https://www.energystar.gov/ia/partners/manuf_res/CFL_PRG_FINAL.pdf
-LIGHTBULBS_PER_HOUSEHOLD = 40
-
-# 0.039 metric ton CO2 per urban tree seedling planted and grown for 10 years
-# https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references#seedlings
-TREE_SEQUESTERED = 0.039
-
-# $4.80 annual cost per incandescent lightbulb
-# Based on 2 hrs/day of usage, an electricity rate of 11 cents per kilowatt-hour, shown in U.S. dollars.
-# Lasts ~1000 hours
+# Data sources
 # https://energy.gov/energysaver/how-energy-efficient-light-bulbs-compare-traditional-incandescents
-# $6.12 on Amazon for 4 GE 60W bulbs (1/29/2017)
-# https://www.amazon.com/GE-Lighting-41028-60-Watt-4-Pack/dp/B01CTUERCU/
-INCANDESCENT_COST = 4.8
-INCANDESCENT_LIFE = 1000
-INCANDESCENT_BULB_COST = 6.12 / 4
+# https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references#incanbulb
+COST_PER_KWH = 0.11 # electricity rate of 11 cents per kilowatt-hour
+HOURS_PER_DAY = 3.0 # average light bulb usage in hours per day
+TREE_SEQUESTERED = 0.039 # 0.039 metric ton CO2 per urban tree seedling planted and grown for 10 years
+lightbulbs = [
+    {
+        "id": "incandescent",
+        "label": "60W Incandescent",
+        "annualEnergyCost": 4.8,
+        "watts": 60,
+        "lifeHours": 1000,
+        "svg": "svg/bulb_inc.svg",
+        "bulbCost": 1.53 # https://www.amazon.com/GE-Lighting-41028-60-Watt-4-Pack/dp/B01CTUERCU/ (1/29/2017)
+    },{
+        "id": "cfl",
+        "label": "60W Equivalent CFL",
+        "annualEnergyCost": 1.2,
+        "lifeHours": 10000,
+        "watts": 14,
+        "svg": "svg/bulb_cfl.svg",
+        "bulbCost": 2.2 # https://www.amazon.com/EcoSmart-5000K-Spiral-Daylight-4-Pack/dp/B0042UN1U0/ (1/29/2017)
+    },{
+        "id": "led",
+        "label": "60W Equivalent LED",
+        "annualEnergyCost": 1.0,
+        "lifeHours": 25000,
+        "watts": 8,
+        "svg": "svg/bulb_led.svg",
+        "bulbCost": 3.86 # https://www.amazon.com/Philips-459024-Equivalent-White-6-Pack/dp/B01439261O/ (1/29/2017)
+    }
+]
 
-# $1.00 annual cost per LED lightbulb
-# https://energy.gov/energysaver/how-energy-efficient-light-bulbs-compare-traditional-incandescents
-# Lasts ~25,000 hours
-# $7.97 at Home Depot for 4 Philips 60W bulbs (1/29/2017)
-# http://www.homedepot.com/p/Philips-60W-Equivalent-Daylight-A19-LED-Light-Bulb-4-Pack-460329/206557595
-LED_COST = 1.0
-LED_LIFE = 25000
-LED_BULB_COST = 7.97 / 4
+# Do energy/cost calculations
+for i, l in enumerate(lightbulbs):
+    energy = 1.0 * l["watts"] * HOURS_PER_DAY * 365 / 1000
+    energyCost = energy * COST_PER_KWH
+    lifeYears = 1.0 * l["lifeHours"] / 24 / 365
+    bulbsPerYear = 1.0 / lifeYears
+    bulbsCost = bulbsPerYear * l["bulbCost"]
+    totalCost = bulbsCost + energyCost
+    tonsCO2 = energy * 1671 / 1000 / 2204.6
 
-householdReductions = LIGHTBULB_REDUCTIONS * LIGHTBULBS_PER_HOUSEHOLD
-treeEquivalent = int(round(householdReductions / TREE_SEQUESTERED))
+    lightbulbs[i]["annualKwhConsumed"] = energy
+    lightbulbs[i]["annualEnergyCost"] = energyCost
+    lightbulbs[i]["annualBulbCost"] = bulbsCost
+    lightbulbs[i]["annualTotalCost"] = totalCost
+    lightbulbs[i]["annualCO2Emmissions"] = tonsCO2
 
-print "Replacing lightbulbs in one household is equivelent to planting %s urban tree seedlings and letting grow for 10 years" % treeEquivalent
+# sort by cost and make the cheapest one the standard
+newlist = sorted(lightbulbs, key=lambda k: k['annualTotalCost'])
+standard = lightbulbs[-1].copy()
 
-beforeSavings = int(round(INCANDESCENT_COST * LIGHTBULBS_PER_HOUSEHOLD))
-afterSavings = int(round(LED_COST * LIGHTBULBS_PER_HOUSEHOLD))
-savings = int(round(beforeSavings - afterSavings))
+# do savings/reductions calculations
+for i, l in enumerate(lightbulbs):
+    costSavings = l["annualTotalCost"] - standard["annualTotalCost"]
+    co2Reductions = l["annualCO2Emmissions"] - standard["annualCO2Emmissions"]
+    treesPlanted = co2Reductions / TREE_SEQUESTERED
 
-lifeTimes = int(round(1.0 * LED_LIFE / INCANDESCENT_LIFE))
-ledYearsLifetime = 1.0 * LED_LIFE / (365.25 * 24)
-incandescentsYearsLifetime = 1.0 * INCANDESCENT_LIFE / (365.25 * 24)
-lightbulbSavings = int(round(INCANDESCENT_BULB_COST / incandescentsYearsLifetime * LIGHTBULBS_PER_HOUSEHOLD - LED_BULB_COST * LIGHTBULBS_PER_HOUSEHOLD))
+    lightbulbs[i]["annualSavingsIfReplaced"] = costSavings
+    lightbulbs[i]["annualReductionsIfReplaced"] = co2Reductions
+    lightbulbs[i]["treesPlantedEquivalent"] = treesPlanted
 
-print "Replacing lightbulbs in one household will save about $%s ($%s vs $%s) worth of energy and $%s worth of incandescent lightbulbs for a total of $%s in savings per year" % (savings, beforeSavings, afterSavings, lightbulbSavings, savings + lightbulbSavings)
-
-incandescentLifetimeCost = lifeTimes * INCANDESCENT_BULB_COST + ledYearsLifetime * INCANDESCENT_COST
-ledLifetimeCost = LED_BULB_COST + ledYearsLifetime * LED_COST
-lifetimeSaves = incandescentLifetimeCost - ledLifetimeCost
-
-print "LED lightulbs last %s times longer than incandescents" % lifeTimes
-print "LED lightulbs last for %s years (%s months for incandescents) if used 2 hours/day" % (round(ledYearsLifetime, 2), round(incandescentsYearsLifetime*12, 1))
-print "In it's lifetime, an LED light will save $%s compared to incandescent" % round(lifetimeSaves, 2)
+# print report
+print "Annual light bulb stats:"
+for l in lightbulbs:
+    print "-----"
+    print "%s:" % l["label"]
+    print " - %skWh (%s metric tons CO2)" % (round(l["annualEnergyCost"], 2), round(l["annualCO2Emmissions"], 4))
+    print " - $%s ($%s energy + $%s bulbs)" % (round(l["annualTotalCost"], 2), round(l["annualEnergyCost"], 2), round(l["annualBulbCost"], 2))
+    if l["annualReductionsIfReplaced"] > 0:
+        print " - $%s savings if switched to LED" % round(l["annualSavingsIfReplaced"], 2)
+        print " - %s metric tons of CO2 reductions if switched to LED" % round(l["annualReductionsIfReplaced"], 4)
+        print " - Equivalent to %s trees planted" % round(l["treesPlantedEquivalent"], 2)
 
 # config svg
-svgMargin = 10
-svgData = svgu.getDataFromSVG("svg/dollar_02.svg")
-svgWidth = (1.0 * WIDTH - 1.0 * svgMargin * (PER_ROW-1)) / PER_ROW
-svgHeight = svgWidth * svgData["height"] / svgData["width"]
-rows = math.ceil(1.0 * beforeSavings / PER_ROW)
-scale = svgWidth / svgData["width"]
+lightMargin = 0
+groupMargin = 20
+calculationHeight = 100
 
 # init svg
-height = rows * (svgHeight + svgMargin) - svgMargin
-dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
+rows = COUNT / COLS
+dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
-# make reference dollar
-dollarGroup = dwg.g(id="dollar")
-for path in svgData["paths"]:
-    dollarGroup.add(dwg.path(d=path, fill="none", stroke="#000000", stroke_width=1))
-dwg.defs.add(dollarGroup)
+# definitions
+for i, l in enumerate(lightbulbs):
+    group = dwg.g(id=l["id"])
+    svgData = svgu.getDataFromSVG(l["svg"])
+    lightbulbs[i]["svgData"] = svgData
+    for path in svgData["paths"]:
+        group.add(dwg.path(d=path, fill="#000000"))
+    dwg.defs.add(group)
 
-for i in range(beforeSavings):
-    row = i / PER_ROW
-    col = i % PER_ROW
-    x = col * (svgWidth + svgMargin) + PAD
-    y = row * (svgHeight + svgMargin) + PAD
-    group = dwg.g(transform="translate(%s, %s) scale(%s)" % (x, y, scale))
-    group.add(dwg.use("#dollar"))
-    dwg.add(group)
+# draw lightbulbs
+xOffset = PAD
+groupW = 1.0 * (WIDTH - groupMargin * (len(lightbulbs) - 1)) / len(lightbulbs)
+lightW = 1.0 * (groupW - lightMargin * (COLS - 1)) / COLS
+groupH = HEIGHT - calculationHeight
+lightH = 1.0 * groupH / rows - lightMargin
+for l in lightbulbs:
+    scaleW = lightW / l["svgData"]["width"]
+    scaleH = lightH / l["svgData"]["height"]
+    scale = scaleW
+    dwgLightgroup = dwg.g()
+    y = PAD
+    for row in range(rows):
+        x = xOffset
+        for col in range(COLS):
+            dwgLightgroup.add(dwg.use("#"+l["id"], transform="translate(%s, %s) scale(%s)" % (x, y, scale)))
+            x += lightW + lightMargin
+        y += lightH + lightMargin
+    xOffset += groupW + groupMargin
+    dwg.add(dwgLightgroup)
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
