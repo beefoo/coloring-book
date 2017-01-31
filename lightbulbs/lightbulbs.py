@@ -159,6 +159,13 @@ xGroup.add(dwg.rect(insert=(mm, 0), size=(mw, mh), fill="#000000"))
 xGroup.add(dwg.rect(insert=(0, mm), size=(mh, mw), fill="#000000"))
 dwg.defs.add(xGroup)
 
+# equal
+eOffset = 3
+eGroup = dwg.g(id="equals")
+eGroup.add(dwg.rect(insert=(0, eOffset), size=(mh, mw), fill="#000000"))
+eGroup.add(dwg.rect(insert=(0, mh-mw-eOffset), size=(mh, mw), fill="#000000"))
+dwg.defs.add(eGroup)
+
 # draw calculations
 dwgCalc = dwg.g(id="calculations")
 xOffset = PAD
@@ -170,8 +177,11 @@ for l in lightbulbs:
     y = yOffset
     x = xOffset
     dwgCalc.add(dwg.use("#multiply", transform="translate(%s, %s)" % (x, y)))
-    x += 40
-    dwgLabels.add(dwg.text("$%s" % savings, insert=(x, y), font_weight="bold", font_size=36, alignment_baseline="mathematical"))
+    dwgLabels.add(dwg.text("$%s" % savings, insert=(x+40, y), font_weight="bold", font_size=36, alignment_baseline="mathematical"))
+    y += 40
+    dwgCalc.add(dwg.rect(insert=(x, y), size=(groupW, 5)))
+    y += 30
+    dwgCalc.add(dwg.use("#equals", transform="translate(%s, %s)" % (x, y)))
     xOffset += groupW + groupMargin
 dwg.add(dwgCalc)
 
