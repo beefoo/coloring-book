@@ -17,26 +17,32 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 import lib.mathutils as mu
+import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
 # input source: http://www.stateair.net/web/historical/1/1.html
 parser.add_argument('-input', dest="INPUT_FILE", default="data/Beijing_2015_HourlyPM25_created20160201.csv", help="Path to input file")
 parser.add_argument('-reduce', dest="REDUCE", default="max", help="How to reduce a day of data: max or mean")
-parser.add_argument('-wpr', dest="WEEKS_PER_ROW", type=int, default=2, help="Amount of weeks to display per row")
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-dpr', dest="DAYS_PER_ROW", type=int, default=20, help="Amount of days to display per row")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-osc', dest="OSCILLATE", type=float, default=40.0, help="Amount to oscillate")
-parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=2, help="Padding around each day")
+parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=1, help="Padding around each day")
+parser.add_argument('-rowpad', dest="ROW_PAD", type=int, default=12, help="Padding around each row")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/Beijing_2015_DailyPM25.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WEEKS_PER_ROW = args.WEEKS_PER_ROW
-WIDTH = args.WIDTH
+DPI = 150
 OSCILLATE = args.OSCILLATE
-PAD = args.PAD + OSCILLATE
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2 - OSCILLATE * 2
+DAYS_PER_ROW = args.DAYS_PER_ROW
 DAY_PAD = args.DAY_PAD
+ROW_PAD = args.ROW_PAD
 
 # Config Air Quality Index
 # https://www.airnow.gov/index.cfm?action=aqibasics.aqi
@@ -81,9 +87,19 @@ with open(args.INPUT_FILE, 'rb') as f:
     for skip in range(4):
         next(r, None)
     # for each row
+    currentMonth = -1
+    sort = 0
     for _site,_parameter,_date,_year,_month,_day,_hour,_value,_unit,_duration,_qc in r:
         value = int(_value)
         date = datetime.date(int(_year), int(_month), int(_day))
+        sort = 10000*int(_year) + 100*int(_month) + int(_day)
+        if currentMonth != date.month:
+            readings.append({
+                'date': date,
+                'label': date.strftime("%b"),
+                'sort': sort - 0.1
+            })
+            currentMonth = date.month
         if value >= 0:
             if current_date is None:
                 current_date = date
@@ -91,7 +107,8 @@ with open(args.INPUT_FILE, 'rb') as f:
             elif current_date != date:
                 readings.append({
                     'date': current_date,
-                    'value': reduceData(queue)
+                    'value': reduceData(queue),
+                    'sort': sort
                 })
                 queue = []
                 current_date = date
@@ -100,11 +117,12 @@ with open(args.INPUT_FILE, 'rb') as f:
     if len(queue) > 0:
         readings.append({
             'date': current_date,
-            'value': reduceData(queue)
+            'value': reduceData(queue),
+            'sort': sort
         })
 
 # sort chronologically
-readings = sorted(readings, key=lambda k: k['date'])
+readings = sorted(readings, key=lambda k: k['sort'])
 
 # Show a chart
 # y = [r['value'] for r in readings]
@@ -114,39 +132,60 @@ readings = sorted(readings, key=lambda k: k['date'])
 # plt.show()
 
 # init svg
-offset = dayOfWeek(readings[0]['date'])
-days_per_row = WEEKS_PER_ROW * 7
-rows = math.ceil((365.0 + offset) / days_per_row)
-cell_w = 1.0 * WIDTH / days_per_row
-cell_h = cell_w
-height = cell_h * rows
-dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
+offsetDaysPerRow = DAYS_PER_ROW + 0.5
+rows = int(math.ceil(1.0 * len(readings) / DAYS_PER_ROW))
+cell_w = 1.0 * WIDTH / offsetDaysPerRow
+cell_h = 1.0 * (HEIGHT - ROW_PAD * (rows-1)) / rows
+cell_l = min(cell_w, cell_h)
+xOffset = (WIDTH - (cell_l * offsetDaysPerRow)) * 0.5
+yOffset = (HEIGHT - (cell_l * rows) - ROW_PAD * (rows-1)) * 0.5
+dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2+OSCILLATE*2), profile='full')
 
 # add days to svg
-day_r = (cell_w - DAY_PAD * 2) * 0.5
+day_r = (cell_l - DAY_PAD * 2) * 0.5
 dwgShapes = dwg.add(dwg.g(id="shapes"))
 dwgLabels = dwg.add(dwg.g(id="labels"))
-# dwgMonths = dwg.add(dwg.g(id="months"))
-# currentMonth = ""
+dwgMonths = dwg.add(dwg.g(id="months"))
+arrow = []
 for i, r in enumerate(readings):
-    weekday = dayOfWeek(r['date'])
-    j = i + offset
-    week = int((i + offset) / 7)
-    row = int((i + offset) / days_per_row)
-    col = 7 * (week % WEEKS_PER_ROW) + weekday
-    x = col * cell_w + cell_w * 0.5 + PAD
-    osc = mu.oscillate(1.0*col/(WEEKS_PER_ROW*7), OSCILLATE)
-    y = row * cell_h + cell_h * 0.5 + PAD + osc
-    # add circle
-    dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=3, fill="none"))
-    # add value as label
-    value = getValue(r['value'], AQI)
-    dwgLabels.add(dwg.text(str(value), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=18))
+    row = int(i / DAYS_PER_ROW)
+    col = i % DAYS_PER_ROW
+    rowOffset = row * ROW_PAD
+    x = col * cell_l + cell_l * 0.5 + PAD + xOffset
+    o = 1.0*col/DAYS_PER_ROW
+    if row % 2 > 0:
+        x += cell_l * 0.5
+        o = 1.0*(col+0.5)/DAYS_PER_ROW
+    osc = mu.oscillate(o, OSCILLATE)
+    y = row * cell_l + cell_l * 0.5 + PAD + OSCILLATE + osc + yOffset + rowOffset
+    # add arrow point
+    if i > 0 and i < 6:
+        arrow.append((x, y - cell_l))
     # add month label
-    # month = r['date'].strftime("%b")
-    # if currentMonth != month:
-    #     dwgMonths.add(dwg.text(month, insert=(x-day_r, y-day_r), text_anchor="middle", alignment_baseline="middle", font_size=10))
-    #     currentMonth = month
+    if "label" in r:
+        x += cell_l * 0.15
+        dwgMonths.add(dwg.text(r["label"], insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=18))
+    else:
+        # add circle
+        dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=3, fill="none"))
+        # add value as label
+        value = getValue(r['value'], AQI)
+        dwgLabels.add(dwg.text(str(value), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=18))
+
+# add arrow
+dwgArrow = dwg.add(dwg.g(id="arrow"))
+arrowPath = svgu.pointsToCurve(arrow)
+dwgArrow.add(dwg.path(d=arrowPath, stroke="#000000", stroke_width=4, fill="none"))
+arrowHeadH = 16
+d = arrowHeadH
+r = d * 0.5
+p = arrow[-1]
+arrowHead = [
+    (p[0], p[1]-r),
+    (p[0] + d, p[1]),
+    (p[0], p[1]+r),
+]
+dwgArrow.add(dwg.polygon(points=arrowHead, fill="#000000"))
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
