@@ -15,6 +15,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 import lib.mathutils as mu
+import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
@@ -22,15 +23,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-input', dest="INPUT_FILE", default="data/extent_N_{month}_polygon_v2/extent_N_{month}_polygon_v2", help="Path to input shapefiles")
 parser.add_argument('-before', dest="MONTH_BEFORE", default="199609", help="Month before loss")
 parser.add_argument('-after', dest="MONTH_AFTER", default="201609", help="Months after loss")
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-simplify', dest="SIMPLIFY", type=int, default=100, help="Points to simplify to")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/extent_N_polygon_v2.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WIDTH = args.WIDTH
-PAD = args.PAD
+DPI = 150
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 
 # get boundaries
 def boundaries(features):
@@ -58,12 +62,12 @@ def largestPolygon(geojson):
     coordinates = sorted(coordinates, key=lambda c: c["length"])
     return coordinates[-1]["coordinates"]
 
-def lnglatToPx(lnglat, bounds, width, height, pad=0):
+def lnglatToPx(lnglat, bounds, width, height, offset=(0,0)):
     x = 1.0 * (lnglat[0] - bounds[0]) / (bounds[2] - bounds[0]) * width
     y = (1.0 - 1.0 * (lnglat[1] - bounds[1]) / (bounds[3] - bounds[1])) * height
     # return (int(round(x)), int(round(y)))
-    x += pad
-    y += pad
+    x += offset[0]
+    y += offset[1]
     return (x, y)
 
 def featuresToSvg(features, svgfile):
@@ -75,29 +79,60 @@ def featuresToSvg(features, svgfile):
 
     # aspect ratio: w / h
     aspect_ratio = 1.0 * abs(bounds[2]-bounds[0]) / abs(bounds[3]-bounds[1])
-    height = WIDTH / aspect_ratio
+    width = WIDTH
+    height = width / aspect_ratio
+    offsetX = 0
+    offsetY = 0
+    if height > HEIGHT:
+        scale = HEIGHT / height
+        width *= scale
+        height = HEIGHT
+        offsetX = (WIDTH - width) * 0.5
+    else:
+        offsetY = (HEIGHT - height) * 0.5
 
     # Init svg
-    dwg = svgwrite.Drawing(svgfile, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
+    dwg = svgwrite.Drawing(svgfile, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
     center = (0.5*(WIDTH+PAD*2), 0.5*(height+PAD*2))
+
+    # diagonal pattern
+    diagonalSize = 36
+    diagonalW = 1
+    diagonalPattern = dwg.pattern(id="diagonal", patternUnits="userSpaceOnUse", size=(diagonalSize,diagonalSize))
+    commands = [
+        "M0,%s" % diagonalSize,
+        "l%s,-%s" % (diagonalSize, diagonalSize),
+        "M-%s,%s" % (diagonalSize*0.25, diagonalSize*0.25),
+        "l%s,-%s" % (diagonalSize*0.5, diagonalSize*0.5),
+        "M%s,%s" % (diagonalSize-diagonalSize*0.25, diagonalSize+diagonalSize*0.25),
+        "l%s,-%s" % (diagonalSize*0.5, diagonalSize*0.5)
+    ]
+    diagonalPattern.add(dwg.path(d=commands, stroke_width=diagonalW, stroke="#000000"))
+    dwg.defs.add(diagonalPattern)
 
     # Add features to svg
     for i, feature in enumerate(features):
         featureId = feature["id"]
         points = []
         for lnglat in feature["coordinates"]:
-            point = lnglatToPx(lnglat, bounds, WIDTH, height, PAD)
+            point = lnglatToPx(lnglat, bounds, width, height, (offsetX+PAD, offsetY+PAD))
             points.append(point)
         points = mu.smoothPoints(points, feature["smoothResolution"], feature["smoothSigma"])
         # simplify points
         if "simplifyTo" in feature:
             points = mu.simplify(points, feature["simplifyTo"] + 1)
             removeLast = points.pop()
+        fill = "#FFFFFF"
+        if "fill" in feature:
+            fill = feature["fill"]
         # polygons
         if feature["type"] == "Polygon":
             # add closure for polygons
             points.append((points[0][0], points[0][1]))
-            featureLine = dwg.polyline(id=featureId, points=points, stroke="#000000", stroke_width=2, fill="#FFFFFF")
+            path = svgu.pointsToCurve(points)
+            featureLine = dwg.path(id=featureId, d=path, stroke="#000000", stroke_width=feature["strokeWidth"], fill=fill)
+            if "dashArray" in feature:
+                featureLine.dasharray(feature["dashArray"])
             dwg.add(featureLine)
         # multipoints
         elif feature["type"] == "MultiPoint":
@@ -136,6 +171,22 @@ def shapeToGeojson(sfname):
 features = []
 
 # convert shapefile to geojson
+sfname = args.INPUT_FILE.replace("{month}", args.MONTH_BEFORE)
+geojson = shapeToGeojson(sfname)
+# reduce the set to just the largest polygon
+polygon = largestPolygon(geojson)
+features.append({
+    "id": "month" + args.MONTH_BEFORE,
+    "type": "Polygon",
+    "coordinates": polygon,
+    "smoothResolution": 3,
+    "smoothSigma": 1.8,
+    "strokeWidth": 2,
+    "dashArray": [5,2],
+    "fill": "url(#diagonal)"
+})
+
+# convert shapefile to geojson
 sfname = args.INPUT_FILE.replace("{month}", args.MONTH_AFTER)
 geojson = shapeToGeojson(sfname)
 # reduce the set to just the largest polygon
@@ -145,24 +196,8 @@ features.append({
     "type": "Polygon",
     "coordinates": polygon,
     "smoothResolution": 3,
-    "smoothSigma": 1.8
-})
-
-# convert shapefile to geojson
-sfname = args.INPUT_FILE.replace("{month}", args.MONTH_BEFORE)
-geojson = shapeToGeojson(sfname)
-# reduce the set to just the largest polygon
-polygon = largestPolygon(geojson)
-features.append({
-    "id": "month" + args.MONTH_BEFORE,
-    "type": "MultiPoint",
-    "coordinates": polygon,
-    "smoothResolution": 1.8,
-    "smoothSigma": 2,
-    "simplifyTo": args.SIMPLIFY,
-    "label": "number",
-    "textTranslate": 15,
-    "fontSize": 12
+    "smoothSigma": 1.8,
+    "strokeWidth": 4
 })
 
 featuresToSvg(features, args.OUTPUT_FILE)
