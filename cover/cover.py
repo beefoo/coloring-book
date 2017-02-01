@@ -61,8 +61,8 @@ print "Read %s values from %s" % (count, args.INPUT_FILE)
 COMPRESS_Y = 0.6667
 COMPRESS_X = 0.99
 LINE_HEIGHT = 60.0
-COLOR = "#ba5353"
-COLOR_ALT = "#998686"
+COLOR = "#A92D2D"
+COLOR_ALT = "#000000"
 ADD_LINE = False
 
 # svg calculations
