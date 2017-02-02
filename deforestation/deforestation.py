@@ -7,15 +7,18 @@ import sys
 
 # input
 parser = argparse.ArgumentParser()
-parser.add_argument('-width', dest="WIDTH", type=int, default=600, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=60, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.25, help="Padding of output file")
 parser.add_argument('-row', dest="PER_ROW", type=int, default=3, help="Fields per row")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/deforestation.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WIDTH = args.WIDTH
-PAD = args.PAD
+DPI = 150
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 PER_ROW = args.PER_ROW
 
 # source: http://www.fao.org/3/a-i4793e.pdf
