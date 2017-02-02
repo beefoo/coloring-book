@@ -50,6 +50,19 @@ def boundaries(features):
     maxLat = max(lats)
     return [minLng, minLat, maxLng, maxLat]
 
+def distanceBetweenCoordinates(c1, c2):
+    (lon1, lat1) = c1
+    (lon2, lat2) = c2
+    R = 6371 # km
+    dLat = math.radians(lat2-lat1)
+    dLon = math.radians(lon2-lon1)
+    lat1 = math.radians(lat1)
+    lat2 = math.radians(lat2)
+    a = math.sin(dLat*0.5) * math.sin(dLat*0.5) + math.sin(dLon*0.5) * math.sin(dLon*0.5) * math.cos(lat1) * math.cos(lat2)
+    c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = R * c
+    return d
+
 def largestPolygon(geojson):
     coordinates = []
     # Add features to svg
@@ -93,6 +106,7 @@ def featuresToSvg(features, svgfile):
 
     # Init svg
     dwg = svgwrite.Drawing(svgfile, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
+    dwgLabels = dwg.add(dwg.g(id="labels"))
     center = (0.5*(WIDTH+PAD*2), 0.5*(height+PAD*2))
 
     # diagonal pattern
@@ -107,12 +121,27 @@ def featuresToSvg(features, svgfile):
         "M%s,%s" % (diagonalSize-diagonalSize*0.25, diagonalSize+diagonalSize*0.25),
         "l%s,-%s" % (diagonalSize*0.5, diagonalSize*0.5)
     ]
+    diagonalPattern.add(dwg.rect(size=(diagonalSize,diagonalSize), fill="#ffffff"))
     diagonalPattern.add(dwg.path(d=commands, stroke_width=diagonalW, stroke="#000000"))
     dwg.defs.add(diagonalPattern)
 
     # Add features to svg
     for i, feature in enumerate(features):
         featureId = feature["id"]
+        # add label
+        ab = "after-edge"
+        tOffset = -10
+        if feature["labelLine"][-1][1] > feature["labelLine"][0][1]:
+            ab = "before-edge"
+            tOffset *= -1
+        tp = feature["labelLine"][-1]
+        tp = (tp[0], tp[1]+tOffset)
+        dwgLabels.add(dwg.text(feature["label"], insert=tp, text_anchor="middle", alignment_baseline=ab, font_size=24))
+        labelLine = dwg.line(start=feature["labelLine"][0], end=feature["labelLine"][-1], stroke="#000000", stroke_width=feature["strokeWidth"])
+        if "dashArray" in feature:
+            labelLine.dasharray(feature["dashArray"])
+        dwg.add(labelLine)
+        # get points from lat lon
         points = []
         for lnglat in feature["coordinates"]:
             point = lnglatToPx(lnglat, bounds, width, height, (offsetX+PAD, offsetY+PAD))
@@ -125,28 +154,30 @@ def featuresToSvg(features, svgfile):
         fill = "#FFFFFF"
         if "fill" in feature:
             fill = feature["fill"]
-        # polygons
-        if feature["type"] == "Polygon":
-            # add closure for polygons
-            points.append((points[0][0], points[0][1]))
-            path = svgu.pointsToCurve(points)
-            featureLine = dwg.path(id=featureId, d=path, stroke="#000000", stroke_width=feature["strokeWidth"], fill=fill)
-            if "dashArray" in feature:
-                featureLine.dasharray(feature["dashArray"])
-            dwg.add(featureLine)
-        # multipoints
-        elif feature["type"] == "MultiPoint":
-            dwgGroup = dwg.add(dwg.g(id=featureId))
-            for point in points:
-                dwgGroup.add(dwg.circle(center=point, r=3))
-            dwgTextGroup = dwg.add(dwg.g(id=featureId+"_labels"))
-            if "label" in feature:
-                for j, point in enumerate(points):
-                    rad = mu.radiansBetweenPoints(center, point)
-                    # round to nearest X degrees
-                    rad = mu.roundToNearestDegree(rad, 45)
-                    tp = mu.translatePoint(point, rad, feature["textTranslate"])
-                    dwgTextGroup.add(dwg.text(str(j+1), insert=tp, text_anchor="middle", alignment_baseline="middle", font_size=feature["fontSize"]))
+        # add closure for polygons
+        points.append((points[0][0], points[0][1]))
+        path = svgu.pointsToCurve(points)
+        featureLine = dwg.path(id=featureId, d=path, stroke="#000000", stroke_width=feature["strokeWidth"], fill=fill)
+        if "dashArray" in feature:
+            featureLine.dasharray(feature["dashArray"])
+        dwg.add(featureLine)
+        # get distance of feature
+        # if "distanceLabel" in feature:
+        #     lngs = [lnglat[0] for lnglat in feature["coordinates"]]
+        #     lats = [lnglat[1] for lnglat in feature["coordinates"]]
+        #     meanLng = mu.mean(lngs)
+        #     meanLat = mu.mean(lats)
+        #     left = [ll for ll in feature["coordinates"] if ll[0] <= meanLng]
+        #     right = [ll for ll in feature["coordinates"] if ll[0] > meanLng]
+        #     left = sorted(left, key=lambda ll: abs(ll[1]-meanLat))
+        #     right = sorted(right, key=lambda ll: abs(ll[1]-meanLat))
+        #     c1 = left[0]
+        #     c2 = (right[0][0], c1[1])
+        #     km = distanceBetweenCoordinates(c1, c2)
+        #     print "Total kilometers: %s" % "{:,}".format(km)
+        #     p1 = lnglatToPx(c1, bounds, width, height, (offsetX+PAD, offsetY+PAD))
+        #     p2 = lnglatToPx(c2, bounds, width, height, (offsetX+PAD, offsetY+PAD))
+        #     dwg.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1))
     # Save
     dwg.save()
     print "Saved svg: %s" % svgfile
@@ -175,6 +206,8 @@ sfname = args.INPUT_FILE.replace("{month}", args.MONTH_BEFORE)
 geojson = shapeToGeojson(sfname)
 # reduce the set to just the largest polygon
 polygon = largestPolygon(geojson)
+labelX = 0.2 * WIDTH + PAD
+labelY = 0.1 * HEIGHT + PAD
 features.append({
     "id": "month" + args.MONTH_BEFORE,
     "type": "Polygon",
@@ -183,7 +216,9 @@ features.append({
     "smoothSigma": 1.8,
     "strokeWidth": 2,
     "dashArray": [5,2],
-    "fill": "url(#diagonal)"
+    "fill": "url(#diagonal)",
+    "label": "September 1996",
+    "labelLine": [(labelX, PAD + HEIGHT * 0.5), (labelX, labelY)]
 })
 
 # convert shapefile to geojson
@@ -191,13 +226,18 @@ sfname = args.INPUT_FILE.replace("{month}", args.MONTH_AFTER)
 geojson = shapeToGeojson(sfname)
 # reduce the set to just the largest polygon
 polygon = largestPolygon(geojson)
+labelX = 0.65 * WIDTH + PAD
+labelY = 0.8 * HEIGHT + PAD
 features.append({
     "id": "month" + args.MONTH_AFTER,
     "type": "Polygon",
     "coordinates": polygon,
     "smoothResolution": 3,
     "smoothSigma": 1.8,
-    "strokeWidth": 4
+    "strokeWidth": 4,
+    "label": "September 2016",
+    "labelLine": [(labelX, PAD + HEIGHT * 0.5), (labelX, labelY)],
+    "distanceLabel": 0.5
 })
 
 featuresToSvg(features, args.OUTPUT_FILE)
