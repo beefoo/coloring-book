@@ -1,16 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import inspect
 import math
+import os
 import svgwrite
 import sys
+
+# add parent directory to sys path to import relative modules
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+
+import lib.mathutils as mu
 
 # input
 parser = argparse.ArgumentParser()
 parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
-parser.add_argument('-pad', dest="PAD", type=float, default=0.25, help="Padding of output file")
-parser.add_argument('-row', dest="PER_ROW", type=int, default=3, help="Fields per row")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/deforestation.svg", help="Path to output svg file")
 
 # init input
@@ -19,7 +27,6 @@ DPI = 150
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
-PER_ROW = args.PER_ROW
 
 # source: http://www.fao.org/3/a-i4793e.pdf
 # 1990: million hectares of forest globally
@@ -47,15 +54,23 @@ lossFFPerMinute = int(round(lossHaPerMinute * ffPerHa))
 
 print "Net global forest loss per minute: %s football fields" % lossFFPerMinute
 
+fieldRatioW = 4.0
+fieldRatioH = 3.0
+degreesPerField = 360.0 / lossFFPerMinute
+
+# get field W/H given radius
+pageRadius = min(WIDTH, HEIGHT) * 0.5
+radius = pageRadius * 0.7
+fieldH = 2.0 * radius * math.cos(math.radians(0.5*(180-degreesPerField)))
+fieldW = fieldH * (fieldRatioW / fieldRatioH)
+# print "%s, %s, %s" % (fieldW, fieldH, radius)
+# sys.exit(1)
+
 # init svg
-rows = int(math.ceil(1.0 * lossFFPerMinute / PER_ROW))
-fieldW = 1.0 * WIDTH / PER_ROW
-fieldH = fieldW * 0.75
-height = fieldH * rows
-dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2+fieldW*0.5, height+PAD*2), profile='full')
+dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
+# dwg.add(dwg.line(start=(PAD, 0), end=(PAD, HEIGHT+PAD*2), stroke="#000000"))
 
 # field reference
-
 fieldStrokeW = 2
 goalH = fieldH * 0.5
 goalW = fieldW * 0.2
@@ -68,27 +83,36 @@ dwgField.add(dwg.rect(insert=(0,goalY), size=(goalW, goalH), stroke_width=fieldS
 dwgField.add(dwg.rect(insert=(fieldW-goalW,goalY), size=(goalW, goalH), stroke_width=fieldStrokeW, stroke="#000000", fill="none")) # right goal
 dwg.defs.add(dwgField)
 
-halfFieldW = fieldW * 0.5
-halfFieldH = fieldH * 0.5
-direction = 1
-scale = 0.85
-y = 0
-for row in range(rows):
-    x = 0
-    offsetx = row % 2 * halfFieldW
-    for col in range(PER_ROW):
-        i = row * PER_ROW + col
-        # add offset for uneven row
-        if col <= 0 and offsetx <= 0 and (lossFFPerMinute-i) < PER_ROW:
-            x += fieldW
-        if i >= lossFFPerMinute:
-            break
-        t = "translate(%s,%s) scale(%s) rotate(%s %s %s)" % (PAD+x+offsetx, PAD+y, scale, 45*direction, halfFieldW, halfFieldH)
-        g = dwg.add(dwg.g(id="field%s" % i, transform=t))
-        g.add(dwg.use("#field"))
-        x += fieldW
-    y += fieldH * scale
-    direction *= -1
+# draw fields
+angle = -90 - 0.5 * degreesPerField
+cx = WIDTH * 0.5 + PAD
+cy = HEIGHT * 0.5 + PAD
+dwgFields = dwg.add(dwg.g(id="fields"))
+dwgLabels = dwg.add(dwg.g(id="labels"))
+for i in range(lossFFPerMinute):
+    (x, y) = mu.translatePoint((cx, cy), math.radians(angle), radius)
+    rotate = angle + 0.5 * degreesPerField
+    dwgFields.add(dwg.use("#field", transform="translate(%s,%s) rotate(%s)" % (x, y, rotate)))
+    if int(rotate) % 90 == 0:
+        label = "60"
+        d = (int(rotate) + 90) / 90
+        if d > 0:
+            label = str(d * 15)
+        labelP = mu.translatePoint((cx, cy), math.radians(rotate), radius*0.86)
+        dwgLabels.add(dwg.text(label, insert=labelP, text_anchor="middle", alignment_baseline="middle", font_size=40))
+    angle += degreesPerField
+
+# draw clock hands
+dwgClock = dwg.add(dwg.g(id="clock"))
+handR = 10
+handL = radius * 0.667
+handPath = [
+    "M%s,%s" % (cx, cy - handL),
+    "L%s,%s" % (cx + handR, cy),
+    "Q%s,%s %s,%s" % (cx, cy + handR*1.5, cx - handR, cy),
+    "Z"
+]
+dwgClock.add(dwg.path(d=handPath, stroke="#000000", fill="none", stroke_width=4))
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
