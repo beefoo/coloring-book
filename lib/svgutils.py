@@ -131,6 +131,23 @@ def patternDiamond(size=24, dotSize=8):
     ]
     return commands
 
+def patternWater(width=24, height=36, waveHeight=12):
+    w = width
+    h = height
+    wh = waveHeight
+    hw = width * 0.5
+    offsetH = (h - wh * 2) * 0.5
+    hh = h - offsetH
+    commands = [
+        "M%s,%s" % (0,0),
+        "C%s,%s %s,%s %s,%s" % (0, wh, w, wh, w, 0),
+        "M-%s,%s" % (hw, hh-wh),
+        "C-%s,%s %s,%s %s,%s" % (hw, hh, hw, hh, hw, hh-wh),
+        "M%s,%s" % (hw, hh-wh),
+        "C%s,%s %s,%s %s,%s" % (hw, hh, w+hw, hh, w+hw, hh-wh)
+    ]
+    return commands
+
 # convert points to curve
 # recommended curviness range: 0.1 - 0.5
 def pointsToCurve(points, curviness=0.3):

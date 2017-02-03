@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<svg baseProfile="full" height="792.0" version="1.1" width="612.0" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><pattern height="72" id="water" patternUnits="userSpaceOnUse" width="36"><path d="M0,0 C0,18 36,18 36,0 M-18.0,36.0 C-18.0,54.0 18.0,54.0 18.0,36.0 M18.0,36.0 C18.0,54.0 54.0,54.0 54.0,36.0" fill="none" stroke="#000000" stroke-width="2" /></pattern></defs><rect fill="url(#water)" height="756.0" width="576.0" x="18.0" y="18.0" /></svg>
