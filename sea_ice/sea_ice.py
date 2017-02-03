@@ -31,7 +31,7 @@ parser.add_argument('-output', dest="OUTPUT_FILE", default="data/extent_N_polygo
 
 # init input
 args = parser.parse_args()
-DPI = 150
+DPI = 72
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
@@ -110,7 +110,7 @@ def featuresToSvg(features, svgfile):
     center = (0.5*(WIDTH+PAD*2), 0.5*(height+PAD*2))
 
     # diagonal pattern
-    diagonalSize = 36
+    diagonalSize = 18
     diagonalW = 1
     diagonalPattern = dwg.pattern(id="diagonal", patternUnits="userSpaceOnUse", size=(diagonalSize,diagonalSize))
     commands = [
@@ -136,7 +136,7 @@ def featuresToSvg(features, svgfile):
             tOffset *= -1
         tp = feature["labelLine"][-1]
         tp = (tp[0], tp[1]+tOffset)
-        dwgLabels.add(dwg.text(feature["label"], insert=tp, text_anchor="middle", alignment_baseline=ab, font_size=24))
+        dwgLabels.add(dwg.text(feature["label"], insert=tp, text_anchor="middle", alignment_baseline=ab, font_size=12))
         labelLine = dwg.line(start=feature["labelLine"][0], end=feature["labelLine"][-1], stroke="#000000", stroke_width=feature["strokeWidth"])
         if "dashArray" in feature:
             labelLine.dasharray(feature["dashArray"])
@@ -214,8 +214,8 @@ features.append({
     "coordinates": polygon,
     "smoothResolution": 3,
     "smoothSigma": 1.8,
-    "strokeWidth": 2,
-    "dashArray": [5,2],
+    "strokeWidth": 1,
+    "dashArray": [3,1],
     "fill": "url(#diagonal)",
     "label": "September 1996",
     "labelLine": [(labelX, PAD + HEIGHT * 0.5), (labelX, labelY)]
@@ -234,7 +234,7 @@ features.append({
     "coordinates": polygon,
     "smoothResolution": 3,
     "smoothSigma": 1.8,
-    "strokeWidth": 4,
+    "strokeWidth": 2,
     "label": "September 2016",
     "labelLine": [(labelX, PAD + HEIGHT * 0.5), (labelX, labelY)],
     "distanceLabel": 0.5

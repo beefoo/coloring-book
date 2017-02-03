@@ -28,14 +28,14 @@ parser.add_argument('-dpr', dest="DAYS_PER_ROW", type=int, default=20, help="Amo
 parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
-parser.add_argument('-osc', dest="OSCILLATE", type=float, default=40.0, help="Amount to oscillate")
-parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=1, help="Padding around each day")
-parser.add_argument('-rowpad', dest="ROW_PAD", type=int, default=12, help="Padding around each row")
+parser.add_argument('-osc', dest="OSCILLATE", type=float, default=24.0, help="Amount to oscillate")
+parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=0, help="Padding around each day")
+parser.add_argument('-rowpad', dest="ROW_PAD", type=int, default=6, help="Padding around each row")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/Beijing_2015_DailyPM25.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-DPI = 150
+DPI = 72
 OSCILLATE = args.OSCILLATE
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
@@ -163,20 +163,20 @@ for i, r in enumerate(readings):
         arrow.append((x, y - cell_l))
     # add month label
     if "label" in r:
-        x += cell_l * 0.15
-        dwgMonths.add(dwg.text(r["label"], insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=18))
+        x += cell_l * 0.1
+        dwgMonths.add(dwg.text(r["label"], insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=12))
     else:
         # add circle
-        dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=3, fill="none"))
+        dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=2, fill="none"))
         # add value as label
         value = getValue(r['value'], AQI)
-        dwgLabels.add(dwg.text(str(value), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=18))
+        dwgLabels.add(dwg.text(str(value), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=12))
 
 # add arrow
 dwgArrow = dwg.add(dwg.g(id="arrow"))
 arrowPath = svgu.pointsToCurve(arrow)
-dwgArrow.add(dwg.path(d=arrowPath, stroke="#000000", stroke_width=4, fill="none"))
-arrowHeadH = 16
+dwgArrow.add(dwg.path(d=arrowPath, stroke="#000000", stroke_width=3, fill="none"))
+arrowHeadH = 10
 d = arrowHeadH
 r = d * 0.5
 p = arrow[-1]

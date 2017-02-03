@@ -23,7 +23,7 @@ parser.add_argument('-output', dest="OUTPUT_FILE", default="data/deforestation.s
 
 # init input
 args = parser.parse_args()
-DPI = 150
+DPI = 72
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
@@ -71,7 +71,7 @@ dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profi
 # dwg.add(dwg.line(start=(PAD, 0), end=(PAD, HEIGHT+PAD*2), stroke="#000000"))
 
 # field reference
-fieldStrokeW = 2
+fieldStrokeW = 1.5
 goalH = fieldH * 0.5
 goalW = fieldW * 0.2
 goalY = (fieldH - goalH) * 0.5
@@ -99,12 +99,12 @@ for i in range(lossFFPerMinute):
         if d > 0:
             label = str(d * 15)
         labelP = mu.translatePoint((cx, cy), math.radians(rotate), radius*0.86)
-        dwgLabels.add(dwg.text(label, insert=labelP, text_anchor="middle", alignment_baseline="middle", font_size=40))
+        dwgLabels.add(dwg.text(label, insert=labelP, text_anchor="middle", alignment_baseline="middle", font_size=24))
     angle += degreesPerField
 
 # draw clock hands
 dwgClock = dwg.add(dwg.g(id="clock"))
-handR = 10
+handR = 5
 handL = radius * 0.667
 handPath = [
     "M%s,%s" % (cx, cy - handL),
@@ -112,7 +112,7 @@ handPath = [
     "Q%s,%s %s,%s" % (cx, cy + handR*1.5, cx - handR, cy),
     "Z"
 ]
-dwgClock.add(dwg.path(d=handPath, stroke="#000000", fill="none", stroke_width=4))
+dwgClock.add(dwg.path(d=handPath, stroke="#000000", fill="none", stroke_width=2))
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
