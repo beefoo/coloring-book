@@ -89,46 +89,15 @@ dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profi
 diagonalSize = 48
 diagonalW = 12
 diagonalPattern = dwg.pattern(id="diagonal", patternUnits="userSpaceOnUse", size=(diagonalSize,diagonalSize))
-commands = [
-    "M0,0",
-    "l%s,%s" % (diagonalSize, diagonalSize),
-    "M-%s,%s" % (diagonalSize*0.25, diagonalSize*0.75),
-    "l%s,%s" % (diagonalSize*0.5, diagonalSize*0.5),
-    "M%s,-%s" % (diagonalSize*0.75, diagonalSize*0.25),
-    "l%s,%s" % (diagonalSize*0.5, diagonalSize*0.5)
-]
+commands = svgu.patternDiagonal(diagonalSize, "down")
 diagonalPattern.add(dwg.path(d=commands, stroke_width=diagonalW, stroke=COLOR))
 dwg.defs.add(diagonalPattern)
 
 # dot pattern
 dotSize = 24
 dotW = 8
-dotR = dotW / 2
-dotC = dotSize / 2
 dotPattern = dwg.pattern(id="dot", patternUnits="userSpaceOnUse", size=(dotSize,dotSize))
-commands = [
-    "M0,0",
-    "L%s,%s" % (0, dotR),
-    "L%s,%s" % (dotR, 0),
-    "Z",
-    "M%s,%s" % (dotSize, 0),
-    "L%s,%s" % (dotSize, dotR),
-    "L%s,%s" % (dotSize-dotR, 0),
-    "Z",
-    "M%s,%s" % (0, dotSize),
-    "L%s,%s" % (dotR, dotSize),
-    "L%s,%s" % (0, dotSize-dotR),
-    "Z",
-    "M%s,%s" % (dotSize, dotSize),
-    "L%s,%s" % (dotSize-dotR, dotSize),
-    "L%s,%s" % (dotSize, dotSize-dotR),
-    "Z",
-    "M%s,%s" % (dotC, dotC-dotR),
-    "L%s,%s" % (dotC-dotR, dotC),
-    "L%s,%s" % (dotC, dotC+dotR),
-    "L%s,%s" % (dotC+dotR, dotC),
-    "Z"
-]
+commands = svgu.patternDiamond(dotSize, dotW)
 dotPattern.add(dwg.path(d=commands, fill=COLOR_ALT))
 dwg.defs.add(dotPattern)
 

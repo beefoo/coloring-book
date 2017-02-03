@@ -83,6 +83,54 @@ def getTransformString(w, h, x, y, sx=1, sy=1, r=0):
         transform = "translate(%s,%s) scale(%s, %s)" % (tx, ty, sx, sy)
     return transform
 
+def patternDiagonal(size, direction="up"):
+    commands = [
+        "M0,%s" % size,
+        "l%s,-%s" % (size, size),
+        "M-%s,%s" % (size*0.25, size*0.25),
+        "l%s,-%s" % (size*0.5, size*0.5),
+        "M%s,%s" % (size*0.75, size*1.25),
+        "l%s,-%s" % (size*0.5, size*0.5)
+    ]
+    if direction=="down":
+        commands = [
+            "M0,0",
+            "l%s,%s" % (size, size),
+            "M-%s,%s" % (size*0.25, size*0.75),
+            "l%s,%s" % (size*0.5, size*0.5),
+            "M%s,-%s" % (size*0.75, size*0.25),
+            "l%s,%s" % (size*0.5, size*0.5)
+        ]
+    return commands
+
+def patternDiamond(size=24, dotSize=8):
+    dotR = dotSize / 2
+    dotC = size / 2
+    commands = [
+        "M0,0",
+        "L%s,%s" % (0, dotR),
+        "L%s,%s" % (dotR, 0),
+        "Z",
+        "M%s,%s" % (size, 0),
+        "L%s,%s" % (size, dotR),
+        "L%s,%s" % (size-dotR, 0),
+        "Z",
+        "M%s,%s" % (0, size),
+        "L%s,%s" % (dotR, size),
+        "L%s,%s" % (0, size-dotR),
+        "Z",
+        "M%s,%s" % (size, size),
+        "L%s,%s" % (size-dotR, size),
+        "L%s,%s" % (size, size-dotR),
+        "Z",
+        "M%s,%s" % (dotC, dotC-dotR),
+        "L%s,%s" % (dotC-dotR, dotC),
+        "L%s,%s" % (dotC, dotC+dotR),
+        "L%s,%s" % (dotC+dotR, dotC),
+        "Z"
+    ]
+    return commands
+
 # convert points to curve
 # recommended curviness range: 0.1 - 0.5
 def pointsToCurve(points, curviness=0.3):
