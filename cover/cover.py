@@ -31,7 +31,7 @@ parser.add_argument('-output', dest="OUTPUT_FILE", default="data/cover.svg", hel
 
 # init input
 args = parser.parse_args()
-DPI = 150
+DPI = 72
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
@@ -60,7 +60,7 @@ print "Read %s values from %s" % (count, args.INPUT_FILE)
 # svg config
 COMPRESS_Y = 0.6667
 COMPRESS_X = 0.99
-LINE_HEIGHT = 60.0
+LINE_HEIGHT = 30.0
 COLOR = "#A92D2D"
 COLOR_ALT = "#000000"
 ADD_LINE = False
@@ -86,8 +86,8 @@ for i, v in enumerate(values):
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
 # diagonal pattern
-diagonalSize = 48
-diagonalW = 12
+diagonalSize = 24
+diagonalW = 6
 diagonalPattern = dwg.pattern(id="diagonal", patternUnits="userSpaceOnUse", size=(diagonalSize,diagonalSize))
 commands = [
     "M0,%s" % diagonalSize,
@@ -101,8 +101,8 @@ diagonalPattern.add(dwg.path(d=commands, stroke_width=diagonalW, stroke=COLOR))
 dwg.defs.add(diagonalPattern)
 
 # dot pattern
-dotSize = 36
-dotW = 12
+dotSize = 18
+dotW = 6
 dotX = dotSize * 0.5 - dotW * 0.5
 dotPattern = dwg.pattern(id="dot", patternUnits="userSpaceOnUse", size=(dotSize,dotSize), patternTransform="rotate(45)")
 dotPattern.add(dwg.rect(insert=(dotX, dotX), size=(dotW, dotW), fill=COLOR_ALT))
@@ -121,7 +121,7 @@ y0 = HEIGHT + PAD
 y1 = PAD
 p0 = pointsTop[0]
 p1 = pointsTop[-1]
-cp = 20
+cp = 12
 
 # top curve
 commandsTop = svgu.pointsToCurve(pointsTop, 0.1)
