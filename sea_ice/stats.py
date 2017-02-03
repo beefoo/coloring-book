@@ -25,7 +25,7 @@ parser.add_argument('-output', dest="OUTPUT_FILE", default="data/india.svg", hel
 
 # init input
 args = parser.parse_args()
-DPI = 150
+DPI = 72
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
@@ -36,7 +36,7 @@ print "India's land mass is 3.3 (2.9 land) million square kilometers"
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
 # diagonal pattern
-diagonalSize = 36
+diagonalSize = 18
 diagonalW = 1
 diagonalPattern = dwg.pattern(id="diagonal", patternUnits="userSpaceOnUse", size=(diagonalSize,diagonalSize))
 commands = [
@@ -75,7 +75,7 @@ for polygon in polygons:
     # poly.append((poly[0][0], poly[0][1]))
     # poly = svgu.pointsToCurve(poly)
     # dwg.add(dwg.path(d=poly, fill="url(#diagonal)", stroke="#000000", stroke_width=2))
-    dwg.add(dwg.polygon(points=poly, fill="url(#diagonal)", stroke="#000000", stroke_width=2))
+    dwg.add(dwg.polygon(points=poly, fill="url(#diagonal)", stroke="#000000", stroke_width=1))
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
