@@ -22,7 +22,6 @@ import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
-parser.add_argument('-input', dest="INPUT_FILE", default="../sea_ice/data/extent_N_199609_polygon_v2/extent_N_199609_polygon_v2", help="Path to input shapefiles")
 parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=float, default=0.25, help="Padding of output file")
@@ -40,46 +39,32 @@ COLOR = "#A92D2D"
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
 # water pattern
-waterW = 36
-waterH = 72
+waterW = 24
+waterH = 60
 waterStrokeW = 2
-waveHeight = 18
+waveHeight = 12
 waterPattern = dwg.pattern(id="water", patternUnits="userSpaceOnUse", size=(waterW,waterH))
 commands = svgu.patternWater(waterW, waterH, waveHeight)
-waterPattern.add(dwg.path(d=commands, stroke_width=waterStrokeW, stroke="#000000", fill="none"))
+waterPattern.add(dwg.rect(size=(waterW,waterH), fill=COLOR))
+waterPattern.add(dwg.path(d=commands, stroke_width=waterStrokeW, stroke="#FFFFFF", fill="none"))
 dwg.defs.add(waterPattern)
-dwg.add(dwg.rect(insert=(PAD, PAD), size=(WIDTH, HEIGHT), fill="url(#water)"))
 
-# diagonal pattern
-diagonalSize = 48
-diagonalW = 12
-diagonalPattern = dwg.pattern(id="diagonal", patternUnits="userSpaceOnUse", size=(diagonalSize,diagonalSize))
-commands = svgu.patternDiagonal(diagonalSize, "down")
-diagonalPattern.add(dwg.rect(size=(diagonalSize,diagonalSize), fill="#FFFFFF"))
-diagonalPattern.add(dwg.path(d=commands, stroke_width=diagonalW, stroke=COLOR))
-dwg.defs.add(diagonalPattern)
+# dot pattern
+dotSize = 24
+dotW = 8
+dotPattern = dwg.pattern(id="dot", patternUnits="userSpaceOnUse", size=(dotSize,dotSize))
+commands = svgu.patternDiamond(dotSize, dotW)
+dotPattern.add(dwg.path(d=commands, fill="#000000"))
+dwg.defs.add(dotPattern)
+dwg.add(dwg.rect(insert=(PAD, PAD), size=(WIDTH, HEIGHT), fill="url(#dot)"))
 
-# get geojson data
-g = geo.GeoJSONUtil(args.INPUT_FILE)
-g.onlyBiggestShape()
-(w, h) = g.getDimensions()
-offsetX = 0
-offsetY = 0
-width = WIDTH
-height = width * (1.0 * h / w)
-if height > HEIGHT:
-    width = HEIGHT * (1.0 * w / h)
-    height = HEIGHT
-    offsetX = (WIDTH - width) * 0.5
-else:
-    offsetY = (HEIGHT - height) * 0.5
-polygons = g.toPolygons(WIDTH, PAD+offsetX, PAD+offsetY)
-# polygons
-for polygon in polygons:
-    poly = mu.smoothPoints(polygon)
-    poly.append((poly[0][0], poly[0][1]))
-    poly = svgu.pointsToCurve(poly)
-    dwg.add(dwg.path(d=poly, fill="url(#diagonal)", stroke="#FFFFFF", stroke_width=4))
+data = svgu.getDataFromSVG("../sea_ice/data/extent_N_polygon_v2.svg")
+paths = [path for path in data["paths"] if len(path) > 200]
+for i, path in enumerate(paths):
+    fill = "#FFFFFF"
+    if i <= 0:
+        fill = "url(#water)"
+    dwg.add(dwg.path(d=path, fill=fill, stroke=COLOR, stroke_width=3))
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
