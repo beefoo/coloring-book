@@ -20,26 +20,27 @@ import lib.mathutils as mu
 parser = argparse.ArgumentParser()
 # input source: https://www.ncdc.noaa.gov/monitoring-references/faq/anomalies.php
 parser.add_argument('-input', dest="INPUT_FILE", default="data/188001-201612_land_ocean.csv", help="Path to input file")
-parser.add_argument('-ys', dest="YEAR_START", type=int, default=1986, help="Year start on viz")
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-height', dest="HEIGHT", type=int, default=1200, help="Height of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=60, help="Padding of output file")
+parser.add_argument('-ys', dest="YEAR_START", type=int, default=1990, help="Year start on viz")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.625, help="Padding of output file")
 parser.add_argument('-rank', dest="MAX_RANK", type=int, default=9, help="Maximum rank to display")
-parser.add_argument('-wavex', dest="WAVELENGTH_X", type=float, default=30.0, help="Wavelength to oscillate x")
-parser.add_argument('-wavey', dest="WAVELENGTH_Y", type=float, default=15.0, help="Wavelength to oscillate y")
+parser.add_argument('-wavex', dest="WAVELENGTH_X", type=float, default=20.0, help="Wavelength to oscillate x")
+parser.add_argument('-wavey', dest="WAVELENGTH_Y", type=float, default=10.0, help="Wavelength to oscillate y")
 parser.add_argument('-freqx', dest="FREQUENCY_X", type=float, default=4.0, help="Frequency to oscillate x")
 parser.add_argument('-freqy', dest="FREQUENCY_Y", type=float, default=2.0, help="Frequency to oscillate y")
-parser.add_argument('-edge', dest="EDGE", type=float, default=15.0, help="Jagged edge height")
-parser.add_argument('-ylabel', dest="YLABEL_WIDTH", type=float, default=100.0, help="Y-label width")
-parser.add_argument('-xlabel', dest="XLABEL_HEIGHT", type=float, default=50.0, help="X-label height")
+parser.add_argument('-edge', dest="EDGE", type=float, default=8.0, help="Jagged edge height")
+parser.add_argument('-ylabel', dest="YLABEL_WIDTH", type=float, default=60.0, help="Y-label width")
+parser.add_argument('-xlabel', dest="XLABEL_HEIGHT", type=float, default=36.0, help="X-label height")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/188001-201612_land_ocean.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WIDTH = args.WIDTH
-HEIGHT = args.HEIGHT
+DPI = 72
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 YEAR_START = args.YEAR_START
-PAD = args.PAD
 MAX_RANK = args.MAX_RANK
 WAVELENGTH_X = args.WAVELENGTH_X
 WAVELENGTH_Y = args.WAVELENGTH_Y
@@ -76,14 +77,17 @@ for i in range(12):
     for rank, m in enumerate(mlist):
         values[m["index"]]["rank"] = rank + 1
 
+innerWidth = WIDTH - YLABEL_WIDTH
+innerHeight = HEIGHT - XLABEL_HEIGHT
+
 year_end = max([v['year'] for v in values])
 yearCount = year_end - YEAR_START + 1
-cellW = 1.0 * WIDTH / 12
-cellH = 1.0 * HEIGHT / yearCount
+cellW = 1.0 * innerWidth / 12
+cellH = 1.0 * innerHeight / yearCount
 maxValues = [-99] * 12
 
 # init svg
-dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2+YLABEL_WIDTH+WAVELENGTH_X, HEIGHT+PAD*2+XLABEL_HEIGHT+WAVELENGTH_Y), profile='full')
+dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
 # x axis
 dwgXAxis = dwg.add(dwg.g(id="xaxis"))
@@ -117,20 +121,6 @@ for month in range(13):
         oscx = mu.oscillate(1.0*yp/yearCount, WAVELENGTH_X, FREQUENCY_X)
         points.append((x+oscx, y+oscy))
     dwgXGrid.add(dwg.polyline(points=points, stroke="#000000", stroke_width=2, fill="none"))
-
-# y grid
-# dwgYGrid = dwg.add(dwg.g(id="ygrid"))
-# for year in range(yearCount+1):
-#     points = []
-#     y = PAD + XLABEL_HEIGHT + year * cellH
-#     yp = year % yearCount
-#     oscx = mu.oscillate(1.0*yp/yearCount, WAVELENGTH_X, FREQUENCY_X)
-#     for month in range(13):
-#         xp = month % 11
-#         x = PAD + YLABEL_WIDTH + month * cellW
-#         oscy = mu.oscillate(1.0*xp/11, WAVELENGTH_Y, FREQUENCY_Y)
-#         points.append((x+oscx, y+oscy))
-#     dwgYGrid.add(dwg.polyline(points=points, stroke="#000000", stroke_width=1, fill="none"))
 
 # y grid
 dwgYGrid = dwg.add(dwg.g(id="ygrid"))
@@ -167,6 +157,9 @@ for i, v in enumerate(values):
 
             dwgLabels.add(dwg.text(label, insert=(cx+oscx, cy+oscy-EDGE*0.5), text_anchor="middle", alignment_baseline="middle", font_size=14))
 
+# guide
+# MARGIN = 0.25 * 72
+# dwg.add(dwg.rect(insert=(MARGIN, MARGIN), size=(WIDTH+PAD*2-MARGIN*2, HEIGHT+PAD*2-MARGIN*2), stroke="#000000", stroke_width=1, fill="none"))
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
