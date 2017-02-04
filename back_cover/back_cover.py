@@ -41,8 +41,8 @@ dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profi
 # water pattern
 waterW = 24
 waterH = 60
-waterStrokeW = 2
-waveHeight = 12
+waterStrokeW = 4
+waveHeight = 14
 waterPattern = dwg.pattern(id="water", patternUnits="userSpaceOnUse", size=(waterW,waterH))
 commands = svgu.patternWater(waterW, waterH, waveHeight)
 waterPattern.add(dwg.rect(size=(waterW,waterH), fill=COLOR))
@@ -64,7 +64,7 @@ for i, path in enumerate(paths):
     fill = "#FFFFFF"
     if i <= 0:
         fill = "url(#water)"
-    dwg.add(dwg.path(d=path, fill=fill, stroke=COLOR, stroke_width=3))
+    dwg.add(dwg.path(d=path, fill=fill))
 
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
