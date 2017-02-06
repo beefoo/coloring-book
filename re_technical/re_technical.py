@@ -8,14 +8,17 @@ import sys
 
 # input
 parser = argparse.ArgumentParser()
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=60, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/re_actual_potential.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WIDTH = args.WIDTH
-PAD = args.PAD
+DPI = 72
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 
 # conversion between BTU and Watt Hour
 BTU_PER_WH = 3.412141633
@@ -97,8 +100,7 @@ def writeSvg(filename, data):
     data = sorted(data, key=lambda k: -k['value'])
 
     # init svg
-    height = WIDTH
-    dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
+    dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
     # make patterns
     diagonalPattern = dwg.pattern(id="diagonal", patternUnits="userSpaceOnUse", size=(20,20))
@@ -108,28 +110,26 @@ def writeSvg(filename, data):
     circlesPattern = dwg.pattern(id="circles", patternUnits="userSpaceOnUse", size=(6,6))
     circlesPattern.add(dwg.rect(insert=(0,0), size=(6,6), fill="#FFFFFF"))
     circlesPattern.add(dwg.circle(center=(3,3), r=1, fill="#000000"))
+    circlesPattern.add(dwg.circle(center=(0,0), r=1, fill="#000000"))
+    circlesPattern.add(dwg.circle(center=(0,6), r=1, fill="#000000"))
+    circlesPattern.add(dwg.circle(center=(6,0), r=1, fill="#000000"))
+    circlesPattern.add(dwg.circle(center=(6,6), r=1, fill="#000000"))
     dwg.defs.add(circlesPattern)
     wavesPattern = dwg.pattern(id="waves", patternUnits="userSpaceOnUse", size=(20,20))
     wavesPattern.add(dwg.rect(insert=(0,0), size=(20,20), fill="#FFFFFF"))
-    wavesPattern.add(dwg.path(d="M 0 10 c 2.5 -5 , 7.5 -5 , 10 0 c 2.5 5 , 7.5 5 , 10 0 M -10 10 c 2.5 5 , 7.5 5 , 10 0 M 20 10 c 2.5 -5 , 7.5 -5 , 10 0", stroke_width=1, stroke="#000000", stroke_linecap="square", fill="none"))
+    wavesPattern.add(dwg.path(d="M0 10 c 2.5 -5 , 7.5 -5 , 10 0 c 2.5 5 , 7.5 5 , 10 0 M -10 10 c 2.5 5 , 7.5 5 , 10 0 M 20 10 c 2.5 -5 , 7.5 -5 , 10 0", stroke_width=1, stroke="#000000", stroke_linecap="square", fill="none"))
     dwg.defs.add(wavesPattern)
 
-    minRadius = 10
     shapes = dwg.add(dwg.g(id="shapes"))
     radius = WIDTH * 0.5
     area = math.pi * math.pow(radius, 2)
-    direction = 1.0
     for i, item in enumerate(data):
         itemArea = area * item["value"]
-        itemRadius = max(math.sqrt(itemArea / math.pi), minRadius)
+        itemRadius = math.sqrt(itemArea / math.pi)
+        offsetY = radius - itemRadius
         x = WIDTH*0.5
-        y = height*0.5
-        # if i > 0:
-            # adjust = math.sqrt(math.pow(itemRadius,2)/2)
-            # x += (direction * adjust)
-            # y += (direction * itemRadius)
-            # y += (direction * radius * 0.5)
-            # direction *= -1
+        y = HEIGHT*0.5 - offsetY
+        y += i * 10
         shapes.add(dwg.circle(center=(x+PAD, y+PAD), r=itemRadius, fill="url(#%s)" % item["pattern"], stroke="#000000", stroke_width=item["width"]))
     dwg.save()
     print "Saved svg: %s" % filename
@@ -138,7 +138,7 @@ actualRenewable = windProduction + solarProduction
 potentialRenewable = windPotential + solarPotential
 maxValue = max([totalEnergyConsumption, actualRenewable, potentialRenewable])
 writeSvg(args.OUTPUT_FILE, [
-    {"label": "Total energy consumption", "value": totalEnergyConsumption / maxValue, "width": 2, "pattern": "diagonal"},
-    {"label": "Wind and solar production", "value": actualRenewable / maxValue, "width": 2, "pattern": "circles"},
-    {"label": "Wind and solar potential", "value": potentialRenewable / maxValue, "width": 2, "pattern": "waves"}
+    {"label": "Total energy consumption", "value": totalEnergyConsumption / maxValue, "width": 3, "pattern": "diagonal"},
+    {"label": "Wind and solar production", "value": actualRenewable / maxValue, "width": 3, "pattern": "circles"},
+    {"label": "Wind and solar potential", "value": potentialRenewable / maxValue, "width": 3, "pattern": "waves"}
 ])
