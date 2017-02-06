@@ -4,6 +4,9 @@
 #   python flux.py
 #   python flux.py -geo data/CHN.geo.json -color True
 
+# Data source:
+# https://www.esrl.noaa.gov/gmd/ccgg/carbontracker/fluxes.php
+
 import argparse
 from collections import Counter
 import csv
@@ -28,16 +31,20 @@ import lib.mathutils as mu
 parser = argparse.ArgumentParser()
 parser.add_argument('-in', dest="INPUT_FILE", default="data/CT2015_flux1x1_longterm.csv", help="Input data file")
 parser.add_argument('-geo', dest="GEO_FILE", default="data/USA.geo.json", help="Input geojson file")
-parser.add_argument('-width', dest="WIDTH", type=int, default=1600, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=11, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=8.5, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-color', dest="SHOW_COLOR", type=bool, default=False, help="Whether or not to display color")
 parser.add_argument('-out', dest="OUTPUT_FILE", default="data/flux_%s.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WIDTH = args.WIDTH
-PAD = args.PAD
+DPI = 72
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 SHOW_COLOR = args.SHOW_COLOR
+Y_OFFSET = 0.1 * HEIGHT
 
 LATS = 180
 LONS = 360
@@ -90,11 +97,17 @@ with open(args.GEO_FILE) as f:
 coordinates = []
 for feature in geodata["features"]:
     t = feature["geometry"]["type"]
-    for coordinate in feature["geometry"]["coordinates"]:
+    gcoordinates = feature["geometry"]["coordinates"]
+    if t == "MultiPolygon":
+        gcoordinates = sorted(gcoordinates, key=lambda c: -1*len(c[0]))
+    else:
+        gcoordinates = sorted(gcoordinates, key=lambda c: -1*len(c))
+    for coordinate in gcoordinates:
         if t == "MultiPolygon":
             coordinates.append(coordinate[0])
         else:
             coordinates.append(coordinate)
+        break # only show biggest shape
 
 def withinCoordinates(coords, p):
     within = False
@@ -132,28 +145,43 @@ print "Bounds: (%s, %s) (%s, %s)" % (minX, minY, maxX, maxY)
 # calculate dimensions
 xDiff = maxX - minX
 yDiff = maxY - minY
-cellW = 1.0 * WIDTH / xDiff
+aspect_ratio = 1.0 * abs(xDiff) / abs(yDiff)
+width = WIDTH
+height = width / aspect_ratio
+offsetX = 0
+offsetY = 0
+if height > HEIGHT:
+    scale = HEIGHT / height
+    width *= scale
+    height = HEIGHT
+    offsetX = (WIDTH - width) * 0.5
+else:
+    offsetY = (HEIGHT - height) * 0.5
+cellW = 1.0 * width / xDiff
 cellH = cellW
 halfW = cellW * 0.5
 halfH = cellH * 0.5
-height = cellH * yDiff
 
 # init svg
 prefix = args.GEO_FILE.split("/")[1].split(".")[0]
 filename = args.OUTPUT_FILE % prefix
-dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, height+PAD*2), profile='full')
+dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
 # add cells and labels
 cellsGroup = dwg.add(dwg.g(id="cells"))
 labelsGroup = dwg.add(dwg.g(id="labels"))
+labelsGroups = {}
+for g in GROUPS:
+    labelsGroups[g["key"]] = labelsGroup.add(dwg.g(id="labels%s" % g["key"]))
 for d in data:
-    x = (d["x"]-minX) * cellW + PAD
-    y = (d["y"]-minY) * cellH + PAD
+    x = (d["x"]-minX) * cellW + PAD + offsetX
+    y = (d["y"]-minY) * cellH + PAD + offsetY + Y_OFFSET
     color = "none"
     if SHOW_COLOR:
         color = d["group"]["color"]
-    cellsGroup.add(dwg.rect(insert=(x, y), size=(cellW, cellH), fill=color, stroke="#000000", stroke_width=1))
-    labelsGroup.add(dwg.text(d["group"]["key"], insert=(x+halfW, y+halfH), text_anchor="middle", alignment_baseline="middle", font_size=12))
+    # cellsGroup.add(dwg.rect(insert=(x, y), size=(cellW, cellH), fill=color, stroke="#000000", stroke_width=1))
+    cellsGroup.add(dwg.circle(center=(x+halfW, y+halfH), r=halfW, fill=color, stroke="#000000", stroke_width=1))
+    labelsGroups[d["group"]["key"]].add(dwg.text(d["group"]["key"], insert=(x+halfW, y+halfH), text_anchor="middle", alignment_baseline="middle", font_size=11))
 dwg.save()
 print "Saved svg: %s" % filename
 
