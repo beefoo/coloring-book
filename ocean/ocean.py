@@ -41,26 +41,38 @@ parser.add_argument('-slrh', dest="SLRH_FILE", default="data/CSIRO_Recons_gmsl_m
 parser.add_argument('-y0', dest="YEAR_START", default=1995, help="Year start")
 parser.add_argument('-y1', dest="YEAR_END", default=2015, help="Year end")
 parser.add_argument('-yi', dest="YEAR_INCR", default=5, help="Year increment")
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-height', dest="HEIGHT", type=int, default=1035, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=100, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/ocean.svg", help="Path to output svg file")
+parser.add_argument('-guides', dest="GUIDES", type=bool, default=False, help="Show guides")
 
 # init input
 args = parser.parse_args()
+DPI = 72
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 YEAR_START = args.YEAR_START
 YEAR_END = args.YEAR_END
 YEAR_INCR = args.YEAR_INCR
-WIDTH = args.WIDTH
-HEIGHT = args.HEIGHT
-PAD = args.PAD
+GUIDES = args.GUIDES
+
+# chart config
+Y_LEFT_WIDTH = 0.55 * DPI
+Y_RIGHT_WIDTH = 0.725 * DPI
+Y_WIDTH = Y_LEFT_WIDTH + Y_RIGHT_WIDTH
+X_HEIGHT = 0.375 * DPI
+CHART_WIDTH = WIDTH - Y_WIDTH
+CHART_HEIGHT = HEIGHT - X_HEIGHT
+CHART_OFFSET_X = PAD + Y_LEFT_WIDTH
+CHART_OFFSET_Y = PAD
+DATA_CURVE_WIDTH = 3
 
 # config
 SLR_KEY_PRIORITY = ["Jason-2", "Jason-1", "TOPEX/Poseidon", "GMSL (mm)"]
 COLORS = ["G", "Y", "O", "R", "V"]
 AXIS_ROUND_TO_NEAREST = 10
-GUIDES = False
-LINE_HEIGHT = 50
 colorCount = len(COLORS)
 
 def parseNumber(string):
@@ -183,39 +195,43 @@ dwgGuides = dwg.g(id="guides")
 
 # draw axis
 axisValue = axisMin + AXIS_ROUND_TO_NEAREST
-x = PAD+WIDTH
-monthWidth = WIDTH / 12.0
+x = PAD+WIDTH-Y_RIGHT_WIDTH
+monthWidth = (CHART_WIDTH) / 12.0
 # y axis
 while axisValue < axisMax:
-    label = str(axisValue) + " mm"
+    label = str(axisValue)
     if axisValue > 0:
         label = "+" + label
     py = mu.norm(axisValue, axisMin, axisMax)
-    y = HEIGHT - HEIGHT * py + PAD
-    dwgAxis.add(dwg.line(start=(x, y), end=(x + 10, y), stroke_width=2, stroke="#000000"))
-    dwgLabels.add(dwg.text(label, insert=(x+15, y), alignment_baseline="middle", font_size=16))
+    y = CHART_HEIGHT - CHART_HEIGHT * py + PAD
+    dwgAxis.add(dwg.line(start=(x, y), end=(x+5, y), stroke_width=2, stroke="#000000"))
+    dwgLabels.add(dwg.text(label, insert=(x+10, y), alignment_baseline="middle", font_size=14))
     axisValue += AXIS_ROUND_TO_NEAREST
+# draw y axis label
+yAxisLabelRight = "Change in mean sea level (mm)"
+labelX = PAD+WIDTH-7
+labelY = PAD+CHART_HEIGHT*0.4
+dwgLabels.add(dwg.text(yAxisLabelRight, insert=(labelX, labelY), alignment_baseline="middle", font_size=14, dominant_baseline="central", transform="rotate(90,%s,%s)" % (labelX, labelY)))
 # x axis
-y = PAD + HEIGHT + 10
+y = PAD + HEIGHT - X_HEIGHT + X_HEIGHT * 0.5
 for month in range(12):
     label = calendar.month_abbr[month+1]
-    x = month * monthWidth + monthWidth * 0.5 + PAD
-    dwgLabels.add(dwg.text(label, insert=(x, y), text_anchor="middle", alignment_baseline="before-edge", font_size=16))
+    x = month * monthWidth + monthWidth * 0.5 + PAD + Y_LEFT_WIDTH
+    dwgLabels.add(dwg.text(label, insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=14))
 
 # draw data
-lineDelta = LINE_HEIGHT * 0.5
 prevPoints = None
 prevIntersections = None
 prevIntersectionsC = None
 for yi, d in enumerate(plotData):
     points = []
     for month, dm in enumerate(d["months"]):
-        x = month * (WIDTH / 11.0) + PAD
+        x = month * (CHART_WIDTH / 11.0) + CHART_OFFSET_X
         py = mu.norm(dm["slr"], axisMin, axisMax)
-        y = HEIGHT - HEIGHT * py + PAD
+        y = CHART_HEIGHT - CHART_HEIGHT * py + PAD
         points.append((x, y))
         if month <= 0:
-            dwgLabels.add(dwg.text(str(d["year"]), insert=(x-10, y), text_anchor="end", alignment_baseline="middle", font_size=16))
+            dwgLabels.add(dwg.text(str(d["year"]), insert=(CHART_OFFSET_X-10, y), text_anchor="end", alignment_baseline="middle", font_size=14))
     for point in points:
         dwgGuides.add(dwg.circle(center=point, r=3, fill="#000000"))
 
@@ -224,8 +240,8 @@ for yi, d in enumerate(plotData):
         prevIntersections = []
         prevIntersectionsC = []
         for month, dm in enumerate(d["months"]):
-            x = month * monthWidth + PAD
-            y = PAD + HEIGHT
+            x = month * monthWidth + CHART_OFFSET_X
+            y = PAD + CHART_HEIGHT
             prevIntersections.append((x, y))
             prevIntersectionsC.append((x+0.5*monthWidth, y))
 
@@ -233,7 +249,7 @@ for yi, d in enumerate(plotData):
     intersections = []
     intersectionsC = []
     for month, dm in enumerate(d["months"]):
-        x = month * monthWidth + PAD
+        x = month * monthWidth + CHART_OFFSET_X
         # find intersections
         intersection = mu.xIntersect(points, x)
         intersections.append((x, intersection[1]))
@@ -244,13 +260,13 @@ for yi, d in enumerate(plotData):
 
     # draw ta data
     for month, dm in enumerate(d["months"]):
-        x = month * monthWidth + PAD
+        x = month * monthWidth + CHART_OFFSET_X
         y1 = intersections[month][1]
         y0 = prevIntersections[month][1]
 
         # draw divider lines
         if month > 0:
-            dwgData.add(dwg.line(start=(x, y0-6), end=(x, y1+6), stroke_width=2, stroke="#000000", stroke_dasharray="5,2"))
+            dwgData.add(dwg.line(start=(x, y0-6), end=(x, y1+6), stroke_width=1, stroke="#000000", stroke_dasharray="3,1"))
 
         # draw color label
         pt = mu.norm(dm["ta"], taMin, taMax)
@@ -260,17 +276,22 @@ for yi, d in enumerate(plotData):
         y0 = prevIntersectionsC[month][1]
         xc = x + monthWidth * 0.5
         yc = y1 + (y0 - y1) * 0.5
-        dwgLabels.add(dwg.text(color, insert=(xc, yc), text_anchor="middle", alignment_baseline="middle", font_size=16))
+        dwgLabels.add(dwg.text(color, insert=(xc, yc), text_anchor="middle", alignment_baseline="middle", font_size=14))
 
     pathCurve = svgu.pointsToCurve(points)
-    dwgData.add(dwg.path(d=pathCurve, stroke_width=2, stroke="#000000", fill="none"))
+    dwgData.add(dwg.path(d=pathCurve, stroke_width=DATA_CURVE_WIDTH, stroke="#000000", fill="none"))
 
     prevPoints = points[:]
     prevIntersections = intersections[:]
     prevIntersectionsC = intersectionsC[:]
 
-y = HEIGHT + PAD
-dwgAxis.add(dwg.polyline(points=[prevPoints[0], (PAD, y), (PAD+WIDTH, y), prevPoints[-1]], stroke_width=2, stroke="#000000", fill="none"))
+y = CHART_HEIGHT + PAD
+p0 = prevPoints[0]
+p1 = prevPoints[-1]
+offset = DATA_CURVE_WIDTH * 0.5
+dwgAxis.add(dwg.polyline(points=[(p0[0], p0[1]-offset), (CHART_OFFSET_X, y), (CHART_OFFSET_X+CHART_WIDTH, y), (p1[0], p1[1]-offset)], stroke_width=2, stroke="#000000", fill="none"))
+
+dwgGuides.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 
 # save svg
 dwg.add(dwgAxis)
