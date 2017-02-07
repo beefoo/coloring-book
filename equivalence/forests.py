@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 
+import inspect
 import math
-from shared import getDataFromSVGs
-from shared import getTransformString
+import os
 import svgwrite
+import sys
+
+# add parent directory to sys path to import relative modules
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+
+import lib.svgutils as svgu
 
 # Config
-WIDTH = 1000
-PAD = 200
+DPI = 72
+PAD = 0.5 * DPI
+WIDTH = 8.5 * DPI - PAD * 2
 TREES = ['svg/pine02.svg']
 OUTPUT_FILE = 'data/forests.svg'
 TREES_CENTER_ROW = 5
@@ -22,10 +31,10 @@ ACRE_FOREST_SEQUESTERED = 1.06
 
 # Acres of U.S. forests to take one car off the road for a year
 forests = int(round(VEHICLE_EMISSIONS / ACRE_FOREST_SEQUESTERED))
-print "%s acres of forest necessary." % forests
+print "Taking one car off the road for a year is equivalent to %s acres of North American pine forest." % forests
 
 # Retrieve SVG data
-treeData = getDataFromSVGs(TREES)
+treeData = svgu.getDataFromSVGs(TREES)
 treeSetCount = len(TREES)
 forestWidth = WIDTH * 0.5
 forestHeight = forestWidth
@@ -54,7 +63,7 @@ dwgRects = dwg.g(id="rects")
 def addRect(w, h, x, y, sx, sy, r):
     global dwg
     global dwgRects
-    t = getTransformString(w, h, x, y, sx, sy, r)
+    t = svgu.getTransformString(w, h, x, y, sx, sy, r)
     dwgRect = dwg.rect(size=(w, h), stroke_width=2, stroke="#000000", fill="#FFFFFF")
     dwgRectWrapper = dwg.g(transform=t)
     dwgRectWrapper.add(dwgRect)
@@ -71,7 +80,7 @@ def addTree(w, cx, cy):
     scale = w / tree["width"]
     x = cx - tree["width"] * 0.5
     y = cy - tree["height"] * 0.5 - tree["height"] * scale * 0.5
-    t = getTransformString(tree["width"], tree["height"], x, y, scale, scale)
+    t = svgu.getTransformString(tree["width"], tree["height"], x, y, scale, scale)
 
     dwgTree = dwg.g(transform=t)
     dwgTree.add(dwg.use("#"+tree["id"]))
@@ -83,7 +92,7 @@ def addTree(w, cx, cy):
 x = 0
 y = 0
 sx = 0.6667
-sy = 0.3
+sy = 0.4
 dx = math.sqrt(2.0 * math.pow(forestWidth * sx, 2)) * 0.5
 dy = math.sqrt(2.0 * math.pow(forestHeight * sy, 2)) * 0.5
 offsetX = forestWidth*0.2
