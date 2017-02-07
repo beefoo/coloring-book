@@ -18,18 +18,19 @@ import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-height', dest="HEIGHT", type=int, default=1100, help="Height of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-count', dest="COUNT", type=int, default=50, help="Lightbulbs per group")
 parser.add_argument('-cols', dest="COLS", type=int, default=5, help="Columns")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/lightbulbs.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WIDTH = args.WIDTH
-HEIGHT = args.HEIGHT
-PAD = args.PAD
+DPI = 72
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 COUNT = args.COUNT
 COLS = args.COLS
 
@@ -42,7 +43,7 @@ TREE_SEQUESTERED = 0.039 # 0.039 metric ton CO2 per urban tree seedling planted 
 lightbulbs = [
     {
         "id": "incandescent",
-        "label": "60W Incandescent",
+        "label": "Incandescent Bulbs",
         "annualEnergyCost": 4.8,
         "watts": 60,
         "lifeHours": 1000,
@@ -50,7 +51,7 @@ lightbulbs = [
         "bulbCost": 1.53 # https://www.amazon.com/GE-Lighting-41028-60-Watt-4-Pack/dp/B01CTUERCU/ (1/29/2017)
     },{
         "id": "cfl",
-        "label": "60W Equivalent CFL",
+        "label": "Compact Fluorescent Bulbs",
         "annualEnergyCost": 1.2,
         "lifeHours": 10000,
         "watts": 14,
@@ -58,7 +59,7 @@ lightbulbs = [
         "bulbCost": 2.2 # https://www.amazon.com/EcoSmart-5000K-Spiral-Daylight-4-Pack/dp/B0042UN1U0/ (1/29/2017)
     },{
         "id": "led",
-        "label": "60W Equivalent LED",
+        "label": "LED Bulbs",
         "annualEnergyCost": 1.0,
         "lifeHours": 25000,
         "watts": 8,
@@ -112,7 +113,9 @@ for l in lightbulbs:
 # config svg
 lightMargin = 0
 groupMargin = 20
-calculationHeight = 150
+labelsHeight = 24
+calculationHeight = 80
+lightsHeight = HEIGHT - labelsHeight - calculationHeight
 
 # init svg
 rows = COUNT / COLS
@@ -132,14 +135,17 @@ for i, l in enumerate(lightbulbs):
 xOffset = PAD
 groupW = 1.0 * (WIDTH - groupMargin * (len(lightbulbs) - 1)) / len(lightbulbs)
 lightW = 1.0 * (groupW - lightMargin * (COLS - 1)) / COLS
-groupH = HEIGHT - calculationHeight
-lightH = 1.0 * groupH / rows - lightMargin
+lightH = 1.0 * lightsHeight / rows - lightMargin
 for l in lightbulbs:
     scaleW = lightW / l["svgData"]["width"]
     scaleH = lightH / l["svgData"]["height"]
     scale = scaleW
     dwgLightgroup = dwg.g()
     y = PAD
+    # draw labels
+    xc = xOffset + 0.5 * (lightW * COLS + lightMargin * (COLS-1))
+    dwgLabels.add(dwg.text(l["label"], insert=(xc, y), text_anchor="middle", alignment_baseline="before-edge", font_size=14))
+    y += labelsHeight
     for row in range(rows):
         x = xOffset
         for col in range(COLS):
@@ -169,7 +175,7 @@ dwg.defs.add(eGroup)
 # draw calculations
 dwgCalc = dwg.g(id="calculations")
 xOffset = PAD
-yOffset = PAD + groupH + 30
+yOffset = PAD + labelsHeight + lightsHeight + 15
 for l in lightbulbs:
     savings = int(round(l["annualSavingsIfReplaced"]))
     if savings <= 0:
@@ -178,12 +184,14 @@ for l in lightbulbs:
     x = xOffset
     dwgCalc.add(dwg.use("#multiply", transform="translate(%s, %s)" % (x, y)))
     dwgLabels.add(dwg.text("$%s" % savings, insert=(x+40, y), font_weight="bold", font_size=36, alignment_baseline="mathematical"))
-    y += 40
-    dwgCalc.add(dwg.rect(insert=(x, y), size=(groupW, 5)))
     y += 30
+    dwgCalc.add(dwg.rect(insert=(x, y), size=(groupW, 5)))
+    y += 16
     dwgCalc.add(dwg.use("#equals", transform="translate(%s, %s)" % (x, y)))
     xOffset += groupW + groupMargin
 dwg.add(dwgCalc)
+
+dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 
 dwg.add(dwgLabels)
 dwg.save()
