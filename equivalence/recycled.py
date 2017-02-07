@@ -12,6 +12,6 @@ RECYCLED_TRUCK_REDUCTIONS = 22.06
 
 # Vehicles offset per year per garbage truck of waste recycled instead of landfilled
 vehicles = int(round(RECYCLED_TRUCK_REDUCTIONS / VEHICLE_EMISSIONS))
-print "%s vehicles offset." % vehicles
+print "One garbage truck of waste recycled instead of landfilled is equivalent to taking %s cars off the road for one year." % vehicles
 
 # (Should be 5)
