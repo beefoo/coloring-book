@@ -45,14 +45,14 @@ def getDataFromSVG(filename):
             print "Warning: could not find dimensions for %s" % filename
 
         # find the path data
-        matches = re.findall(r'\sd="([^"]+)"\s', contents)
+        matches = re.findall(r'\sd="([^"]+)"[\s\/]', contents)
         if matches and len(matches):
             paths = list(matches)
         else:
             print "Warning: couldn't find paths in %s" % filename
 
         # find the polygon data
-        matches = re.findall(r'\spoints="([^"]+)"\s', contents)
+        matches = re.findall(r'\spoints="([^"]+)"[\s\/]', contents)
         if matches and len(matches):
             polygons = list(matches)
 

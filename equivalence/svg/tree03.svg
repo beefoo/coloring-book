@@ -1,1 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><path fill="#000000" d="m82.37239,39.22383c0.25866,-1.66427 0.38145,-3.29195 0.38145,-4.93531c0,-17.98815 -14.64656,-32.653 -32.66345,-32.653s-32.67389,14.66746 -32.67389,32.65561c0,17.1103 13.2096,31.1481 29.96979,32.54587l0,6.3984l-6.64138,-4.10187l-0.01307,0l-1.9621,-1.26975c-1.35335,-0.88308 -3.1378,-0.49118 -4.00781,0.85695c-0.87524,1.34814 -0.49118,3.14303 0.87001,4.01043l11.75435,7.58194l0,38.89986l-16.37614,0l-2.85302,0c-1.60417,0 -2.89482,1.30633 -2.89482,2.90266s1.29065,2.88437 2.89482,2.88437l2.85302,0l38.15525,0l2.99672,0c1.60417,0 2.89482,-1.28543 2.89482,-2.88437s-1.29065,-2.90266 -2.89482,-2.90266l-2.99672,0l-15.98163,0l0,-29.05798l17.63805,-13.2932c2.75896,1.41345 5.87848,2.22076 9.17827,2.22076c11.02019,0 19.99989,-8.98232 19.99989,-20.00251c0.00261,-10.22594 -7.72301,-18.67789 -17.6276,-19.8562l0,-0.00001zm-29.186,43.67057l0,-16.0783c2.64139,-0.26649 5.2227,-0.82559 7.73347,-1.73481c0.99542,3.17438 2.73807,5.95425 5.02153,8.21942l-12.75499,9.59368z"/><text x="0" y="115" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">Created by Iconic</text><text x="0" y="120" fill="#000000" font-size="5px" font-weight="bold" font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">from the Noun Project</text></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 100 125"
+   style="enable-background:new 0 0 100 125;"
+   xml:space="preserve"><metadata
+     id="metadata12"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs10" /><style
+     type="text/css"
+     id="style3">
+	.st0{font-family:'HelveticaNeue-Bold';}
+	.st1{font-size:5px;}
+</style><path
+     id="path5"
+     d="M 50.042969 0.80078125 C 31.942969 0.80078125 17.341797 15.5 17.341797 33.5 C 17.341797 50.6 30.541797 64.6 47.341797 66 L 47.341797 72.400391 L 40.742188 68.300781 L 38.742188 67 C 38.727519 66.99057 38.711999 66.985707 38.697266 66.976562 L 35.574219 71.847656 C 35.59845 71.8642 35.617715 71.884407 35.642578 71.900391 L 47.443359 79.5 L 47.443359 118.40039 L 30.943359 118.40039 L 29.642578 118.40039 L 29.642578 124.19922 L 30.943359 124.19922 L 69.142578 124.19922 L 70.341797 124.19922 L 70.341797 118.40039 L 69.142578 118.40039 L 53.142578 118.40039 L 53.142578 89.300781 L 70.742188 76 C 73.542187 77.4 76.643359 78.199219 79.943359 78.199219 C 90.943359 78.199219 99.943359 69.199219 99.943359 58.199219 C 99.943359 48.099219 92.241797 39.600391 82.341797 38.400391 C 82.641797 36.700391 82.742188 35.1 82.742188 33.5 C 82.742188 15.5 68.142969 0.80078125 50.042969 0.80078125 z M 60.841797 64.300781 C 61.841797 67.500781 63.541797 70.3 65.841797 72.5 L 53.142578 82.099609 L 53.142578 66 C 55.742578 65.7 58.341797 65.200781 60.841797 64.300781 z " /><text
+     id="text7"
+     class="st0 st1"
+     x="-0.057372034"
+     y="114.19999"
+     style="font-size:5px;font-family:HelveticaNeue-Bold">Created by Iconic</text>
+<text
+     id="text9"
+     class="st0 st1"
+     x="-0.057372034"
+     y="119.19999"
+     style="font-size:5px;font-family:HelveticaNeue-Bold">from the Noun Project</text>
+</svg>

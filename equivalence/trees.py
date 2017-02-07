@@ -1,15 +1,31 @@
 # -*- coding: utf-8 -*-
 
+import inspect
 import math
-from shared import getDataFromSVGs
+import os
 import svgwrite
+import sys
+
+# add parent directory to sys path to import relative modules
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+
+import lib.svgutils as svgu
 
 # Config
-WIDTH = 1000
+DPI = 72
+PAD = 0.5 * DPI
+WIDTH = 8.5 * DPI - PAD * 2
+HEIGHT = 11 * DPI - PAD * 2
+HEADER_H = 1.5 * DPI
 COLS = 11
-PAD = 100
 TREES = ['svg/tree01.svg', 'svg/tree02.svg', 'svg/tree03.svg']
 OUTPUT_FILE = 'data/trees.svg'
+TREE_PLATFORM_H = 0.2 * 72
+TREE_PLATFORM_HALF = TREE_PLATFORM_H * 0.5
+
+TREES_H = HEIGHT - HEADER_H
 
 # 4.73 metric tons CO2E /vehicle/year
 # https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references#vehicles
@@ -21,82 +37,74 @@ TREE_SEQUESTERED = 0.039
 
 # Number of tree seedlings grown for 10 years to take one car off the road for a year
 trees = int(round(VEHICLE_EMISSIONS / TREE_SEQUESTERED))
-print "%s trees necessary." % trees
+print "Taking one car off the road for a year is equivalent to %s urban trees planted and grown for 10 years." % trees
 
 # (Should be 121)
 
 # Retrieve SVG data
-treeData = getDataFromSVGs(TREES)
+treeData = svgu.getDataFromSVGs(TREES)
 treeSetCount = len(TREES)
 rowCount = int(math.ceil(1.0 * trees / COLS))
-treeWidth = 1.0 * WIDTH / COLS
-treeHeight = treeWidth
+treeWidth = 1.0 * WIDTH / (COLS+0.5)
+treeHeight = 1.0 * (TREES_H-TREE_PLATFORM_H) / rowCount
 halfWidth = treeWidth * 0.5
 halfHeight = treeHeight * 0.5
 
 # Add more tree data
 for i, tree in enumerate(treeData):
     treeData[i]["id"] = "tree%s" % i
-    treeData[i]["scale"] = treeWidth / tree["width"]
+    scale = treeWidth / tree["width"]
+    treeData[i]["scale"] = scale
+    treeData[i]["sWidth"] = tree["width"] * scale
+    treeData[i]["sHeight"] = tree["height"] * scale
 
 # Init SVG
-height = WIDTH
-dwg = svgwrite.Drawing(OUTPUT_FILE, size=(WIDTH+PAD*2+halfWidth, height+PAD*2), profile='full')
+dwg = svgwrite.Drawing(OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
 # Add tree definitions
 for i, tree in enumerate(treeData):
     dwgTree = dwg.g(id=tree["id"])
+    strokeWidth = 1.3 / tree["scale"]
     for path in tree["paths"]:
-        dwgTree.add(dwg.path(d=path, stroke_width=1, stroke="#000000", fill="#FFFFFF"))
+        dwgTree.add(dwg.path(d=path, stroke_width=strokeWidth, stroke="#000000", fill="#FFFFFF"))
     dwg.defs.add(dwgTree)
 
 dwgTrees = dwg.g(id="trees")
-degRectInner = dwg.g(id="rects_inner")
+# degRectInner = dwg.g(id="rects_inner")
 degRectOuter = dwg.g(id="rects_outer")
 for row in range(rowCount):
-    offsetX = 0
+    offsetX = PAD
+    offsetY = PAD + HEADER_H
     if row % 2 > 0:
-        offsetX = halfWidth
+        offsetX += halfWidth
     for col in range(COLS):
         count = row * COLS + col
-        x = col * treeWidth + PAD + offsetX
-        y = row * treeHeight + PAD
+        x = col * treeWidth + offsetX
+        y = row * treeHeight + offsetY - (tree["sHeight"] - treeHeight)
         cx = x + halfWidth
         cy = y + halfHeight
 
         treeSet = count % treeSetCount
         tree = treeData[treeSet]
 
-        t = "translate(%s,%s) scale(%s)" % (x-halfWidth*(tree["scale"]-1), y-halfHeight*(tree["scale"]-1), tree["scale"])
+        t = "translate(%s, %s) scale(%s)" % (x, y, tree["scale"])
         dwgTree = dwg.g(transform=t)
         dwgTree.add(dwg.use("#"+tree["id"]))
         dwgTrees.add(dwgTree)
 
-        rectScaleX = 0.7
-        rectScaleY = 0.4
-        rectTransX = x-halfWidth*(rectScaleX-1) + treeWidth * 0.05
-        rectTransY = y-halfHeight*(rectScaleY-1) + treeHeight * 0.8
-        t = "translate(%s,%s) scale(%s, %s) rotate(45, %s, %s)" % (rectTransX, rectTransY, rectScaleX, rectScaleY, halfWidth, halfHeight)
-        dwgRect = dwg.rect(size=(treeWidth, treeWidth), stroke_width=2, stroke="#000000", fill="#FFFFFF")
-        dwgRectWrapper = dwg.g(transform=t)
-        dwgRectWrapper.add(dwgRect)
-        degRectOuter.add(dwgRectWrapper)
-
-        rectScaleX *= 0.75
-        rectScaleY *= 0.75
-        rectTransX = x-halfWidth*(rectScaleX-1) + treeWidth * 0.05
-        rectTransY = y-halfHeight*(rectScaleY-1) + treeHeight * 0.8
-        t = "translate(%s,%s) scale(%s, %s) rotate(45, %s, %s)" % (rectTransX, rectTransY, rectScaleX, rectScaleY, halfWidth, halfHeight)
-        dwgRect = dwg.rect(size=(treeWidth, treeWidth), stroke_width=2, stroke="#000000", fill="#FFFFFF")
-        dwgRectWrapper = dwg.g(transform=t)
-        dwgRectWrapper.add(dwgRect)
-        degRectInner.add(dwgRectWrapper)
+        ph = TREE_PLATFORM_H
+        py = y + tree["sHeight"]
+        points = [(cx,py-ph), (x,py), (cx,py+ph), (x+treeWidth,py)]
+        dwgRect = dwg.polygon(points=points, stroke_width=1, stroke="#000000", fill="#FFFFFF")
+        degRectOuter.add(dwgRect)
 
         if count >= trees-1:
             break
 
+dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
+
 dwg.add(degRectOuter)
-dwg.add(degRectInner)
+# dwg.add(degRectInner)
 dwg.add(dwgTrees)
 dwg.save()
 print "Saved svg: %s" % OUTPUT_FILE
