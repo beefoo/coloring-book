@@ -135,9 +135,9 @@ def makeSVG(filename, amount):
             yesPoint = points[0]
             noPoint = points[1]
             if i >= yesHalf - yesLeft and i <= yesHalf + yesRight:
-                yesGroup.add(dwg.text("YES", insert=yesPoint, text_anchor="middle", alignment_baseline="middle", font_size=10, dominant_baseline="central", transform="rotate(-%s,%s,%s)" % (angle, yesPoint[0], yesPoint[1])))
+                yesGroup.add(dwg.text("YES", insert=yesPoint, text_anchor="middle", alignment_baseline="middle", font_size=9, dominant_baseline="central", transform="rotate(-%s,%s,%s)" % (angle, yesPoint[0], yesPoint[1])))
             if i >= noHalf - noLeft and i <= noHalf + noRight:
-                noGroup.add(dwg.text("NO", insert=noPoint, text_anchor="middle", alignment_baseline="middle", font_size=10, dominant_baseline="central", transform="rotate(%s,%s,%s)" % (angle, noPoint[0], noPoint[1])))
+                noGroup.add(dwg.text("NO", insert=noPoint, text_anchor="middle", alignment_baseline="middle", font_size=9, dominant_baseline="central", transform="rotate(%s,%s,%s)" % (angle, noPoint[0], noPoint[1])))
             x += cellw
         y += cellh
 
