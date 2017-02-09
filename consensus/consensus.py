@@ -20,16 +20,18 @@ import lib.mathutils as mu
 parser = argparse.ArgumentParser()
 parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
-parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
-parser.add_argument('-row', dest="PER_ROW", type=int, default=10, help="Hands per row")
+parser.add_argument('-padx', dest="PADX", type=float, default=0.875, help="Padding of output file")
+parser.add_argument('-pady', dest="PADY", type=float, default=0.5, help="Padding of output file")
+parser.add_argument('-row', dest="PER_ROW", type=int, default=8, help="Hands per row")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/consensus_%s.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
 DPI = 72
-PAD = args.PAD * DPI
-WIDTH = args.WIDTH * DPI - PAD * 2
-HEIGHT = args.HEIGHT * DPI - PAD * 2
+PADX = args.PADX * DPI
+PADY = args.PADY * DPI
+WIDTH = args.WIDTH * DPI - PADX * 2
+HEIGHT = args.HEIGHT * DPI - PADY * 2
 PER_ROW = args.PER_ROW
 MARGIN_TOP = 3.25 * DPI
 
@@ -55,27 +57,27 @@ def makeSVG(filename, amount):
     yesHalf = half
     noHalf = half
     if yes < PER_ROW:
-        yesHalf += 5
+        yesHalf += 1
     if no < PER_ROW:
-        noHalf += 5
+        noHalf += 1
 
     # calculate sizes
     cellw = 1.0 * WIDTH / (PER_ROW + (1.0/3))
-    cellh = cellw / 1.125
+    cellh = cellw / 1.2625
 
     # init svg
     width = 1.0 * WIDTH
     height = cellh * rows
-    yOffset = PAD
-    xOffset = PAD
+    yOffset = PADY
+    xOffset = PADX
     if height > HEIGHT:
         scale = HEIGHT / height
         width = width * scale
         cellw = width / PER_ROW
-        xOffset = (WIDTH - width) * 0.5 + PAD
+        xOffset = (WIDTH - width) * 0.5 + PADX
     else:
-        yOffset = min((HEIGHT - height + PAD), MARGIN_TOP)
-    dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
+        yOffset = HEIGHT - height + PADY
+    dwg = svgwrite.Drawing(filename, size=(WIDTH+PADX*2, HEIGHT+PADY*2), profile='full')
     arrowsGroup = dwg.add(dwg.g(id="arrows"))
     yesGroup = dwg.add(dwg.g(id="yes"))
     noGroup = dwg.add(dwg.g(id="no"))
@@ -118,7 +120,7 @@ def makeSVG(filename, amount):
         arrows = arrowsCombined[i % arrowsLen]
         for arrow in arrows:
             points = [(p[0] * cellw, p[1] * cellh) for p in arrow]
-            arrowGroup.add(dwg.polyline(points=points, stroke_width=1, stroke="#000000", stroke_linejoin="round", fill="none"))
+            arrowGroup.add(dwg.polygon(points=points, stroke_width=1, stroke="#000000", stroke_linejoin="round", fill="none"))
         dwg.defs.add(arrowGroup)
 
     # build
@@ -141,7 +143,9 @@ def makeSVG(filename, amount):
             x += cellw
         y += cellh
 
-    dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
+    dwg.add(dwg.rect(insert=(PADX,PADY), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
+    guideY = 2.125 * DPI
+    dwg.add(dwg.line(start=(0, guideY), end=(WIDTH+PADX*2, guideY), stroke_width=1, stroke="#000000", fill="none"))
 
     dwg.save()
     print "Saved svg: %s" % filename
