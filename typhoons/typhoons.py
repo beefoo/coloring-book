@@ -41,7 +41,7 @@ MAX_RADIUS = 0.325 * WIDTH
 MAX_AREA = math.pi * math.pow(MAX_RADIUS, 2)
 ANGLE1 = -10
 ANGLE2 = 10
-LINE_W = 0.35 * DPI
+LINE_W = 0.3 * DPI
 MIN_R_DIFF = 4
 
 def parseNumber(string):
@@ -124,11 +124,11 @@ for i, d in enumerate(data):
     dwgLines.add(dwg.line(start=pf0, end=pf1, stroke="#000000", stroke_width=1))
     dwgLines.add(dwg.line(start=pm0, end=pm1, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
     # draw labels
-    dwgLabels.add(dwg.text("%s dead" % "{:,}".format(d["Fatalities"]), insert=(pf1[0]+5, pf1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
-    dwgLabels.add(dwg.text("%s missing" % "{:,}".format(d["Missing"]), insert=(pm1[0]+5, pm1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
+    dwgLabels.add(dwg.text("%s dead" % "{:,}".format(d["Fatalities"]), insert=(pf1[0]+2, pf1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
+    dwgLabels.add(dwg.text("%s missing" % "{:,}".format(d["Missing"]), insert=(pm1[0]+2, pm1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
     # name of typhoon
-    dwgLabels.add(dwg.text(d["Name"], insert=(center[0]-maxR-12, center[1]-8), text_anchor="end", alignment_baseline="middle", font_size=12))
-    dwgLabels.add(dwg.text(str(d["Year"]), insert=(center[0]-maxR-12, center[1]+8), text_anchor="end", alignment_baseline="middle", font_size=12))
+    dwgLabels.add(dwg.text(d["Name"], insert=(center[0]-maxR-8, center[1]-8), text_anchor="end", alignment_baseline="middle", font_size=12))
+    dwgLabels.add(dwg.text(str(d["Year"]), insert=(center[0]-maxR-8, center[1]+8), text_anchor="end", alignment_baseline="middle", font_size=12))
     y += maxR * 2 + MARGIN
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
