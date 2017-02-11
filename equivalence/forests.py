@@ -21,11 +21,14 @@ HEIGHT = 11 * DPI - PAD * 2
 TREES = ['svg/pine02.svg']
 OUTPUT_FILE = 'data/forests.svg'
 ACRES_PER_ROW = 2
-TREES_PER_ROW = 5
-TREE_HEIGHT = 1.0 * DPI
-TREE_WIDTH = 0.33 * DPI
-ACRE_HEIGHT_RATIO = 0.75
-MARGIN_X = 0.125 * DPI
+ACRE_PAD = 0.2 * DPI
+TREES_PER_ROW = 4
+TREE_HEIGHT = 2.0 * DPI
+TREE_WIDTH = 0.625 * DPI
+STUMP_HEIGHT = TREE_HEIGHT * 0.1
+STUMP_WIDTH =  TREE_WIDTH * 0.2
+ACRE_HEIGHT_RATIO = 0.825
+MARGIN_X = 0 * DPI
 MARGIN_Y = 0.5 * DPI
 
 # 4.73 metric tons CO2E /vehicle/year
@@ -43,7 +46,7 @@ print "Taking one car off the road for a year is equivalent to %s acres of North
 
 # Calculations
 rows = int(math.ceil(1.0 * forests / ACRES_PER_ROW))
-acreWidth = 1.0 * (WIDTH - MARGIN_X * (ACRES_PER_ROW - 1) - TREE_WIDTH * ACRES_PER_ROW) / ACRES_PER_ROW
+acreWidth = 1.0 * (WIDTH - MARGIN_X * (ACRES_PER_ROW - 1) - (TREE_WIDTH-ACRE_PAD*2) * ACRES_PER_ROW) / ACRES_PER_ROW
 acreHeight = acreWidth * ACRE_HEIGHT_RATIO
 height = acreHeight * rows + MARGIN_Y * (rows-1)
 
@@ -51,7 +54,24 @@ height = acreHeight * rows + MARGIN_Y * (rows-1)
 dwg = svgwrite.Drawing(OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 
 # Tree ref
-xOffset = PAD + TREE_WIDTH * 0.5
+halfTree = TREE_WIDTH * 0.5
+halfStump = STUMP_WIDTH * 0.5
+stumpY = TREE_HEIGHT - STUMP_HEIGHT
+tree = [
+    (halfTree, 0),
+    (0, stumpY),
+    (halfTree-halfStump, stumpY),
+    (halfTree-halfStump, TREE_HEIGHT),
+    (halfTree+halfStump, TREE_HEIGHT),
+    (halfTree+halfStump, stumpY),
+    (TREE_WIDTH, stumpY),
+    (halfTree, 0)
+]
+dwgTree = dwg.polygon(id="tree", points=tree, stroke_width=1.5, stroke="#000000", fill="#FFFFFF")
+dwg.defs.add(dwgTree)
+
+# Draw forests
+xOffset = PAD + TREE_WIDTH * 0.5 - ACRE_PAD
 yOffset = HEIGHT + PAD - height
 for row in range(rows):
     x = xOffset
@@ -65,16 +85,23 @@ for row in range(rows):
         # Draw rect
         points = [(x,yc), (xc,y), (x1,yc), (xc,y1)]
         dwgGroup = dwg.add(dwg.g(id="acre%s" % i))
-        dwgGroup.add(dwg.polygon(points=points, stroke_width=1, stroke="#000000", fill="none"))
+        dwgGroup.add(dwg.polygon(points=points, stroke_width=2, stroke="#000000", fill="none"))
         # Draw trees
-        tbox = points
+        tp = ACRE_PAD
+        tbox = [(x+tp,yc), (xc,y+tp), (x1-tp,yc), (xc,y1-tp)]
+        tps = []
         for trow in range(TREES_PER_ROW):
             a = mu.lerp2D(tbox[0], tbox[3], 1.0*trow/(TREES_PER_ROW-1))
             b = mu.lerp2D(tbox[1], tbox[2], 1.0*trow/(TREES_PER_ROW-1))
             for tcol in range(TREES_PER_ROW):
-                point = mu.lerp2D(a, b, 1.0*tcol/(TREES_PER_ROW-1))
-                dwgGroup.add(dwg.circle(center=point, r=5, fill="#000000"))
-        x += MARGIN_X + acreWidth + TREE_WIDTH
+                p = mu.lerp2D(a, b, 1.0*tcol/(TREES_PER_ROW-1))
+                tp = (p[0]-halfTree, p[1]-TREE_HEIGHT)
+                tps.append(tp)
+        # sort based on y unit
+        tps = sorted(tps, key=lambda p: p[1])
+        for tp in tps:
+            dwgGroup.add(dwg.use("#tree", insert=tp))
+        x += MARGIN_X + acreWidth + TREE_WIDTH - ACRE_PAD * 2
     yOffset += MARGIN_Y + acreHeight
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
