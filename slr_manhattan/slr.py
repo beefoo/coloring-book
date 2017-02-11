@@ -16,13 +16,15 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 import lib.mathutils as mu
+import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
 # input source: http://choices.climatecentral.org/
 parser.add_argument('-input', dest="INPUT_FILE", default="data/slr_%sd.png", help="Path to input file")
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=40, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-mpa', dest="MIN_POLY_AREA", type=float, default=0.002, help="Minimum polygon area to match")
 parser.add_argument('-image', dest="SHOW_IMAGE", type=bool, default=False, help="Show image")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/manhattan_slr.svg", help="Path to output svg file")
@@ -31,12 +33,62 @@ parser.add_argument('-output', dest="OUTPUT_FILE", default="data/manhattan_slr.s
 args = parser.parse_args()
 INPUT_FILE = args.INPUT_FILE
 OUTPUT_FILE = args.OUTPUT_FILE
-WIDTH = args.WIDTH
-PAD = args.PAD
+DPI = 72
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 MIN_POLY_AREA = args.MIN_POLY_AREA
 DEGREES = [2, 4]
 ALPHA_THRESHOLD = 0.5
 SHOW_IMAGE = args.SHOW_IMAGE
+MARGIN = 0.25 * DPI
+MARGIN_X = -0.175 * DPI
+WATER_STEP_X = 0.1 * DPI
+WATER_OSCILLATE_X = (0.25*DPI, 0.25*DPI)
+WATER_OSCILLATE_Y = (0.05*DPI, 0.2*DPI)
+WAVES = 40
+WAVE_STEPS_X = 60
+WAVE_FREQUENCY = 8.0
+LABEL_X = 0.45
+LABEL_Y = 0.55
+
+# Init SVG
+dwg = svgwrite.Drawing(OUTPUT_FILE, size=(WIDTH + PAD*2, HEIGHT + PAD*2), profile='full')
+dwgWater = dwg.add(dwg.g(id="water"))
+dwgLand = dwg.add(dwg.g(id="land"))
+dwgLabels = dwg.add(dwg.g(id="labels"))
+
+# Draw water
+maxWave = max(WATER_OSCILLATE_Y[0], WATER_OSCILLATE_Y[1])
+waveHeight = maxWave * 2
+waveStepY = 1.0 * HEIGHT / WAVES
+yoffset = PAD
+xoffset = PAD
+if waveHeight > waveStepY:
+    diff = waveHeight - waveStepY
+    waveStepY = 1.0 * (HEIGHT - diff) / WAVES
+    yoffset += diff * 0.5
+waveStepY -= (3.0 / WAVES)
+waveHStepY = waveStepY * 0.5
+waveStepX = 1.0 * WIDTH / (WAVE_STEPS_X-1)
+xStart = PAD
+xEnd = PAD + WIDTH
+waveOffset = 0
+for wave in range(WAVES):
+    points = []
+    x = xoffset
+    yh = yoffset + 0.5 * waveStepY
+    for xstep in range(WAVE_STEPS_X):
+        progress = mu.norm(x+waveOffset, xStart, xEnd)
+        amount = mu.lerp(WATER_OSCILLATE_Y[0], WATER_OSCILLATE_Y[1], progress)
+        y = yh + mu.oscillate(progress, amount, WAVE_FREQUENCY)
+        points.append((x, y))
+        # dwgWater.add(dwg.circle(center=(x,y), r=5))
+        x += waveStepX
+    commands = svgu.pointsToCurve(points)
+    dwgWater.add(dwg.path(d=commands, stroke="#000000", stroke_width=1, fill="none"))
+    yoffset += waveStepY
+    waveOffset += WATER_STEP_X
 
 def inBounds(x, y, w, h):
     return x >= 0 and y >= 0 and x < w and y < h
@@ -115,22 +167,27 @@ for i,d in enumerate(DEGREES):
         "shapes": landContours
     })
 
-# Init SVG
-dwg = svgwrite.Drawing(OUTPUT_FILE, size=(w*len(contours), h), profile='full')
+# Contours calculations
+count = len(contours)
+targetW = 1.0 * (WIDTH - MARGIN_X * (count-1) - MARGIN * 2) / count
+targetH = targetW * h / w
+scale = 1.0 * targetW / w
+offsetY = (HEIGHT - targetH) * 0.5
 
 # Draw contours
-xoffset = 0
-for contour in contours:
-    dwgGroup = dwg.add(dwg.g(id=contour["label"]))
+xoffset = PAD + MARGIN + 10
+yoffset = PAD + offsetY
+for i, contour in enumerate(contours):
+    dwgGroup = dwgLand.add(dwg.g(id=contour["label"]))
     # image as bg
     if SHOW_IMAGE:
-        dwgGroup.add(dwg.image(contour["image"], insert=(xoffset, 0), size=(w, h)))
-    for i, points in enumerate(contour["shapes"]):
+        dwgGroup.add(dwg.image(contour["image"], insert=(xoffset, yoffset), size=(targetW, targetH)))
+    for j, points in enumerate(contour["shapes"]):
         polyArea = mu.polygonArea(points)
         p = polyArea / area
         # area is big enough to show
         if p > MIN_POLY_AREA:
-            points = [(p[1]+xoffset,p[0]) for p in points]
+            points = [(p[1],p[0]) for p in points]
             # simplify polygon
             target = 0.1 * len(points)
             points = mu.simplify(points, target)
@@ -140,10 +197,23 @@ for contour in contours:
             points = mu.simplify(points, target)
             # add closure for polygons
             points.append((points[0][0], points[0][1]))
-            # add polygon as polyline
-            line = dwg.polyline(id=contour["label"]+str(i), points=points, stroke="#000000", stroke_width=2, fill="none")
+            # scale and translate
+            points = mu.scalePoints(points, scale)
+            points = mu.translatePoints(points, xoffset, yoffset)
+            # add polygon
+            line = dwg.polygon(id=contour["label"]+str(j), points=points, stroke="#000000", stroke_width=2, fill="#FFFFFF")
             dwgGroup.add(line)
-    xoffset += w
+    # add label
+    degrees = 0
+    if i > 0:
+        degrees = DEGREES[i-1]
+    labelX = xoffset + targetW * LABEL_X
+    labelY = yoffset + targetH * LABEL_Y
+    dwgLabels.add(dwg.text("+%s°C" % degrees, insert=(labelX, labelY), text_anchor="middle", font_size=28))
+    xoffset += MARGIN_X + targetW
+
+dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
+
 # Save
 dwg.save()
 print "Saved svg: %s" % OUTPUT_FILE

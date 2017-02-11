@@ -83,6 +83,11 @@ def roundToNearest(x, nearest):
 def roundToNearestDegree(radians, degree):
     return math.radians(roundToNearest(math.degrees(radians), degree))
 
+def scalePoints(points, scale):
+    for i,p in enumerate(points):
+        points[i] = (p[0]*scale, p[1]*scale)
+    return points
+
 # for line simplification
 def simplify(line, targetLength=100):
     simplifier = VWSimplifier(line)
@@ -111,6 +116,11 @@ def translatePoint(p, radians, distance):
     x2 = p[0] + distance * math.cos(radians)
     y2 = p[1] + distance * math.sin(radians)
     return (x2, y2)
+
+def translatePoints(points, x, y):
+    for i,p in enumerate(points):
+        points[i] = (p[0]+x, p[1]+y)
+    return points
 
 def xIntersect(points, x):
     if len(points) < 2:
