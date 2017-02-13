@@ -13,6 +13,10 @@ def containsPoint(points, point):
     bbPath = mplPath.Path(np.array(points))
     return bbPath.contains_point(point)
 
+def ellipseCircumference(a, b):
+    t = ((a-b)/(a+b))**2
+    return math.pi*(a+b)*(1 + 3*t/(10 + math.sqrt(4 - 3*t)))
+
 def floorToNearest(x, nearest):
     return math.floor(1.0 * x / nearest) * nearest
 

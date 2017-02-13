@@ -20,6 +20,13 @@ def distance(p1, p2):
     (x2, y2) = p2
     return math.hypot(x2 - x1, y2 - y1)
 
+def polarToCartesian(cx, cy, rx, ry, degrees):
+    radians = math.radians(degrees)
+    return (
+        cx + (rx * math.cos(radians)),
+        cy + (ry * math.sin(radians))
+    )
+
 def translatePoint(p, angle, distance):
     (x, y) = p
     r = math.radians(angle)
@@ -28,6 +35,21 @@ def translatePoint(p, angle, distance):
     return (x2, y2)
 
 # SVG file functions
+
+def describeArc(x, y, rx, ry, startAngle, endAngle):
+    start = polarToCartesian(x, y, rx, ry, endAngle)
+    end = polarToCartesian(x, y, rx, ry, startAngle)
+    largeArcFlag = 0
+    if (endAngle - startAngle) > 180:
+        largeArcFlag = 1
+    sweepFlag = 0
+    if startAngle > endAngle:
+        sweepFlag = 1
+    d = [
+        "M%s,%s" % start,
+        "A%s,%s,%s,%s,%s,%s,%s" % (rx, ry, 0, largeArcFlag, sweepFlag, end[0], end[1])
+    ]
+    return d
 
 def getDataFromSVG(filename):
     paths = []
