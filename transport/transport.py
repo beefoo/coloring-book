@@ -138,7 +138,7 @@ mrx2 = rx1 - j * (ARC_MARGIN + ARC_W)
 mry2 = ry1 - j * (ARC_MARGIN + ARC_W)
 maxArcLen = CENTER_W * (halfArcs * 1.5) + mu.ellipseCircumference(mrx1, mry1) * 0.5 * (halfArcs/2) + mu.ellipseCircumference(mrx2, mry2) * 0.5 * (halfArcs/2)
 stepY = halfTurnH - arcsW + ARC_W
-footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * 1.55
+footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * 2
 
 # Check for arc validity
 if footprintW <= 0:
