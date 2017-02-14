@@ -17,6 +17,10 @@ def ellipseCircumference(a, b):
     t = ((a-b)/(a+b))**2
     return math.pi*(a+b)*(1 + 3*t/(10 + math.sqrt(4 - 3*t)))
 
+def ellipseRadius(a, b, angle):
+    r = math.radians(angle)
+    return (a * b) / math.sqrt(a**2 * math.sin(r)**2 + b**2 * math.cos(r)**2)
+
 def floorToNearest(x, nearest):
     return math.floor(1.0 * x / nearest) * nearest
 
