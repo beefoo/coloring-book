@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import math
+from path import Arc, CubicBezier, Line, parse_path, QuadraticBezier
 import re
 
 # Utility functions
@@ -93,6 +94,15 @@ def getDataFromSVGs(filenames):
         data.append(fileData)
     return data
 
+def getParsedDataFromSVG(filename):
+    svgData = getDataFromSVG(filename)
+    parsedPaths = []
+    for path in svgData["paths"]:
+        parsedPath = parsePath(path)
+        parsedPaths.append(parsedPath)
+    svgData["paths"] = parsedPaths
+    return svgData
+
 # SVG parameter functions
 
 def getTransformString(w, h, x, y, sx=1, sy=1, r=0):
@@ -104,6 +114,25 @@ def getTransformString(w, h, x, y, sx=1, sy=1, r=0):
     if r==0:
         transform = "translate(%s,%s) scale(%s, %s)" % (tx, ty, sx, sy)
     return transform
+
+def parsePath(d):
+    path = parse_path(d)
+    commands = []
+    for p in path:
+        if isinstance(p, Arc):
+            commands.append(["A", (p.start.real, p.start.imag), (p.radius.real, p.radius.imag), (p.rotation.real, p.rotation.imag), (p.arc.real, p.arc.imag), (p.sweep.real, p.sweep.imag), (p.end.real, p.end.imag)])
+
+        elif isinstance(p, CubicBezier):
+            commands.append(["C", (p.start.real, p.start.imag), (p.control1.real, p.control1.imag), (p.control2.real, p.control2.imag), (p.end.real, p.end.imag)])
+
+        elif isinstance(p, Line):
+            commands.append(["L", (p.start.real, p.start.imag), (p.end.real, p.end.imag)])
+
+        elif isinstance(p, QuadraticBezier):
+            commands.append(["Q", (p.start.real, p.start.imag), (p.control.real, p.control.imag), (p.end.real, p.end.imag)])
+    if path.closed:
+        commands.append(["Z"])
+    return commands
 
 def patternDiagonal(size, direction="up"):
     commands = [
