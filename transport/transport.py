@@ -4,6 +4,9 @@
 # https://docs.google.com/spreadsheets/d/1TAMZLvUrMlxAR4RdDOs928-yoU5RxMrDKIb8tXuOKsc/
 # https://www.rita.dot.gov/bts/sites/rita.dot.gov.bts/files/publications/national_transportation_statistics/html/table_04_20.html
 
+# Icons:
+# Freepik: http://www.flaticon.com/packs/vehicles
+
 import argparse
 import csv
 import inspect
@@ -164,15 +167,16 @@ for i, d in enumerate(data):
     h = svgd["height"]
     scale = 1.0 * ICON_W / w
     th = h * scale
-    ty = PAD + i * (ARC_W + ARC_MARGIN)
+    ty = PAD + i * (ARC_W + ARC_MARGIN) - (th - ARC_W) * 0.5
     tx = PAD + WIDTH * 0.5 - 0.5 * CENTER_W - ICON_W - 10
     t = "translate(%s, %s) scale(%s)" % (tx, ty, scale)
     g = dwgIcons.add(dwg.g(id="icon%s" % i, transform=t))
     strokeW = 1.0 / scale
     for path in svgd["paths"]:
-        g.add(dwg.path(d=path, stroke_width=strokeW, stroke="#000000", fill="none"))
+        g.add(dwg.path(d=path, fill="#000000"))
 
     # add label
+    ty = PAD + i * (ARC_W + ARC_MARGIN)
     dwgLabels.add(dwg.text(d["Label"], insert=(tx - 10, ty), text_anchor="end", alignment_baseline="before-edge", font_size=14))
 
     value = d["value"]
