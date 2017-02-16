@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 99.792999 52.058998"
+   enable-background="new 0 0 100 100"
+   xml:space="preserve"
+   id="svg8"
+   width="99.792999"
+   height="52.058998"><metadata
+     id="metadata14"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs12" /><path
+     id="path2"
+     d="M 58.951172 0 L 10.978516 0.001953125 C 7.6135144 0.001953125 4.8808594 2.7306562 4.8808594 6.0976562 L 4.875 30.539062 L 1.8242188 30.548828 C 0.8162186 30.548828 0 31.368953 0 32.376953 L 0 37.199219 C 0 38.211219 0.8162186 39.029297 1.8242188 39.029297 L 8.4609375 39.03125 C 8.4612781 39.029216 8.4625492 39.027424 8.4628906 39.025391 L 12.189453 39.025391 C 12.013818 39.792324 11.912109 40.588027 11.912109 41.408203 C 11.912109 47.291203 16.683453 52.058594 22.564453 52.058594 C 28.444453 52.058594 33.212891 47.290203 33.212891 41.408203 C 33.212891 40.587622 33.111173 39.792472 32.935547 39.025391 L 68.113281 39.025391 C 67.937746 39.792324 67.835938 40.588027 67.835938 41.408203 C 67.835938 47.291203 72.604375 52.058594 78.484375 52.058594 C 84.362375 52.058594 89.132812 47.290203 89.132812 41.408203 C 89.132812 40.587622 89.031095 39.792472 88.855469 39.025391 L 92.585938 39.025391 L 97.964844 39.029297 C 98.976844 39.029297 99.792969 38.209219 99.792969 37.199219 L 99.792969 32.378906 C 99.792969 31.370906 98.976844 30.550781 97.964844 30.550781 L 94.740234 30.539062 L 94.740234 21.109375 C 94.740234 18.415375 92.560188 16.232422 89.867188 16.232422 L 74.056641 16.232422 L 64.697266 3.0488281 C 63.051266 0.85682818 61.471172 1.4802974e-015 58.951172 0 z "
+     style="fill:#000000" /><text
+     x="-0.142"
+     y="92.183998"
+     font-size="5px"
+     font-weight="bold"
+     id="text4"
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000">Created by Simon Child</text>
+<text
+     x="-0.142"
+     y="97.183998"
+     font-size="5px"
+     font-weight="bold"
+     id="text6"
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000">from the Noun Project</text>
+</svg>

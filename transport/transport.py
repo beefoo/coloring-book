@@ -36,7 +36,8 @@ HEIGHT = args.HEIGHT * DPI - PAD * 2
 ARC_MARGIN = 0.15 * DPI
 ARC_W = 0.25 * DPI
 CENTER_W = 0.1 * WIDTH
-FOOTPRINT_MARGIN = 0.05 * DPI
+FOOTPRINT_MARGIN = 0.025 * DPI
+ICON_W = 0.625 * DPI
 
 def parseNumber(string):
     try:
@@ -72,6 +73,7 @@ for i, d in enumerate(data):
     data[i]["index"] = i
     data[i]["value"] = int(d[dataKey])
     data[i]["valueI"] = 1.0 * d[dataKey] / maxValue
+    data[i]["svgData"] = svgu.getDataFromSVG("svg/%s" % d["Svg"])
 
 def getArcFootprints(value, cx, cy, rx, ry, a1, a2, w, td):
     footprints = []
@@ -104,7 +106,7 @@ def getLineFootprints(a, value, x, y, w, td):
     lineAmount = min(amount, value)
     m = 1.0 * (CENTER_W - amount * w) / amount
     direction = -1
-    if (a/2) % 2 > 0:
+    if a % 2 > 0:
         direction = 1
     d = td * ARC_W
     lx = x
@@ -117,13 +119,15 @@ def getLineFootprints(a, value, x, y, w, td):
 # Init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 dwgFootprints = dwg.add(dwg.g(id="footprints"))
+dwgIcons = dwg.add(dwg.g(id="icons"))
+dwgLabels = dwg.add(dwg.g(id="labels"))
 
 # Calculate arcs
-arcs = 4
+arcs = 2
 halfArcs = arcs / 2
 arcsI = 1.0 / arcs
 arcsW = ARC_W * count + ARC_MARGIN * (count-1)
-halfTurnH = 1.0 * ((HEIGHT - ARC_W) + (arcsW - ARC_W) * (halfArcs-1)) / halfArcs
+halfTurnH = 1.0 * ((HEIGHT - ARC_W) + (arcsW - ARC_W) * (arcs-1)) / arcs
 rx1 = (WIDTH - ARC_W*2 - CENTER_W) * 0.5
 ry1 = halfTurnH * 0.5
 
@@ -136,9 +140,9 @@ mry1 = ry1 - j * (ARC_MARGIN + ARC_W)
 j = count - 1 - j
 mrx2 = rx1 - j * (ARC_MARGIN + ARC_W)
 mry2 = ry1 - j * (ARC_MARGIN + ARC_W)
-maxArcLen = CENTER_W * (halfArcs * 1.5) + mu.ellipseCircumference(mrx1, mry1) * 0.5 * (halfArcs/2) + mu.ellipseCircumference(mrx2, mry2) * 0.5 * (halfArcs/2)
+maxArcLen = CENTER_W * (arcs + 1) + mu.ellipseCircumference(mrx1, mry1) * 0.5 * halfArcs + mu.ellipseCircumference(mrx2, mry2) * 0.5 * halfArcs
 stepY = halfTurnH - arcsW + ARC_W
-footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * 2
+footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * 0.975
 
 # Check for arc validity
 if footprintW <= 0:
@@ -153,11 +157,29 @@ if arcsW > ry1:
 
 # Draw data
 for i, d in enumerate(data):
+
+    # add icons
+    svgd = d["svgData"]
+    w = svgd["width"]
+    h = svgd["height"]
+    scale = 1.0 * ICON_W / w
+    th = h * scale
+    ty = PAD + i * (ARC_W + ARC_MARGIN)
+    tx = PAD + WIDTH * 0.5 - 0.5 * CENTER_W - ICON_W - 10
+    t = "translate(%s, %s) scale(%s)" % (tx, ty, scale)
+    g = dwgIcons.add(dwg.g(id="icon%s" % i, transform=t))
+    strokeW = 1.0 / scale
+    for path in svgd["paths"]:
+        g.add(dwg.path(d=path, stroke_width=strokeW, stroke="#000000", fill="none"))
+
+    # add label
+    dwgLabels.add(dwg.text(d["Label"], insert=(tx - 10, ty), text_anchor="end", alignment_baseline="before-edge", font_size=14))
+
     value = d["value"]
     cy = PAD + ry1
     footprints = []
     for a in range(arcs):
-        turnDirection = (a/2) % 2 * -1
+        turnDirection = a % 2 * -1
         if turnDirection >= 0:
             turnDirection = 1
         cx = PAD + WIDTH * 0.5 + 0.5 * CENTER_W * turnDirection
@@ -175,7 +197,7 @@ for i, d in enumerate(data):
 
         # draw first line
         if a <= 0 and CENTER_W > 0:
-            fs = getLineFootprints(3, value, cx-CENTER_W, cy-ry, footprintW, turnDirection)
+            fs = getLineFootprints(1, value, cx-CENTER_W, cy-ry, footprintW, turnDirection)
             footprints += fs
             value -= len(fs)
             if value < 0:
@@ -188,20 +210,21 @@ for i, d in enumerate(data):
         if value < 0:
             break
 
-        if a % 2 > 0:
-            # draw line
-            if CENTER_W > 0:
-                fs = getLineFootprints(a, value, cx, cy + ry, footprintW, turnDirection * -1)
-                footprints += fs
-                value -= len(fs)
-                if value < 0:
-                    break
-            cy += stepY
+        # draw line
+        if CENTER_W > 0:
+            fs = getLineFootprints(a, value, cx, cy + ry, footprintW, turnDirection * -1)
+            footprints += fs
+            value -= len(fs)
+            if value < 0:
+                break
 
+        cy += stepY
+
+    print len(footprints)
     # draw path
     for footprint in footprints:
         dwgFootprints.add(dwg.polygon(points=footprint, stroke_width=1, stroke="#000000", fill="none"))
 
-# dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
+dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE

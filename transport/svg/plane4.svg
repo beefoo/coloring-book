@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   height="42.349609"
+   width="90.300781"
+   id="svg10"
+   xml:space="preserve"
+   enable-background="new 0 0 100 100"
+   viewBox="0 0 90.300781 42.349609"
+   y="0px"
+   x="0px"
+   version="1.1"><metadata
+     id="metadata16"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs14" /><path
+     id="path2"
+     d="M 25.027344 0 L 37.5 29.050781 L 13.199219 29.050781 L 5.5 18.75 L 0 20.050781 L 6.0996094 35.75 L 7.7324219 42.214844 L 19.025391 42.214844 L 19.025391 42.25 L 61.699219 42.25 L 69.396484 42.25 L 69.396484 42.285156 L 84 42.349609 C 87.5 42.349609 90.300781 39.45 90.300781 35.75 C 90.300781 32.05 87.400391 29.150391 83.900391 29.150391 L 61.599609 29.25 L 35.828125 0 L 25.027344 0 z " /><text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text6"
+     font-weight="bold"
+     font-size="5px"
+     y="100.75"
+     x="-4.9000001">Created by Björn Andersson</text>
+<text
+     style="font-weight:bold;font-size:5px;font-family:'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif;fill:#000000"
+     id="text8"
+     font-weight="bold"
+     font-size="5px"
+     y="105.75"
+     x="-4.9000001">from the Noun Project</text>
+</svg>
