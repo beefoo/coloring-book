@@ -118,18 +118,17 @@ def getTransformString(w, h, x, y, sx=1, sy=1, r=0):
 def parsePath(d):
     path = parse_path(d)
     commands = []
+    if len(path):
+        commands.append(["M", (path[0].start.real, path[0].start.imag)])
     for p in path:
-        if isinstance(p, Arc):
-            commands.append(["A", (p.start.real, p.start.imag), (p.radius.real, p.radius.imag), (p.rotation.real, p.rotation.imag), (p.arc.real, p.arc.imag), (p.sweep.real, p.sweep.imag), (p.end.real, p.end.imag)])
-
-        elif isinstance(p, CubicBezier):
-            commands.append(["C", (p.start.real, p.start.imag), (p.control1.real, p.control1.imag), (p.control2.real, p.control2.imag), (p.end.real, p.end.imag)])
+        if isinstance(p, CubicBezier):
+            commands.append(["C", (p.control1.real, p.control1.imag), (p.control2.real, p.control2.imag), (p.end.real, p.end.imag)])
 
         elif isinstance(p, Line):
-            commands.append(["L", (p.start.real, p.start.imag), (p.end.real, p.end.imag)])
+            commands.append(["L", (p.end.real, p.end.imag)])
 
         elif isinstance(p, QuadraticBezier):
-            commands.append(["Q", (p.start.real, p.start.imag), (p.control.real, p.control.imag), (p.end.real, p.end.imag)])
+            commands.append(["Q", (p.control.real, p.control.imag), (p.end.real, p.end.imag)])
     if path.closed:
         commands.append(["Z"])
     return commands
@@ -233,3 +232,17 @@ def pointsToCurve(points, curviness=0.3):
                 cp2 = translatePoint(point, a2, cpd)
                 commands.append("S%s,%s %s,%s" % flattenTuples([cp2, point]))
     return commands
+
+def scalePath(d, scale):
+    commands = parsePath(d)
+    path = []
+    for command in commands:
+        points = ["%s,%s" % (round(xy[0]*scale, 3), round(xy[0]*scale, 3)) for xy in command[1:]]
+        path.append(command[0] + " ".join(points))
+    return path
+
+def scalePaths(paths, scale):
+    sPaths = []
+    for path in paths:
+        sPaths.append(scalePath(path, scale))
+    return sPaths

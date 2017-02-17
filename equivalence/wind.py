@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
 
+import inspect
 import math
-from shared import getDataFromSVGs
-from shared import getTransformString
+import os
 import svgwrite
+import sys
+
+# add parent directory to sys path to import relative modules
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+
+import lib.svgutils as svgu
 
 # Config
-PAD = 100
+DPI = 72
+PAD = 0.5 * DPI
+WIDTH = 8.5 * DPI - PAD * 2
+HEIGHT = 11 * DPI - PAD * 2
+HEADER_H = 1.5 * DPI
+COLS = 9
 CARS = ['svg/car01.svg','svg/car02.svg','svg/car03.svg','svg/car04.svg','svg/car05.svg','svg/car06.svg','svg/car07.svg','svg/car08.svg','svg/car09.svg','svg/car10.svg']
 OUTPUT_FILE = 'data/wind.svg'
 GUIDES = False
-
-# Spiral config
-THETA_START = 10.0
-SPIRAL_A = 0 # turns the spiral
-SPIRAL_B = 5 # controls the distance between successive turnings.
-SPIRAL_STEP = 50
 
 # 4.73 metric tons CO2E /vehicle/year
 # https://www.epa.gov/energy/ghg-equivalencies-calculator-calculations-and-references#vehicles
@@ -32,37 +39,26 @@ print "%s vehicles offset." % vehicles
 # (Should be 837)
 
 # retrieve svg data
-carData = getDataFromSVGs(CARS)
+carData = svgu.getDataFromSVGs(CARS)
 carSetCount = len(CARS)
 
-# Add more tree data
+# Do calculations
+rows = int(math.ceil(1.0 * vehicles / COLS))
+carsW = 1.0 * WIDTH
+carsH = 1.0 * HEIGHT - HEADER_H
+cellW = carsW / COLS
+cellH = carsH / rows
+
+# Scale paths
 for i, car in enumerate(carData):
     carData[i]["id"] = "car%s" % i
-    carData[i]["scale"] = 1.0 * SPIRAL_STEP / car["width"] * 1.5
-
-# determine the width of the svg
-maxRadius = 0
-theta = THETA_START
-x = 0
-y = 0
-a = SPIRAL_A
-b = SPIRAL_B
-for i in range(vehicles):
-    r = a + b * theta
-    x = r * math.cos(theta)
-    y = r * math.sin(theta)
-    d = math.hypot(x, y)
-    a = math.acos((2.0 * math.pow(d,2) - math.pow(SPIRAL_STEP,2)) / (2.0 * math.pow(d,2)))
-    theta += a
-    maxRadius = max([maxRadius, abs(x), abs(y)])
-width = int(math.ceil(maxRadius * 2))
-height = width
-print "Width: %s" % width
-cx = width * 0.5
-cy = height * 0.5
+    scale = cellW / car["width"]
+    carData[i]["scale"] = scale
+    carData[i]["strokeW"] = 1.0 / scale
+    # carData[i]["paths"] = svgu.scalePaths(car["paths"], scale)
 
 # init svg
-dwg = svgwrite.Drawing(OUTPUT_FILE, size=(width+PAD*2, height+PAD*2), profile='full')
+dwg = svgwrite.Drawing(OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 dwgCars = dwg.g(id="cars")
 dwgGuide = dwg.g(id="guide")
 
@@ -70,31 +66,28 @@ dwgGuide = dwg.g(id="guide")
 for i, car in enumerate(carData):
     dwgCar = dwg.g(id=car["id"])
     for path in car["paths"]:
-        dwgCar.add(dwg.path(d=path, stroke_width=1, stroke="#000000", fill="#FFFFFF"))
+        dwgCar.add(dwg.path(d=path, stroke_width=car["strokeW"], stroke="#000000", fill="#FFFFFF"))
     dwg.defs.add(dwgCar)
 
-# draw car spiral
-theta = THETA_START
-a = SPIRAL_A
-b = SPIRAL_B
-for i in range(vehicles):
-    r = a + b * theta
-    x = cx + r * math.cos(theta)
-    y = cy + r * math.sin(theta)
-    d = math.hypot(x - cx, y - cy)
-    a = math.acos((2.0 * math.pow(d,2) - math.pow(SPIRAL_STEP,2)) / (2.0 * math.pow(d,2)))
-    theta += a
-    # add car
-    car = carData[i % carSetCount]
-    t = getTransformString(car["width"], car["height"], x-car["width"]*0.5+PAD, y-car["height"]*0.5+PAD, car["scale"], car["scale"])
-    carWrapper = dwg.g(transform=t)
-    carWrapper.add(dwg.use("#"+car["id"]))
-    dwgCars.add(carWrapper)
-    if GUIDES:
-        dwgGuide.add(dwg.circle(center=(x+PAD, y+PAD), r=2, fill="black"))
+y = PAD + HEADER_H
+for row in range(rows):
+    x = PAD
+    for col in range(COLS):
+        i = COLS * row + col
+        if i > vehicles:
+            break
+        # add car
+        car = carData[i % carSetCount]
+        t = "translate(%s, %s) scale(%s)" % (x, y, car["scale"])
+        dwgCar = dwg.g(transform=t)
+        dwgCar.add(dwg.use("#"+car["id"]))
+        dwgCars.add(dwgCar)
+        x += cellW
+    y += cellH
 
 dwg.add(dwgCars)
 if GUIDES:
     dwg.add(dwgGuide)
+
 dwg.save()
 print "Saved svg: %s" % OUTPUT_FILE
