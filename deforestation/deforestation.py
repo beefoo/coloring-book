@@ -28,7 +28,7 @@ PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
 
-# source: http://www.fao.org/3/a-i4793e.pdf
+# source: http://www.fao.org/3/a-i4793e.pdf, pg. 3
 # 1990: million hectares of forest globally
 START_MHA = 4128
 # 2015: million hectares of forest globally
@@ -52,6 +52,8 @@ lossHaPerHour = lossHaPerDay / 24
 lossHaPerMinute = lossHaPerHour / 60
 lossFFPerMinute = int(round(lossHaPerMinute * ffPerHa))
 
+print "Net global forest loss of %s million hectares over %s year period" % (LOSS_MHA, years)
+print "Net global forest loss per year: %s million hectares per year" % lossMhaPerYear
 print "Net global forest loss per minute: %s football fields" % lossFFPerMinute
 
 fieldRatioW = 4.0

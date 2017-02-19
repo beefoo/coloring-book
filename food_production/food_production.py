@@ -168,6 +168,7 @@ if REPORT:
         p = popProjections[year]
         percent = round((1.0 * p / basePopulation - 1.0) * 100, 2)
         print " - Projection %s: %s (+%s%%)" % (year, "{:,}".format(p), percent)
+    sys.exit(1)
 
 # svg config
 LABEL_HEIGHT = 0.25 * DPI
