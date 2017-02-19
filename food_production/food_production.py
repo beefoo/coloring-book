@@ -34,17 +34,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-input', dest="INPUT_FILE", default="data/global_food_production_data.csv", help="Path to input data file")
 parser.add_argument('-popest', dest="POPULATION_ESTIMATES", default="data/population_estimates.csv", help="Path to input population estimates data file")
 parser.add_argument('-popproj', dest="POPULATION_PROJECTIONS", default="data/population_projections.csv", help="Path to input population projections data file")
-parser.add_argument('-width', dest="WIDTH", type=int, default=800, help="Width of output file")
-parser.add_argument('-height', dest="HEIGHT", type=int, default=1100, help="Height of output file")
-parser.add_argument('-pad', dest="PAD", type=int, default=100, help="Padding of output file")
+parser.add_argument('-width', dest="WIDTH", type=int, default=8.5, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=int, default=11.0, help="Height of output file")
+parser.add_argument('-pad', dest="PAD", type=int, default=0.5, help="Padding of output file")
 parser.add_argument('-report', dest="REPORT", type=bool, default=False, help="Output report")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/food_production.svg", help="Path to output svg file")
 
 # init input
 args = parser.parse_args()
-WIDTH = args.WIDTH
-HEIGHT = args.HEIGHT
-PAD = args.PAD
+DPI = 72
+PAD = args.PAD * DPI
+WIDTH = args.WIDTH * DPI - PAD * 2
+HEIGHT = args.HEIGHT * DPI - PAD * 2
 REPORT = args.REPORT
 
 # config
@@ -169,13 +170,14 @@ if REPORT:
         print " - Projection %s: %s (+%s%%)" % (year, "{:,}".format(p), percent)
 
 # svg config
-LABEL_HEIGHT = 40
-LABEL_PAD = 10
+LABEL_HEIGHT = 0.25 * DPI
+YEAR_LABEL_HEIGHT = 0.5 * DPI
+LABEL_PAD = 0.1 * DPI
 yearLabels = PROJECTIONS[:]
 yearLabelW = 1.0 * WIDTH / len(yearLabels)
-dataHeight = (HEIGHT - LABEL_HEIGHT) * 0.5
-dataWidth = 0.96 * yearLabelW
-arrowHeight = 50
+dataHeight = (HEIGHT - YEAR_LABEL_HEIGHT - LABEL_HEIGHT * 2 - LABEL_PAD * 2) * 0.5
+dataWidth = 0.833 * yearLabelW
+arrowHeight = 0.4 * DPI
 arrowWidth = yearLabelW
 xOffset = 0.5 * (arrowWidth - dataWidth)
 yOffset = arrowHeight
@@ -187,8 +189,8 @@ dwgLabels = dwg.g(id="labels")
 dwgData = dwg.g(id="data")
 
 # define people pattern
-personH = 80
-patternSpace = 12
+personH = 40
+patternSpace = 3
 svgMan = svgu.getDataFromSVG("svg/man.svg")
 svgWoman = svgu.getDataFromSVG("svg/woman.svg")
 manScale = 1.0 * personH / svgMan["height"]
@@ -200,12 +202,12 @@ patternW = personW * 2 + patternSpace * 2
 patternH = personH + patternSpace
 personPatternDef = dwg.pattern(id="people", patternUnits="userSpaceOnUse", size=(patternW, patternH), patternTransform="rotate(45)")
 for path in svgMan["paths"]:
-    strokeWidth = 1.0 / manScale
+    strokeWidth = 1.0
     hw = svgMan["width"] * 0.5
     hh = svgMan["height"] * 0.5
     personPatternDef.add(dwg.path(d=path, transform="scale(%s) rotate(180,%s,%s)" % (manScale, hw, hh), stroke_width=strokeWidth, stroke="#000000", fill="none"))
 for path in svgWoman["paths"]:
-    strokeWidth = 1.0 / womanScale
+    strokeWidth = 1.0
     x = personW + patternSpace
     y = personH * 0.5 + patternSpace * 0.5
     personPatternDef.add(dwg.path(d=path, transform="translate(%s, %s) scale(%s)" % (x, y, womanScale), stroke_width=strokeWidth, stroke="#000000", fill="none"))
@@ -214,16 +216,16 @@ for path in svgWoman["paths"]:
 dwg.defs.add(personPatternDef)
 
 # define corn pattern
-cornH = 80
-patternSpace = 8
-svgCorn = svgu.getDataFromSVG("svg/corn_01.svg")
+cornH = 40
+patternSpace = 3
+svgCorn = svgu.getDataFromSVG("svg/corn_02.svg")
 scale = 1.0 * personH / svgCorn["height"]
 cornW = svgCorn["width"] * scale
 patternW = cornW * 2 + patternSpace * 2
 patternH = cornH + patternSpace
 cornPatternDef = dwg.pattern(id="corn", patternUnits="userSpaceOnUse", size=(patternW, patternH), patternTransform="rotate(135)")
 for path in svgCorn["paths"]:
-    strokeWidth = 1.0 / scale
+    strokeWidth = 1.2
     hw = svgCorn["width"] * 0.5
     hh = svgCorn["height"] * 0.5
     # t = svgu.getTransformString(w, h, x, y, sx=1, sy=1, r=0)
@@ -237,7 +239,8 @@ dwg.defs.add(cornPatternDef)
 
 # draw year labels
 x = PAD + yearLabelW * 0.5
-y = 0.5 * (HEIGHT+PAD*2)
+cy = 0.5 * (HEIGHT+PAD*2)
+y = cy
 for label in yearLabels:
     dwgLabels.add(dwg.text(label, insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=20))
     x += yearLabelW
@@ -249,7 +252,7 @@ for year in yearLabels:
     delta = popProjections[year]-basePopulation
     ph = 1.0 * delta / maxDelta
     h = ph * dataHeight
-    y = dataHeight - h + PAD
+    y = dataHeight - h + PAD + LABEL_HEIGHT + LABEL_PAD
     label = int(round(delta / 1000000.0))
     if label >= 1000:
         label = round(delta / 1000000000.0, 1)
@@ -267,7 +270,7 @@ for year in yearLabels:
     # p7 = (x+dataWidth+xOffset, y+yOffset)
     arrow = [p1, p3, p4, p5, p6]
 
-    dwgData.add(dwg.polygon(points=arrow, stroke_width=2, stroke="#000000", fill="url(#people)"))
+    dwgData.add(dwg.polygon(points=arrow, stroke="#000000", stroke_width=2, fill="url(#people)"))
     dwgLabels.add(dwg.text(label, insert=(x+dataWidth*0.5, y-LABEL_PAD), text_anchor="middle", alignment_baseline="after-edge", font_size=20))
     x += yearLabelW
 
@@ -277,7 +280,7 @@ baseTotal = food["value"]
 foodProjections = food["projections"]
 maxDelta = max([baseTotal-p["value"] for p in foodProjections])
 x = PAD + (yearLabelW-dataWidth) * 0.5
-y = PAD + dataHeight + LABEL_HEIGHT
+y = PAD + dataHeight + LABEL_HEIGHT + YEAR_LABEL_HEIGHT + LABEL_PAD
 for year in yearLabels:
     value = sum([p["value"] for p in foodProjections if p["group"]==year])
     delta = baseTotal - value
@@ -296,7 +299,7 @@ for year in yearLabels:
     # p7 = (x+dataWidth+xOffset, y+h-yOffset)
     arrow = [p1, p3, p4, p5, p6]
 
-    dwgData.add(dwg.polygon(points=arrow, stroke_width=2, stroke="#000000", fill="url(#corn)"))
+    dwgData.add(dwg.polygon(points=arrow, stroke="#000000", stroke_width=2, fill="url(#corn)"))
     dwgLabels.add(dwg.text(label, insert=(x+dataWidth*0.5, y+h+LABEL_PAD), text_anchor="middle", alignment_baseline="before-edge", font_size=20))
     x += yearLabelW
 
@@ -304,5 +307,7 @@ for year in yearLabels:
 dwg.add(dwgAxis)
 dwg.add(dwgData)
 dwg.add(dwgLabels)
+dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
+
 dwg.save()
 print "Saved svg: %s" % args.OUTPUT_FILE
