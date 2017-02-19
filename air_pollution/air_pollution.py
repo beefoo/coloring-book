@@ -46,6 +46,7 @@ ROW_PAD = args.ROW_PAD
 
 # Config Air Quality Index
 # https://www.airnow.gov/index.cfm?action=aqibasics.aqi
+# http://ec.europa.eu/environment/integration/research/newsalert/pdf/24si_en.pdf
 AQI = [
     {"max": 50, "label": "Good", "color": "Green", "meaning": "Air quality is considered satisfactory, and air pollution poses little or no risk."},
     {"max": 100, "label": "Moderate", "color": "Yellow", "meaning": "Air quality is acceptable; however, for some pollutants there may be a moderate health concern for a very small number of people who are unusually sensitive to air pollution."},
