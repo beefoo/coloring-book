@@ -19,4 +19,4 @@ On the right, there are 365 circles to represent each day in 2015 for Beijing, a
 ## References
 
 [1] Air Quality Index. US Environmental Protection Agency. www.airnow.gov.
-[2] U.S Embassy Beijing Air Quality Monitor, U.S. Department of State. Beijing Historical Data 2015. www.stateair.net.
+[2] U.S Embassy Beijing Air Quality Monitor, U.S. Department of State. Beijing Historical Data 2015. www.stateair.net/web/historical/1/1.html.

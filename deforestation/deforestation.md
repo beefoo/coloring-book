@@ -10,4 +10,4 @@ How fast can you color 20 football fields? Take out a stopwatch or timer and set
 
 ## References
 
-[1] Global Forest Resources Assessment 2015. Food and Agriculture Organization of the United Nations (FAO). www.fao.org/3/a-i4793e.pdf
+[1] Global Forest Resources Assessment 2015. Food and Agriculture Organization of the United Nations (FAO). www.fao.org/3/a-i4793e.pdf.

@@ -6,4 +6,4 @@ The following three pages compare the carbon emissions from fossil fuels in the 
 
 ## References
 
-[1] Global Fossil-Fuel CO2 Emissions. Carbon Dioxide Information Analysis Center (CDIAC), Oak Ridge National Laboratory (ORNL), U.S. Department of Energy (DOE). cdiac.ornl.gov/trends/emis/tre_glob_2013.html
+[1] Global Fossil-Fuel CO2 Emissions. Carbon Dioxide Information Analysis Center (CDIAC), Oak Ridge National Laboratory (ORNL), U.S. Department of Energy (DOE). cdiac.ornl.gov/trends/emis/tre_glob_2013.html.
