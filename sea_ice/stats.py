@@ -30,7 +30,8 @@ PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
 
-print "The total change between 1996 and 2016 is %s million square kilometers" % (7.9-4.7)
+# Source: https://climate.nasa.gov/vital-signs/arctic-sea-ice/
+print "The total change between 1996 and 2016 is %s million square kilometers" % (7.87-4.72)
 print "India's land mass is 3.3 (2.9 land) million square kilometers"
 
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
