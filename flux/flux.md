@@ -13,6 +13,6 @@ The map below uses data provided by the National Oceanic and Atmospheric Adminis
 | 5      | Brown   | 500 to 1000                         |
 | 6      | Black   | Over 1000                           |
 
-## References
+## Sources
 
 [1] CarbonTracker CT2016. National Oceanic and Atmospheric Administration (NOAA), Earth System Research Laboratory, Global Monitoring Division. www.esrl.noaa.gov/gmd/ccgg/carbontracker/fluxes.php.

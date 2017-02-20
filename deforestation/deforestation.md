@@ -8,6 +8,6 @@ This is equivalent to losing 20 football fields worth of forest every minute for
 
 How fast can you color 20 football fields? Take out a stopwatch or timer and set it to one minute. See if you can color the 20 football fields on the right faster than we are losing global forests.
 
-## References
+## Sources
 
 [1] Global Forest Resources Assessment 2015. Food and Agriculture Organization of the United Nations (FAO). www.fao.org/3/a-i4793e.pdf.
