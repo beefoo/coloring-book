@@ -46,6 +46,7 @@ parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Heig
 parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/ocean.svg", help="Path to output svg file")
 parser.add_argument('-guides', dest="GUIDES", type=bool, default=False, help="Show guides")
+parser.add_argument('-report', dest="REPORT", type=bool, default=False, help="Print report")
 
 # init input
 args = parser.parse_args()
@@ -71,7 +72,7 @@ DATA_CURVE_WIDTH = 3
 
 # config
 SLR_KEY_PRIORITY = ["Jason-2", "Jason-1", "TOPEX/Poseidon", "GMSL (mm)"]
-COLORS = ["G", "Y", "O", "R", "V"]
+COLORS = ["B", "G", "Y", "O", "R", "V"]
 AXIS_ROUND_TO_NEAREST = 10
 colorCount = len(COLORS)
 
@@ -114,21 +115,22 @@ def readCSV(filename):
 
 rawTaData = readCSV(args.TA_FILE)
 rawSlrData = readCSV(args.SLR_FILE)
-rawSlrhData = readCSV(args.SLRH_FILE)
 
-# pprint(rawTaData[0])
-# pprint(rawSlrData[0])
-# pprint(rawSlrhData[0])
+# use pre-1993 data if configured as such
+if YEAR_START < 1993:
+    rawSlrhData = readCSV(args.SLRH_FILE)
 
-# normalize date key
-for i, d in enumerate(rawSlrhData):
-    rawSlrhData[i]["year"] = d["Time"]
+    # normalize date key
+    for i, d in enumerate(rawSlrhData):
+        rawSlrhData[i]["year"] = d["Time"]
 
-# remove any data in non-satellite data after 1993 since more accurate data exists
-rawSlrhData = [d for d in rawSlrhData if d["year"] < 1993]
+    # remove any data in non-satellite data after 1993 since more accurate data exists
+    rawSlrhData = [d for d in rawSlrhData if d["year"] < 1993]
 
-# combine slr data
-rawSlrDataCombined = rawSlrData + rawSlrhData
+    # combine slr data
+    rawSlrDataCombined = rawSlrData + rawSlrhData
+else:
+    rawSlrDataCombined = rawSlrData + []
 
 # do some normalization
 for i, d in enumerate(rawSlrDataCombined):
@@ -174,17 +176,38 @@ while year <= YEAR_END:
         "taRange": (min(taValues), max(taValues))
     })
     year += YEAR_INCR
+plotData = sorted(plotData, key=lambda p: p["year"])
+
+# determine what value should be "zero" on the y-axis (SLR) -> mean of first year
+slrZeroValue = mu.mean([m["slr"] for m in plotData[0]["months"]])
+# normalize slr values to zero value
+for i,p in enumerate(plotData):
+    for j,m in enumerate(p["months"]):
+        plotData[i]["months"][j]["slr"] = m["slr"] - slrZeroValue
+    slrr = p["slrRange"]
+    plotData[i]["slrRange"] = (slrr[0]-slrZeroValue, slrr[1]-slrZeroValue)
 
 # get data ranges
 minValue = min([d["slrRange"][0] for d in plotData])
 maxValue = max([d["slrRange"][1] for d in plotData])
 print "SLR data range: [%s, %s]" % (minValue, maxValue)
 axisMin = int(mu.floorToNearest(minValue, AXIS_ROUND_TO_NEAREST))
-axisMax = int(mu.ceilToNearest(maxValue, AXIS_ROUND_TO_NEAREST))
+axisMax = int(mu.roundToNearest(maxValue, AXIS_ROUND_TO_NEAREST))
 print "SLR axis range: [%s, %s]" % (axisMin, axisMax)
 taMin = min([d["taRange"][0] for d in plotData])
 taMax = max([d["taRange"][1] for d in plotData])
-print "TA data range: [%s, %s]" % (taMin, taMax)
+print "TA data range (°C): [%s, %s]" % (taMin, taMax)
+
+if args.REPORT:
+    tafMin = taMin * 1.8
+    tafMax = taMax * 1.8
+    taStep = tafMax / colorCount
+    print "TA data range (°F): [%s, %s]" % (tafMin, tafMax)
+    vf = 0
+    for i,c in enumerate(COLORS):
+        print "%s: %s to %s°F" % (c, vf, vf+taStep)
+        vf += taStep
+    sys.exit(1)
 
 # init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
@@ -269,7 +292,7 @@ for yi, d in enumerate(plotData):
             dwgData.add(dwg.line(start=(x, y0-6), end=(x, y1+6), stroke_width=1, stroke="#000000", stroke_dasharray="3,1"))
 
         # draw color label
-        pt = mu.norm(dm["ta"], taMin, taMax)
+        pt = mu.norm(dm["ta"], 0, taMax)
         ci = min(int(pt * colorCount), colorCount-1)
         color = COLORS[ci]
         y1 = intersectionsC[month][1]
@@ -291,12 +314,11 @@ p1 = prevPoints[-1]
 offset = DATA_CURVE_WIDTH * 0.5
 dwgAxis.add(dwg.polyline(points=[(p0[0], p0[1]-offset), (CHART_OFFSET_X, y), (CHART_OFFSET_X+CHART_WIDTH, y), (p1[0], p1[1]-offset)], stroke_width=2, stroke="#000000", fill="none"))
 
-dwgGuides.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
-
 # save svg
 dwg.add(dwgAxis)
 dwg.add(dwgData)
 dwg.add(dwgLabels)
+dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 if GUIDES:
     dwg.add(dwgGuides)
 dwg.save()
