@@ -1,6 +1,6 @@
-Name,Year,Fatalities,Missing,Ref,Ref URL
-Typhoon Haiyan,2013,6300,1061,"Effects of Typhoon ""Yolanda"" (Haiyan) (Report). The Philippine National Disaster Risk Reduction and Management Council.",http://ndrrmc.gov.ph/attachments/article/1329/FINAL_REPORT_re_Effects_of_Typhoon_YOLANDA_%28HAIYAN%29_06-09NOV2013.pdf
-Typhoon Fengshen,2008,1392,87,International Federation of Red Cross and Red Crescent Societies ,http://www.ifrc.org/docs/appeals/08/MDRPH00404.pdf
-Typhoon Bopha,2012,1146,834,OCHA,http://reliefweb.int/sites/reliefweb.int/files/resources/OCHA%20Philippines%20TyphoonBopha%20Situation%20Report%20No.19%2013February2013.pdf
-Typhoon Durian,2006,720,762,"OCD Regional Centers, LGUs, DOTC, DPWH, DSWD, DOH-HEMS, DFA, BFP, PDCC Catanduanes",http://reliefweb.int/sites/reliefweb.int/files/resources/0C6B2DAA83185D7DC12572D70020BD46-Full_Report.pdf
-Tropical Storm Washi,2011,1268,181,NDRRMC,http://www.ndrrmc.gov.ph/attachments/article/1347/Final_Report_on_the_Effects_and_Emergency_Management_re_Tropical_Storm_SENDONG_(WASHI)_Status_of_Early_Recovery_Programs_in_Region_X_issued_10FEB2014.pdf
+Name,Year,Fatalities,Missing,Combined,Ref,Ref URL
+Typhoon Haiyan,2013,6300,1061,7361,"Effects of Typhoon ""Yolanda"" (Haiyan) (Report). The Philippine National Disaster Risk Reduction and Management Council.",http://ndrrmc.gov.ph/attachments/article/1329/FINAL_REPORT_re_Effects_of_Typhoon_YOLANDA_%28HAIYAN%29_06-09NOV2013.pdf
+Typhoon Fengshen,2008,1392,87,1479,International Federation of Red Cross and Red Crescent Societies ,http://www.ifrc.org/docs/appeals/08/MDRPH00404.pdf
+Typhoon Bopha,2012,1146,834,1980,OCHA,http://reliefweb.int/sites/reliefweb.int/files/resources/OCHA%20Philippines%20TyphoonBopha%20Situation%20Report%20No.19%2013February2013.pdf
+Typhoon Durian,2006,720,762,1482,"OCD Regional Centers, LGUs, DOTC, DPWH, DSWD, DOH-HEMS, DFA, BFP, PDCC Catanduanes",http://reliefweb.int/sites/reliefweb.int/files/resources/0C6B2DAA83185D7DC12572D70020BD46-Full_Report.pdf
+Tropical Storm Washi,2011,1268,181,1449,NDRRMC,http://www.ndrrmc.gov.ph/attachments/article/1347/Final_Report_on_the_Effects_and_Emergency_Management_re_Tropical_Storm_SENDONG_(WASHI)_Status_of_Early_Recovery_Programs_in_Region_X_issued_10FEB2014.pdf

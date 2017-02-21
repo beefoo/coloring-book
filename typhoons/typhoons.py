@@ -69,26 +69,23 @@ def readCSV(filename):
     return rows
 
 data = readCSV(args.INPUT_FILE)
-data = sorted(data, key=lambda k: -k["Fatalities"])
+data = sorted(data, key=lambda k: -k["Combined"])
 
 # Normalize data
-maxValue = 1.0 * data[0]["Fatalities"]
+maxValue = 1.0 * data[0]["Combined"]
 height = 0
 for i, d in enumerate(data):
-    fatalitiesN = d["Fatalities"] / maxValue
-    missingN = d["Missing"] / maxValue
-    fatalitiesArea = MAX_AREA * fatalitiesN
-    missingArea = MAX_AREA * missingN
-    fatalitiesR = math.sqrt(fatalitiesArea / math.pi)
-    missingR = math.sqrt(missingArea / math.pi)
-    if abs(fatalitiesR-missingR) < MIN_R_DIFF:
-        if fatalitiesR > missingR:
-            fatalitiesR = missingR + MIN_R_DIFF
-        else:
-            missingR = fatalitiesR + MIN_R_DIFF
-    data[i]["fatalitiesR"] = fatalitiesR
-    data[i]["missingR"] = missingR
-    w = max(fatalitiesR * 2, missingR * 2)
+    # outer circle
+    percent = d["Combined"] / maxValue
+    area = MAX_AREA * percent
+    outerRadius = math.sqrt(area / math.pi)
+    data[i]["outerRadius"] = outerRadius
+    # inner circle
+    percent = d["Missing"] / maxValue
+    area = MAX_AREA * percent
+    innerRadius = math.sqrt(area / math.pi)
+    data[i]["innerRadius"] = innerRadius
+    w = outerRadius * 2
     data[i]["xOffset"] = (WIDTH - w) * 0.5
     height += w
 
@@ -105,31 +102,30 @@ x = PAD
 y = PAD
 data = sorted(data, key=lambda k: k["Year"])
 for i, d in enumerate(data):
-    maxR = max(d["fatalitiesR"], d["missingR"])
+    outerR = d["outerRadius"]
+    innerR = d["innerRadius"]
     dx = d["xOffset"]
     dy = offsetY
-    center = (x+dx+maxR, y+maxR+dy)
+    center = (x+dx+outerR, y+dy+outerR)
     # draw circles
-    fr = d["fatalitiesR"]
-    dwgCircles.add(dwg.circle(center=center, r=fr, stroke="#000000", stroke_width=2, fill="none"))
-    mr = d["missingR"]
-    dwgCircles.add(dwg.circle(center=center, r=mr, stroke="#000000", stroke_width=2, fill="none", stroke_dasharray="5,2"))
-    # draw label lines
-    dr = maxR - fr
-    pf0 = mu.translatePoint(center, math.radians(ANGLE1), fr)
-    pm0 = mu.translatePoint(center, math.radians(ANGLE2), mr)
-    px = max(pf0[0] + LINE_W, pm0[0] + LINE_W)
-    pf1 = (px, pf0[1])
-    pm1 = (px, pm0[1])
-    dwgLines.add(dwg.line(start=pf0, end=pf1, stroke="#000000", stroke_width=1))
-    dwgLines.add(dwg.line(start=pm0, end=pm1, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
-    # draw labels
-    dwgLabels.add(dwg.text("%s dead" % "{:,}".format(d["Fatalities"]), insert=(pf1[0]+2, pf1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
-    dwgLabels.add(dwg.text("%s missing" % "{:,}".format(d["Missing"]), insert=(pm1[0]+2, pm1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
+    dwgCircles.add(dwg.circle(center=center, r=outerR, stroke="#000000", stroke_width=2, fill="none"))
+    dwgCircles.add(dwg.circle(center=center, r=innerR, stroke="#000000", stroke_width=2, fill="none", stroke_dasharray="5,2"))
+    # # draw label lines
+    # dr = maxR - fr
+    # pf0 = mu.translatePoint(center, math.radians(ANGLE1), fr)
+    # pm0 = mu.translatePoint(center, math.radians(ANGLE2), mr)
+    # px = max(pf0[0] + LINE_W, pm0[0] + LINE_W)
+    # pf1 = (px, pf0[1])
+    # pm1 = (px, pm0[1])
+    # dwgLines.add(dwg.line(start=pf0, end=pf1, stroke="#000000", stroke_width=1))
+    # dwgLines.add(dwg.line(start=pm0, end=pm1, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
+    # # draw labels
+    # dwgLabels.add(dwg.text("%s dead" % "{:,}".format(d["Fatalities"]), insert=(pf1[0]+2, pf1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
+    # dwgLabels.add(dwg.text("%s missing" % "{:,}".format(d["Missing"]), insert=(pm1[0]+2, pm1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
     # name of typhoon
-    dwgLabels.add(dwg.text(d["Name"], insert=(center[0]-maxR-8, center[1]-8), text_anchor="end", alignment_baseline="middle", font_size=12))
-    dwgLabels.add(dwg.text(str(d["Year"]), insert=(center[0]-maxR-8, center[1]+8), text_anchor="end", alignment_baseline="middle", font_size=12))
-    y += maxR * 2 + MARGIN
+    dwgLabels.add(dwg.text(d["Name"], insert=(center[0]-outerR-8, center[1]-8), text_anchor="end", alignment_baseline="middle", font_size=12))
+    dwgLabels.add(dwg.text(str(d["Year"]), insert=(center[0]-outerR-8, center[1]+8), text_anchor="end", alignment_baseline="middle", font_size=12))
+    y += outerR * 2 + MARGIN
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 
