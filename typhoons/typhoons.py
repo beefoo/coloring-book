@@ -37,7 +37,7 @@ UNITS = [
     {"label": "1,000", "value": 1000}
 ]
 BASE_UNIT = UNITS[0]
-MAX_RADIUS = 0.325 * WIDTH
+MAX_RADIUS = 0.275 * WIDTH
 MAX_AREA = math.pi * math.pow(MAX_RADIUS, 2)
 ANGLE1 = -10
 ANGLE2 = 10
