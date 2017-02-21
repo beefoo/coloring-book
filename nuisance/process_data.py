@@ -76,6 +76,9 @@ for stationId in STATIONS:
             if len(value):
                 value = float(value)
                 years[year]["data"].append(value)
+            elif len(d["Linear_Trend"]):
+                value = float(d["Linear_Trend"])
+                years[year]["data"].append(value)
             # else:
             #     print "Warning: %s at %s-%s has no slr value" % (stationId, year, d["Month"])
     for year in years:
