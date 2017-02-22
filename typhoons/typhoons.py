@@ -31,18 +31,12 @@ PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
 
-UNITS = [
-    {"label": "100", "value": 100},
-    {"label": "500", "value": 500},
-    {"label": "1,000", "value": 1000}
-]
-BASE_UNIT = UNITS[0]
 MAX_RADIUS = 0.275 * WIDTH
 MAX_AREA = math.pi * math.pow(MAX_RADIUS, 2)
-ANGLE1 = -10
-ANGLE2 = 10
-LINE_W = 0.3 * DPI
-MIN_R_DIFF = 4
+LABEL_MARGIN = 0.333 * DPI
+LABEL_MARGIN_RIGHT = 0.25 * DPI
+MIN_Y_MARGIN = 0.45 * DPI
+cx = PAD + WIDTH * 0.533
 
 def parseNumber(string):
     try:
@@ -73,59 +67,96 @@ data = sorted(data, key=lambda k: -k["Combined"])
 
 # Normalize data
 maxValue = 1.0 * data[0]["Combined"]
-height = 0
 for i, d in enumerate(data):
-    # outer circle
     percent = d["Combined"] / maxValue
     area = MAX_AREA * percent
-    outerRadius = math.sqrt(area / math.pi)
-    data[i]["outerRadius"] = outerRadius
-    # inner circle
-    percent = d["Missing"] / maxValue
-    area = MAX_AREA * percent
-    innerRadius = math.sqrt(area / math.pi)
-    data[i]["innerRadius"] = innerRadius
-    w = outerRadius * 2
-    data[i]["xOffset"] = (WIDTH - w) * 0.5
-    height += w
+    radius = math.sqrt(area / math.pi)
+    data[i]["radius"] = radius
+    add = ""
+    if len(d["PhilName"]):
+        add = " ("+d["PhilName"]+")"
+    # data[i]["label"] = d["Type"] + " " + d["Name"] + add
+    data[i]["label"] = d["Name"] + add
 
-offsetY = 0
-MARGIN = 1.0 * (HEIGHT - height) / (len(data)-1)
+# labels should be right aligned to largest circle
+labelX0 = cx - data[0]["radius"] - LABEL_MARGIN
+labelX1 = cx + data[0]["radius"] + LABEL_MARGIN_RIGHT
+
+# sort by year
+data = sorted(data, key=lambda k: k["Year"])
+startYear = data[0]["Year"]
+endYear = data[-1]["Year"]
+totalYears = endYear - startYear
+yStart = PAD + data[0]["radius"]
+yEnd = PAD + HEIGHT - data[-1]["radius"]
+timelineH = yEnd - yStart
+yearH = 1.0 * timelineH / totalYears
 
 # Init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
-dwgCircles = dwg.add(dwg.g(id="circles"))
 dwgLines = dwg.add(dwg.g(id="lines"))
+dwgCircles = dwg.add(dwg.g(id="circles"))
 dwgLabels = dwg.add(dwg.g(id="labels"))
 
-x = PAD
-y = PAD
-data = sorted(data, key=lambda k: k["Year"])
+# Draw timeline
+dwgLines.add(dwg.line(start=(cx, yStart), end=(cx, yEnd), stroke="#000000", stroke_width=1))
+
+# Draw data
+prevLY = MIN_Y_MARGIN * -1
 for i, d in enumerate(data):
-    outerR = d["outerRadius"]
-    innerR = d["innerRadius"]
-    dx = d["xOffset"]
-    dy = offsetY
-    center = (x+dx+outerR, y+dy+outerR)
-    # draw circles
-    dwgCircles.add(dwg.circle(center=center, r=outerR, stroke="#000000", stroke_width=2, fill="none"))
-    dwgCircles.add(dwg.circle(center=center, r=innerR, stroke="#000000", stroke_width=2, fill="none", stroke_dasharray="5,2"))
-    # # draw label lines
-    # dr = maxR - fr
-    # pf0 = mu.translatePoint(center, math.radians(ANGLE1), fr)
-    # pm0 = mu.translatePoint(center, math.radians(ANGLE2), mr)
-    # px = max(pf0[0] + LINE_W, pm0[0] + LINE_W)
-    # pf1 = (px, pf0[1])
-    # pm1 = (px, pm0[1])
-    # dwgLines.add(dwg.line(start=pf0, end=pf1, stroke="#000000", stroke_width=1))
-    # dwgLines.add(dwg.line(start=pm0, end=pm1, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
-    # # draw labels
-    # dwgLabels.add(dwg.text("%s dead" % "{:,}".format(d["Fatalities"]), insert=(pf1[0]+2, pf1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
-    # dwgLabels.add(dwg.text("%s missing" % "{:,}".format(d["Missing"]), insert=(pm1[0]+2, pm1[1]), text_anchor="start", alignment_baseline="middle", font_size=12))
+    radius = d["radius"]
+    py = mu.norm(d["Year"], startYear, endYear)
+    cy = mu.lerp(yStart, yEnd, py)
+    center = (cx, cy)
+    # draw circle
+    dwgCircles.add(dwg.circle(center=center, r=3, fill="#000000"))
+    dwgCircles.add(dwg.circle(center=center, r=radius, stroke="#000000", stroke_width=2, fill="none"))
+
     # name of typhoon
-    dwgLabels.add(dwg.text(d["Name"], insert=(center[0]-outerR-8, center[1]-8), text_anchor="end", alignment_baseline="middle", font_size=12))
-    dwgLabels.add(dwg.text(str(d["Year"]), insert=(center[0]-outerR-8, center[1]+8), text_anchor="end", alignment_baseline="middle", font_size=12))
-    y += outerR * 2 + MARGIN
+    lx = labelX0
+    ly = cy
+    if ly < prevLY + MIN_Y_MARGIN:
+        ly = prevLY + MIN_Y_MARGIN
+    lPad = 6
+    labelString = d["label"]
+    if i <= 0:
+        labelString = d["Type"] + " " + labelString
+    dwgLabels.add(dwg.text(labelString, insert=(lx, ly-lPad), text_anchor="end", alignment_baseline="middle", font_size=12))
+    dwgLabels.add(dwg.text(str(d["Year"]), insert=(lx, ly+lPad), text_anchor="end", alignment_baseline="middle", font_size=12))
+
+    # draw label line
+    p1 = (lx + lPad, ly)
+    p2 = (cx, cy)
+    dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
+
+    # dead or missing
+    if i <=0 or i >= len(data)-1:
+        lx = labelX1
+        labelString = "{:,}".format(d["Combined"])
+        dwgLabels.add(dwg.text(labelString, insert=(lx, cy-lPad), text_anchor="start", alignment_baseline="middle", font_size=12))
+        dwgLabels.add(dwg.text("dead or missing", insert=(lx, cy+lPad), text_anchor="start", alignment_baseline="middle", font_size=12))
+
+        # draw label line
+        p1 = (lx - lPad, cy)
+        p2 = (cx + radius, cy)
+        dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
+
+    prevLY = ly
+
+def getGuideRadius(amt):
+    p = 1.0 * amt / maxValue
+    area = MAX_AREA * p
+    return math.sqrt(area / math.pi)
+
+# make a circle for scale
+gx = 0.2 * WIDTH + PAD
+gy = 0.25 * HEIGHT + PAD
+# dwgGuide = dwg.add(dwg.g(id="guide"))
+# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(100), stroke="#000000", stroke_width=2, fill="none"))
+# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(500), stroke="#000000", stroke_width=2, fill="none"))
+# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(1000), stroke="#000000", stroke_width=2, fill="none"))
+# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(2500), stroke="#000000", stroke_width=2, fill="none"))
+# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(5000), stroke="#000000", stroke_width=2, fill="none"))
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 
