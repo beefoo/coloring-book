@@ -28,12 +28,13 @@ WH_PER_BTU = 1.0 / BTU_PER_WH
 # http://www.eia.gov/totalenergy/data/annual/
 totalEnergyConsumption = 0
 YYYYMM = "201513"
+MSN = "TETCBUS"
 filename = "data/energy_consumption.csv"
 with open(filename, 'rb') as f:
     r = csv.reader(f, delimiter=',')
     next(r, None)
     for _MSN, _YYYYMM, _Value, _Column_Order, _Description, _Unit in r:
-        if _YYYYMM == YYYYMM:
+        if _YYYYMM == YYYYMM and _MSN == MSN:
             # Given in Quadrillion Btu / convert to Trillion Btu
             totalEnergyConsumption = float(_Value) * 1000
             break
@@ -42,58 +43,35 @@ if totalEnergyConsumption <= 0:
     sys.exit(1)
 print "Total energy consumption: %s" % totalEnergyConsumption
 
-# Wind production / U.S. / 2015 / Terawatt Hours:
-# https://www.eia.gov/renewable/data.cfm#wind
-windProduction = 0
-year = "2015"
-filename = "data/energy_production_wind.csv"
-with open(filename, 'rb') as f:
-    for skip in range(5):
-        next(f, None)
-    r = csv.reader(f, delimiter=',')
-    for _Year, _All, _Iowa, _Texas in r:
-        if year == _Year:
-            # Given in Gigawatt hours; convert to Tera
-            windProduction = float(_All) / 1000.0
-            break
-if windProduction <= 0:
-    print "Wind production not found."
-    sys.exit(1)
-print "Total wind production: %s (%s:1)" % (windProduction, int(round(totalEnergyConsumption/windProduction)))
-
-# Solar production / U.S. / 2015 / Terawatt Hours:
-# https://www.eia.gov/renewable/data.cfm#summary
-solarProduction = 0
+# Renewable energy production / U.S. / 2015 / Trillion Btu:
+# http://www.eia.gov/totalenergy/data/annual/
+totalREProduction = 0
 YYYYMM = "201513"
-filename = "data/energy_production_solar.csv"
+MSN = "REPRBUS"
 with open(filename, 'rb') as f:
     r = csv.reader(f, delimiter=',')
     next(r, None)
     for _MSN, _YYYYMM, _Value, _Column_Order, _Description, _Unit in r:
-        if YYYYMM == _YYYYMM:
-            # Given in Gigawatt hours; convert to Tera
-            solarProduction = float(_Value) / 1000.0
+        if _YYYYMM == YYYYMM and _MSN == MSN:
+            # Given in Quadrillion Btu / convert to Trillion Btu
+            totalREProduction = float(_Value) * 1000
             break
-if solarProduction <= 0:
-    print "Solar production not found."
+if totalREProduction <= 0:
+    print "RE production not found."
     sys.exit(1)
-print "Total solar production: %s (%s:1)" % (solarProduction, int(round(totalEnergyConsumption/solarProduction)))
+print "Total RE production: %s (%s%%)" % (totalREProduction, round(1.0*totalREProduction/totalEnergyConsumption*100, 2))
 
 # Wind/solar potential / U.S. / 2012 / Terawatt Hours:
 # http://www.nrel.gov/gis/re_potential.html
-windPotential = 0
-solarPotential = 0
+rePotential = 0
 filename = "data/re_technical_potential_summary.csv"
 dp = {}
 with open(filename, 'rb') as f:
     r = csv.reader(f, delimiter=',')
     next(r, None)
     for _Technology, _Generation_Potential_Twh, _Capacity_Potential_GW in r:
-        dp[_Technology] = float(_Generation_Potential_Twh)
-windPotential = dp["Onshore wind power"] + dp["Offshore wind power"]
-solarPotential = dp["Urban utility-scale PV"] + dp["Rural utility-scale PV"] + dp["Rooftop PV"] + dp["Concentrating solar power"]
-print "Wind technical potential: %s (%s:1)" % (windPotential,  round(totalEnergyConsumption/windPotential, 1))
-print "Solar technical potential: %s (1:%s)" % (solarPotential,  round(solarPotential/totalEnergyConsumption, 1))
+        rePotential += float(_Generation_Potential_Twh)
+print "RE potential: %s (%s%%)" % (rePotential,  round(1.0*rePotential/totalEnergyConsumption*100, 1))
 
 def writeSvg(filename, data):
     # sort data
@@ -114,13 +92,14 @@ def writeSvg(filename, data):
     honeycombPattern.add(dwg.path(d="M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100", fill="none", stroke="#000000", stroke_width=stroke))
     honeycombPattern.add(dwg.path(d="M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34", fill="none", stroke="#000000", stroke_width=stroke))
     dwg.defs.add(honeycombPattern)
-    circlesPattern = dwg.pattern(id="circles", patternUnits="userSpaceOnUse", size=(6,6))
-    circlesPattern.add(dwg.rect(insert=(0,0), size=(6,6), fill="#FFFFFF"))
-    circlesPattern.add(dwg.circle(center=(3,3), r=1, fill="#000000"))
+    circleSize = 12
+    circlesPattern = dwg.pattern(id="circles", patternUnits="userSpaceOnUse", size=(circleSize,circleSize))
+    circlesPattern.add(dwg.rect(insert=(0,0), size=(circleSize,circleSize), fill="#FFFFFF"))
+    circlesPattern.add(dwg.circle(center=(circleSize/2,circleSize/2), r=1, fill="#000000"))
     circlesPattern.add(dwg.circle(center=(0,0), r=1, fill="#000000"))
-    circlesPattern.add(dwg.circle(center=(0,6), r=1, fill="#000000"))
-    circlesPattern.add(dwg.circle(center=(6,0), r=1, fill="#000000"))
-    circlesPattern.add(dwg.circle(center=(6,6), r=1, fill="#000000"))
+    circlesPattern.add(dwg.circle(center=(0,circleSize), r=1, fill="#000000"))
+    circlesPattern.add(dwg.circle(center=(circleSize,0), r=1, fill="#000000"))
+    circlesPattern.add(dwg.circle(center=(circleSize,circleSize), r=1, fill="#000000"))
     dwg.defs.add(circlesPattern)
     # wavesPattern = dwg.pattern(id="waves", patternUnits="userSpaceOnUse", size=(20,20))
     # wavesPattern.add(dwg.rect(insert=(0,0), size=(20,20), fill="#FFFFFF"))
@@ -141,14 +120,15 @@ def writeSvg(filename, data):
         y = HEIGHT*0.5 - offsetY
         y += i * 10
         shapes.add(dwg.circle(center=(x+PAD, y+PAD), r=itemRadius, fill="url(#%s)" % item["pattern"], stroke="#000000", stroke_width=item["width"]))
+    dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
     dwg.save()
     print "Saved svg: %s" % filename
 
-actualRenewable = windProduction + solarProduction
-potentialRenewable = windPotential + solarPotential
+actualRenewable = totalREProduction
+potentialRenewable = rePotential
 maxValue = max([totalEnergyConsumption, actualRenewable, potentialRenewable])
 writeSvg(args.OUTPUT_FILE, [
     {"label": "Total energy consumption", "value": totalEnergyConsumption / maxValue, "width": 3, "pattern": "waves"},
-    {"label": "Wind and solar production", "value": actualRenewable / maxValue, "width": 3, "pattern": "circles"},
-    {"label": "Wind and solar potential", "value": potentialRenewable / maxValue, "width": 3, "pattern": "honeycomb"}
+    {"label": "Renewable energy production", "value": actualRenewable / maxValue, "width": 3, "pattern": "circles"},
+    {"label": "Renewable energy potential", "value": potentialRenewable / maxValue, "width": 3, "pattern": "honeycomb"}
 ])
