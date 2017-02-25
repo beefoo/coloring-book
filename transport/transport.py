@@ -36,7 +36,7 @@ DPI = 72
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
-ARC_MARGIN = 0.15 * DPI
+ARC_MARGIN = 0.1 * DPI
 ARC_W = 0.25 * DPI
 CENTER_W = 0.1 * WIDTH
 FOOTPRINT_MARGIN = 0.025 * DPI
@@ -103,17 +103,20 @@ def getArcFootprints(value, cx, cy, rx, ry, a1, a2, w, td):
         footprints.append([p1, p2, p3, p4, p1])
     return footprints
 
-def getLineFootprints(a, value, x, y, w, td):
+def getLineFootprints(a, value, x, y, w, td, lw=None):
     footprints = []
-    amount = int(round(1.0 * CENTER_W / (w + FOOTPRINT_MARGIN)))
+    if lw is None:
+        lw = CENTER_W
+    amount = int(round(1.0 * lw / (w + FOOTPRINT_MARGIN)))
     lineAmount = min(amount, value)
-    m = 1.0 * (CENTER_W - amount * w) / amount
+    m = FOOTPRINT_MARGIN
     direction = -1
     if a % 2 > 0:
         direction = 1
     d = td * ARC_W
     lx = x
     ly = y
+    w = 1.0 * (lw - amount * m) / amount
     for i in range(lineAmount):
         footprints.append([(lx, ly), (lx, ly+d), (lx+w*direction, ly+d), (lx+w*direction, ly), (lx, ly)])
         lx += direction * (w + m)
@@ -143,9 +146,9 @@ mry1 = ry1 - j * (ARC_MARGIN + ARC_W)
 j = count - 1 - j
 mrx2 = rx1 - j * (ARC_MARGIN + ARC_W)
 mry2 = ry1 - j * (ARC_MARGIN + ARC_W)
-maxArcLen = CENTER_W * (arcs + 1) + mu.ellipseCircumference(mrx1, mry1) * 0.5 * halfArcs + mu.ellipseCircumference(mrx2, mry2) * 0.5 * halfArcs
+maxArcLen = CENTER_W * (arcs + 1) + mu.ellipseCircumference(mrx1, mry1) * 0.5 * halfArcs + mu.ellipseCircumference(mrx2, mry2) * halfArcs
 stepY = halfTurnH - arcsW + ARC_W
-footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * 0.975
+footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * 0.933
 
 # Check for arc validity
 if footprintW <= 0:
@@ -159,6 +162,7 @@ if arcsW > ry1:
     sys.exit(1)
 
 # Draw data
+data = sorted(data, key=lambda k: k["valueI"])
 for i, d in enumerate(data):
 
     # add icons
@@ -180,6 +184,7 @@ for i, d in enumerate(data):
     dwgLabels.add(dwg.text(d["Label"], insert=(tx - 10, ty), text_anchor="end", alignment_baseline="before-edge", font_size=14))
 
     value = d["value"]
+    cx = 0
     cy = PAD + ry1
     footprints = []
     for a in range(arcs):
@@ -223,6 +228,18 @@ for i, d in enumerate(data):
                 break
 
         cy += stepY
+
+    # Draw one more arc if footstep left
+    if value > 0:
+        cx = PAD + WIDTH * 0.5 + 0.5 * CENTER_W
+        cy -= stepY
+        j = count - 1 - i
+        rx = rx1 - j * (ARC_MARGIN + ARC_W)
+        ry = ry1 - j * (ARC_MARGIN + ARC_W)
+        a1 = 90
+        a2 = -90
+        fs = getArcFootprints(value, cx, cy, rx, ry, a1, a2, footprintW, turnDirection)
+        footprints += fs
 
     print len(footprints)
     # draw path
