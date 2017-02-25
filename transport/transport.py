@@ -122,11 +122,22 @@ def getLineFootprints(a, value, x, y, w, td, lw=None):
         lx += direction * (w + m)
     return footprints
 
+def getFootprintTextPosition(footprint):
+    corners = footprint[:4]
+    xs = [p[0] for p in corners]
+    ys = [p[1] for p in corners]
+    x = mu.mean(xs)
+    y = mu.mean(ys)
+    return (x, y)
+
 # Init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 dwgFootprints = dwg.add(dwg.g(id="footprints"))
 dwgIcons = dwg.add(dwg.g(id="icons"))
 dwgLabels = dwg.add(dwg.g(id="labels"))
+dwgNumbers = []
+for i in range(len(data)):
+    dwgNumbers.append(dwg.add(dwg.g(id="numbers%s" % (i+1))))
 
 # Calculate arcs
 arcs = 2
@@ -163,6 +174,7 @@ if arcsW > ry1:
 
 # Draw data
 data = sorted(data, key=lambda k: k["valueI"])
+valueNumbers = []
 for i, d in enumerate(data):
 
     # add icons
@@ -242,9 +254,15 @@ for i, d in enumerate(data):
         footprints += fs
 
     print len(footprints)
+    numbersToAdd = d["value"] - len(valueNumbers)
+    valueNumbers += [i+1] * numbersToAdd
     # draw path
-    for footprint in footprints:
+    for k, footprint in enumerate(footprints):
         dwgFootprints.add(dwg.polygon(points=footprint, stroke_width=1, stroke="#000000", fill="none"))
+        tp = getFootprintTextPosition(footprint)
+        v = valueNumbers[k]
+        dwgNumbers[v-1].add(dwg.text(str(v), insert=tp, text_anchor="middle", alignment_baseline="middle", font_size=9))
+
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 dwg.save()
