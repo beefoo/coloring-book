@@ -1,8 +1,16 @@
 # RENEWABLE ENERGY POTENTIAL
 
-According to the U.S. Department of Energy, the country consumed over 97 Quadrillion BTUs of energy in 2015 [1], equivalent to about 1.5 billion cars driven for one year. [2] However only about 10 percent of the energy we consume is supplied through renewable energy which includes hydroelectric, geothermal, solar, wind, and biomass. The majority of the energy we consume comes from fossil fuels and nuclear electric power.
+According to the United States Department of Energy, the U.S. consumed over 97 Quadrillion BTUs of energy in 2015 [1], equivalent to the amount of energy consumed by 1.5 billion cars driven for one year. [2] However, only about 10 percent of the country's energy needs was supplied through renewable energy which includes hydroelectric, geothermal, solar, wind, and biomass. The majority of the energy consumed in the U.S. comes from fossil fuels.
 
-The U.S. Department of Energy has estimated the potential of renewable energy technologies. These estimates take into consideration resource availability, physical potential of resources, technology performance, topographic limitations, and land-use constraints. With those considerations taken into account, renewable energy can potentially provide nearly four times the energy we currently consume. [3]
+The U.S. Department of Energy has estimated the country's potential energy production of renewable energy technologies. These estimates take into consideration resource availability, physical potential of resources, available technology, land limitations, and land-use constraints, but does not consider economic or market factors. With that into account, renewable energy sources can potentially provide over 14 times the energy we currently consume. The state of Texas alone could generate the whole country's energy needs with just solar power technology. [3]
+
+Color the circles on the following page according to the table below.
+
+| Color  | Figures for the United States                                   |
+|---     |---                                                              |
+| Gold   | Energy generated using renewable energy technologies in 2015    |
+| Blue   | Energy consumed in 2015                                         |
+| Green  | Potential energy generated using renewable energy technologies  |
 
 ## Sources
 

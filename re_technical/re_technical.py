@@ -64,14 +64,20 @@ print "Total RE production: %s (%s%%)" % (totalREProduction, round(1.0*totalREPr
 # Wind/solar potential / U.S. / 2012 / Terawatt Hours:
 # http://www.nrel.gov/gis/re_potential.html
 rePotential = 0
+solarPotential = 0
+solarKeys = ["Urban utility-scale PV", "Rural utility-scale PV", "Rooftop PV", "Concentrating solar power"]
 filename = "data/re_technical_potential_summary.csv"
 dp = {}
 with open(filename, 'rb') as f:
     r = csv.reader(f, delimiter=',')
     next(r, None)
     for _Technology, _Generation_Potential_Twh, _Capacity_Potential_GW in r:
-        rePotential += float(_Generation_Potential_Twh)
+        # convert twh to trillion btu
+        rePotential += float(_Generation_Potential_Twh) * BTU_PER_WH
+        if _Technology in solarKeys:
+            solarPotential += float(_Generation_Potential_Twh) * BTU_PER_WH
 print "RE potential: %s (%s%%)" % (rePotential,  round(1.0*rePotential/totalEnergyConsumption*100, 1))
+print "Solar potential: %s (%s%%)" % (solarPotential,  round(1.0*solarPotential/totalEnergyConsumption*100, 1))
 
 def writeSvg(filename, data):
     # sort data
