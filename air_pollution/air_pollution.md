@@ -1,4 +1,4 @@
-# Air pollution in Beijing
+# AIR POLLUTION IN BEIJING
 
 When carbon-based fuels are burned, carbon dioxide and other pollutants are released into the atmosphere. Pollutants include particulate matter (PM) which can heat the Earth's climate by absorbing radiation of the sun. When inhaled, these pollutants can also have serious negative effects on human health.
 

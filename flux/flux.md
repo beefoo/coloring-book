@@ -9,7 +9,7 @@ The map below uses data provided by the National Oceanic and Atmospheric Adminis
 | 1      | White   | Under 1                             |
 | 2      | Yellow  | 1 to 10                             |
 | 3      | Orange  | 10 to 100                           |
-| 4      | Red     | 100 to 500 metric tons              |
+| 4      | Red     | 100 to 500                          |
 | 5      | Brown   | 500 to 1000                         |
 | 6      | Black   | Over 1000                           |
 

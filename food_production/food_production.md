@@ -10,5 +10,5 @@ The following page shows projections of global corn production where current car
 
 [1] Grain Market Report. 2017. International Grains Council. www.igc.int/downloads/gmrsummary/gmrsumme.pdf.
 [2] Water & Climate Risks Facing U.S. Corn Production. Ceres. www.ceres.org/issues/water/agriculture/the-cost-of-corn.
-[3] Iglesias, A., and C. Rosensweig. 2009. Effects of Climate Change on Global Food Production from SRES Emissions and Socioeconomic Scenarios. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). dx.doi.org/10.7927/H4JM27JZ.
+[3] Iglesias, A., C. Rosensweig. 2009. Effects of Climate Change on Global Food Production from SRES Emissions and Socioeconomic Scenarios. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). dx.doi.org/10.7927/H4JM27JZ.
 [4] Probabilistic Population Projections based on the World Population Prospects: The 2015 Revision. Population Division of the Department of Economic and Social Affairs of the United Nations Secretariat. esa.un.org/unpd/wpp/.

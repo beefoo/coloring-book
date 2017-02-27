@@ -37,10 +37,12 @@ MARGIN_TOP = 3.25 * DPI
 
 # 97% of publishing climate scientists believe climate change is due to human activity
 # source: http://iopscience.iop.org/article/10.1088/1748-9326/11/4/048002
+# Cook et al. Consensus on consensus: a synthesis of consensus estimates on human-caused global warming. 2016. Environmental Research Letters, 11.
 SCIENTIFIC_CONSENSUS = 97
 
 # 48% of U.S. adults believe climate change is due to human activity
 # source: http://www.pewinternet.org/2016/10/04/public-views-on-climate-change-and-climate-scientists/
+# Survey conducted May 10-June 6, 2016. The Politics of Climate. Pew Research Center.
 PUBLIC_VIEW = 48
 
 def makeSVG(filename, amount):
