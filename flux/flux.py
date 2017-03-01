@@ -8,6 +8,7 @@
 # https://www.esrl.noaa.gov/gmd/ccgg/carbontracker/fluxes.php
 
 import argparse
+import base64
 from collections import Counter
 import csv
 import inspect
@@ -50,12 +51,12 @@ LATS = 180
 LONS = 360
 
 GROUPS = [
-    {"key": "1", "min": 0, "label": "Under 1 metric ton", "color": "#90b272"},
-    {"key": "2", "min": 1, "label": "1 to 10 metric tons", "color": "#c6ce4e"},
-    {"key": "3", "min": 10, "label": "10 to 100 metric tons", "color": "#ceab4e"},
-    {"key": "4", "min": 100, "label": "100 to 500 metric tons", "color": "#d86969"},
-    {"key": "5", "min": 500, "label": "500 to 1000 metric tons", "color": "#a82222"},
-    {"key": "6", "min": 1000, "label": "Over 1000 metric tons", "color": "#7c139e"}
+    {"key": "1", "min": 0, "label": "Under 1 metric ton", "color": "#90b272", "image": "data/white.png"},
+    {"key": "2", "min": 1, "label": "1 to 10 metric tons", "color": "#c6ce4e", "image": "data/yellow.png"},
+    {"key": "3", "min": 10, "label": "10 to 100 metric tons", "color": "#ceab4e", "image": "data/orange.png"},
+    {"key": "4", "min": 100, "label": "100 to 500 metric tons", "color": "#d86969", "image": "data/red.png"},
+    {"key": "5", "min": 500, "label": "500 to 1000 metric tons", "color": "#a82222", "image": "data/brown.png"},
+    {"key": "6", "min": 1000, "label": "Over 1000 metric tons", "color": "#7c139e", "image": "data/black.png"}
 ]
 
 def getGroup(value, groups):
@@ -157,7 +158,7 @@ if height > HEIGHT:
     offsetX = (WIDTH - width) * 0.5
 else:
     offsetY = (HEIGHT - height) * 0.5
-cellW = 1.0 * width / xDiff
+cellW = 1.0 * width / (xDiff+1)
 cellH = cellW
 halfW = cellW * 0.5
 halfH = cellH * 0.5
@@ -166,6 +167,18 @@ halfH = cellH * 0.5
 prefix = args.GEO_FILE.split("/")[1].split(".")[0]
 filename = args.OUTPUT_FILE % prefix
 dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
+
+# define color patterns
+if SHOW_COLOR:
+    for g in GROUPS:
+        imageSize = (300, 300)
+        imageData = ""
+        with open(g["image"], "rb") as f:
+            imageData = base64.b64encode(f.read())
+        dwgImage = dwg.image(href="data:image/png;base64,%s" % imageData, insert=(0, 0), size=imageSize)
+        dwgPattern = dwg.pattern(id="pattern%s" % g["key"], patternUnits="userSpaceOnUse", size=imageSize)
+        dwgPattern.add(dwgImage)
+        dwg.defs.add(dwgPattern)
 
 # add cells and labels
 cellsGroup = dwg.add(dwg.g(id="cells"))
@@ -178,10 +191,13 @@ for d in data:
     y = (d["y"]-minY) * cellH + PAD + offsetY + Y_OFFSET
     color = "none"
     if SHOW_COLOR:
-        color = d["group"]["color"]
+        # color = d["group"]["color"]
+        color = "url(#pattern%s)" % d["group"]["key"]
     # cellsGroup.add(dwg.rect(insert=(x, y), size=(cellW, cellH), fill=color, stroke="#000000", stroke_width=1))
     cellsGroup.add(dwg.circle(center=(x+halfW, y+halfH), r=halfW, fill=color, stroke="#000000", stroke_width=1))
     labelsGroups[d["group"]["key"]].add(dwg.text(d["group"]["key"], insert=(x+halfW, y+halfH), text_anchor="middle", alignment_baseline="middle", font_size=11))
+
+dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 dwg.save()
 print "Saved svg: %s" % filename
 
