@@ -53,6 +53,15 @@ for mf in INPUT_MANIFEST_FILES:
             "pages": pages
         })
 
+def makePDF(pages, filename):
+    pdf = FPDF(orientation="Portrait", unit="in", format=(WIDTH, HEIGHT))
+    for page in pages:
+        pdf.add_page()
+        pdf.image(page["file"], 0, 0, WIDTH, HEIGHT)
+    pdf.output(filename, "F")
+    print "Made pdf %s" % filename
+
+
 # read files from directory
 for f in manifest_files:
 
@@ -63,11 +72,17 @@ for f in manifest_files:
 
     # add pages to pdf
     pages = f["pages"]
-    pdf = FPDF(orientation="Portrait", unit="in", format=(8.5, 11.0))
-    for page in pages:
-        pdf.add_page()
-        pdf.image(page["file"], 0, 0, WIDTH, HEIGHT)
+    filename =  directory + "/" + f["name"]
+    makePDF(pages, filename + ".pdf")
 
-    # output pdf
-    outputFile =  directory + "/" + f["name"] + ".pdf"
-    pdf.output(outputFile, "F")
+    # covers
+    covers = [pages.pop(0), pages.pop()]
+    makePDF(covers, filename + "-covers.pdf")
+
+    # even pages
+    evens = [p for i, p in enumerate(pages) if i % 2 <= 0]
+    makePDF(evens, filename + "-evens.pdf")
+
+    # odd pages
+    odds = [p for i, p in enumerate(pages) if i % 2 > 0]
+    makePDF(odds, filename + "-odds.pdf")
