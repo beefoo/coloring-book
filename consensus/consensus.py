@@ -22,7 +22,7 @@ parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
 parser.add_argument('-padx', dest="PADX", type=float, default=0.875, help="Padding of output file")
 parser.add_argument('-pady', dest="PADY", type=float, default=0.5, help="Padding of output file")
-parser.add_argument('-row', dest="PER_ROW", type=int, default=8, help="Hands per row")
+parser.add_argument('-row', dest="PER_ROW", type=int, default=10, help="Arrow per row")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/consensus_%s.svg", help="Path to output svg file")
 
 # init input
@@ -45,6 +45,20 @@ SCIENTIFIC_CONSENSUS = 97
 # Survey conducted May 10-June 6, 2016. The Politics of Climate. Pew Research Center.
 PUBLIC_VIEW = 48
 
+def centerOfArrow(arrow):
+    xs = [p[0] for p in arrow]
+    ys = [p[0] for p in arrow]
+    x = (min(xs), max(xs))
+    y = (min(ys), max(ys))
+    return ((x[1]-x[0])*0.5 + x[0], (y[1]-y[0])*0.5 + y[0])
+
+def normArrow(arrow):
+    xs = [p[0] for p in arrow]
+    xMin = min(xs)
+    xMax = max(xs)
+    nArrow = [(mu.norm(p[0], xMin, xMax), p[1]) for p in arrow]
+    return nArrow
+
 def makeSVG(filename, amount):
     # rows
     total = 100
@@ -52,20 +66,10 @@ def makeSVG(filename, amount):
     rows = int(math.ceil(1.0 * total / PER_ROW))
     yes = amount
     no = total - yes
-    yesLeft = (yes-1) / 2
-    yesRight = int(math.ceil((yes-1) * 0.5))
-    noLeft = (no-1) / 2
-    noRight = int(math.ceil((no-1) * 0.5))
-    yesHalf = half
-    noHalf = half
-    if yes < PER_ROW:
-        yesHalf += 1
-    if no < PER_ROW:
-        noHalf += 1
 
     # calculate sizes
-    cellw = 1.0 * WIDTH / (PER_ROW + (1.0/3))
-    cellh = cellw / 1.2625
+    cellw = 1.0 * WIDTH / PER_ROW
+    cellh = cellw
 
     # init svg
     width = 1.0 * WIDTH
@@ -88,41 +92,32 @@ def makeSVG(filename, amount):
     xs = [1.0/18, 1.0/9, 2.0/9, 1.0/3, 1.0/2, 5.0/9, 11.0/18, 13.0/18, 5.0/6]
     # y guides
     ys = [1.0/9, 1.0/3, 4.0/9, 5.0/9, 2.0/3, 8.0/9]
-    # up and down arrows
-    arrowsEven = [
-        [
-            (0.0, ys[0]), (xs[1], ys[1]), (xs[3], ys[1]),
-            (xs[0], ys[-1]), (xs[1], 1.0), (xs[2], 1.0),
-            (xs[4], ys[2]), (xs[6], ys[4]), (xs[-1], ys[4]),
-            (xs[5], ys[0]), (0.0, ys[0])
-        ],[
-            (xs[5], ys[0]), (xs[-1], ys[4]), (xs[6], ys[4]),
-            (xs[4], ys[-1]), (1.0+xs[0], ys[-1]), (1.0+xs[3], ys[1]),
-            (1.0+xs[1], ys[1]), (1.0, ys[3]), (xs[7], 0.0),
-            (xs[6], 0.0), (xs[5], ys[0])
-        ]
-    ]
-    arrowsOdd = [
-        [(p[0]+0.5, p[1]) for p in arrowsEven[0]],
-        [(p[0]-0.5, p[1]) for p in arrowsEven[1]]
-    ]
-    arrowsCombined = [arrowsEven, arrowsOdd]
+    yesArrow = normArrow([
+        (0.0, ys[0]), (xs[1], ys[1]), (xs[3], ys[1]),
+        (xs[0], ys[-1]), (xs[1], 1.0), (xs[2], 1.0),
+        (xs[4], ys[2]), (xs[6], ys[4]), (xs[-1], ys[4]),
+        (xs[5], ys[0]), (0.0, ys[0])
+    ])
+    noArrow = normArrow([
+        (xs[5], ys[0]), (xs[-1], ys[4]), (xs[6], ys[4]),
+        (xs[4], ys[-1]), (1.0+xs[0], ys[-1]), (1.0+xs[3], ys[1]),
+        (1.0+xs[1], ys[1]), (1.0, ys[3]), (xs[7], 0.0),
+        (xs[6], 0.0), (xs[5], ys[0])
+    ])
+    arrowsCombined = [yesArrow, noArrow]
     arrowsLen = len(arrowsCombined)
-    centerPoints = [
-        [(xs[3], ys[3]), (xs[-1], ys[2])],
-        [(xs[-1], ys[3]), (xs[3], ys[2])]
-    ]
+    yesPoint = centerOfArrow(yesArrow)
+    noPoint = centerOfArrow(noArrow)
     radians = mu.radiansBetweenPoints((xs[1]*cellw, 0.0), (xs[5]*cellw, ys[-1]*cellh))
     angle = math.degrees(radians)
 
     # make reference arrows
-    arrowIds = ["arrowsEven", "arrowsOdd"]
+    arrowIds = ["yesArrow", "noArrow"]
     for i, arrowId in enumerate(arrowIds):
         arrowGroup = dwg.g(id=arrowId)
-        arrows = arrowsCombined[i % arrowsLen]
-        for arrow in arrows:
-            points = [(p[0] * cellw, p[1] * cellh) for p in arrow]
-            arrowGroup.add(dwg.polygon(points=points, stroke_width=1, stroke="#000000", stroke_linejoin="round", fill="none"))
+        arrow = arrowsCombined[i % arrowsLen]
+        points = [(p[0] * cellw, p[1] * cellh) for p in arrow]
+        arrowGroup.add(dwg.polygon(points=points, stroke_width=1, stroke="#000000", stroke_linejoin="round", fill="none"))
         dwg.defs.add(arrowGroup)
 
     # build
@@ -131,17 +126,16 @@ def makeSVG(filename, amount):
         x = xOffset
         for col in range(PER_ROW):
             i = row * PER_ROW + col
-            # draw arrow
-            arrowId = arrowIds[row % 2]
-            arrowsGroup.add(dwg.use("#" + arrowId, insert=(x, y)))
-            # draw text
-            points = [(p[0] * cellw + x, p[1] * cellh + y) for p in centerPoints[row % 2]]
-            yesPoint = points[0]
-            noPoint = points[1]
-            if i >= yesHalf - yesLeft and i <= yesHalf + yesRight:
-                yesGroup.add(dwg.text("YES", insert=yesPoint, text_anchor="middle", alignment_baseline="middle", font_size=9, dominant_baseline="central", transform="rotate(-%s,%s,%s)" % (angle, yesPoint[0], yesPoint[1])))
-            if i >= noHalf - noLeft and i <= noHalf + noRight:
-                noGroup.add(dwg.text("NO", insert=noPoint, text_anchor="middle", alignment_baseline="middle", font_size=9, dominant_baseline="central", transform="rotate(%s,%s,%s)" % (angle, noPoint[0], noPoint[1])))
+            # yes arrow
+            if i < yes:
+                arrowsGroup.add(dwg.use("#yesArrow", insert=(x, y)))
+                p = (yesPoint[0] * cellw + x, yesPoint[1] * cellh + y)
+                yesGroup.add(dwg.text("YES", insert=p, text_anchor="middle", alignment_baseline="middle", font_size=9, dominant_baseline="central", transform="rotate(-%s,%s,%s)" % (angle, p[0], p[1])))
+            # no arrow
+            if i >= (total-no):
+                arrowsGroup.add(dwg.use("#noArrow", insert=(x, y)))
+                p = (noPoint[0] * cellw + x, noPoint[1] * cellh + y)
+                noGroup.add(dwg.text("NO", insert=p, text_anchor="middle", alignment_baseline="middle", font_size=9, dominant_baseline="central", transform="rotate(%s,%s,%s)" % (angle, p[0], p[1])))
             x += cellw
         y += cellh
 
