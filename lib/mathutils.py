@@ -80,6 +80,20 @@ def polygonArea(points):
     y = [p[1] for p in points]
     return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
 
+def polygonCentroid(points):
+    area = polygonArea(points)
+    imax = len(points) - 1
+    x = 0
+    y = 0
+    for i in range(0,imax):
+        x += (points[i][0] + points[i+1][0]) * ((points[i][0] * points[i+1][1]) - (points[i+1][0] * points[i][1]))
+        y += (points[i][1] + points[i+1][1]) * ((points[i][0] * points[i+1][1]) - (points[i+1][0] * points[i][1]))
+    x += (points[imax][0] + points[0][0]) * ((points[imax][0] * points[0][1]) - (points[0][0] * points[imax][1]))
+    y += (points[imax][1] + points[0][1]) * ((points[imax][0] * points[0][1]) - (points[0][0] * points[imax][1]))
+    x /= (area * 6.0)
+    y /= (area * 6.0)
+    return (x, y)
+
 def radiansBetweenPoints(p1, p2):
     deltaX = p2[0] - p1[0]
     deltaY = p2[1] - p1[1]

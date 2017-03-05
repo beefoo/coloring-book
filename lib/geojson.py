@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import json
+import math
 import numpy as np
 import shapefile # https://github.com/GeospatialPython/pyshp
+import sys
+
+def mercator(radians):
+    return math.log(math.tan(radians*0.5 + math.pi*0.25))
 
 class GeoJSONUtil:
 
@@ -20,6 +25,25 @@ class GeoJSONUtil:
             else:
                 self.getShapes()
 
+    # http://stackoverflow.com/questions/2651099/convert-long-lat-to-pixel-x-y-on-a-given-picture
+    # http://gis.stackexchange.com/questions/71643/map-projection-lat-lon-to-pixel
+    def coordinateToPixel(self, lnglat, w, h, bounds):
+        west = math.radians(bounds[0])
+        south = math.radians(bounds[1])
+        east = math.radians(bounds[2])
+        north = math.radians(bounds[3])
+
+        ymin = mercator(south)
+        ymax = mercator(north)
+        xFactor = 1.0 * w / (east - west)
+        yFactor = 1.0 * h / (ymax - ymin)
+
+        x = math.radians(lnglat[0])
+        y = mercator(math.radians(lnglat[1]))
+        x = (x - west) * xFactor
+        y = (ymax - y) * yFactor # y points south
+        return (x, y)
+
     def filterFeatures(self, key, value):
         self.features = [f for f in self.features if key in f["properties"] and f["properties"][key] == value]
         self.getShapes()
@@ -29,10 +53,11 @@ class GeoJSONUtil:
     def getBounds(self):
         lngs = []
         lats = []
-        for shape in self.shapes:
-            for lnglat in shape:
-                lngs.append(lnglat[0])
-                lats.append(lnglat[1])
+        for featureShapes in self.shapes:
+            for featureShape in featureShapes:
+                for lnglat in featureShape:
+                    lngs.append(lnglat[0])
+                    lats.append(lnglat[1])
         minLng = min(lngs)
         maxLng = max(lngs)
         minLat = min(lats)
@@ -41,9 +66,19 @@ class GeoJSONUtil:
 
     def getDimensions(self):
         bounds = self.getBounds()
-        width = bounds[2] - bounds[0]
-        height = bounds[3] - bounds[1]
+        west = math.radians(bounds[0])
+        south = math.radians(bounds[1])
+        east = math.radians(bounds[2])
+        north = math.radians(bounds[3])
+        ymin = mercator(south)
+        ymax = mercator(north)
+        width = (east - west)
+        height = (ymax - ymin)
         return (width, height)
+
+    def getProperties(self, key):
+        properties = [f["properties"][key] for f in self.features]
+        return properties
 
     def getShapes(self):
         shapes = []
@@ -51,17 +86,23 @@ class GeoJSONUtil:
             geo = feature["geometry"]
             geoType = geo["type"]
             coordinates = geo["coordinates"]
+            featureShapes = []
             if geoType == "Polygon":
-                shapes.append(coordinates[0][:])
-            elif geoType == "MultiPolygon":
                 for c in coordinates:
-                    shapes.append(c[0][:])
+                    featureShapes.append(c[:])
+            elif geoType == "MultiPolygon":
+                for mc in coordinates:
+                    for c in mc:
+                        featureShapes.append(c[:])
+            # sort by size and add
+            featureShapes = sorted(featureShapes, key=lambda s: -1 * self.polygonArea(s))
+            shapes.append(featureShapes)
         self.shapes = shapes
 
     def onlyBiggestShape(self):
-        shapes = sorted(self.shapes, key=lambda s: -1 * self.polygonArea(s))
+        shapes = sorted(self.shapes, key=lambda s: -1 * self.polygonArea(s[0]))
         if len(shapes):
-            self.shapes = [shapes[0]]
+            self.shapes = [[shapes[0][0]]]
         else:
             self.shapes = []
 
@@ -99,11 +140,15 @@ class GeoJSONUtil:
         bounds = self.getBounds()
         (w, h) = self.getDimensions()
         targetHeight = 1.0 * targetWidth * (1.0 * h / w)
-        for shape in self.shapes:
-            polygon = []
-            for lnglat in shape:
-                x = 1.0 * (lnglat[0] - bounds[0]) / (bounds[2] - bounds[0]) * targetWidth + offsetX
-                y = (1.0 - (lnglat[1] - bounds[1]) / (bounds[3] - bounds[1])) * targetHeight + offsetY
-                polygon.append((x, y))
-            polygons.append(polygon)
+        for featureShapes in self.shapes:
+            featurePolygons = []
+            for featureShape in featureShapes:
+                featurePolygon = []
+                for lnglat in featureShape:
+                    (x, y) = self.coordinateToPixel(lnglat, targetWidth, targetHeight, bounds)
+                    # x = 1.0 * (lnglat[0] - bounds[0]) / (bounds[2] - bounds[0]) * targetWidth + offsetX
+                    # y = (1.0 - (lnglat[1] - bounds[1]) / (bounds[3] - bounds[1])) * targetHeight + offsetY
+                    featurePolygon.append((x + offsetX, y + offsetY))
+                featurePolygons.append(featurePolygon)
+            polygons.append(featurePolygons)
         return polygons
