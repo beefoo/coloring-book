@@ -46,6 +46,7 @@ WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
 SHOW_COLOR = args.SHOW_COLOR
 Y_OFFSET = 0.1 * HEIGHT
+
 LATS = 180
 LONS = 360
 
@@ -58,51 +59,6 @@ GROUPS = [
     {"key": "6", "min": 1000, "label": "Over 1000 metric tons", "color": "#7c139e", "image": "data/black.png"}
 ]
 
-def mercator(radians):
-    return math.log(math.tan(radians*0.5 + math.pi*0.25))
-
-def getBounds(coordinates):
-    lngs = []
-    lats = []
-    for coords in coordinates:
-        for p in coords:
-            lngs.append(p[0])
-            lats.append(p[1])
-    minLng = min(lngs)
-    maxLng = max(lngs)
-    minLat = min(lats)
-    maxLat = max(lats)
-    return (minLng, minLat, maxLng, maxLat)
-
-def getRatio(coordinates):
-    bounds = getBounds(coordinates)
-    west = math.radians(bounds[0])
-    south = math.radians(bounds[1])
-    east = math.radians(bounds[2])
-    north = math.radians(bounds[3])
-    ymin = mercator(south)
-    ymax = mercator(north)
-    width = (east - west)
-    height = (ymax - ymin)
-    return (width, height)
-
-def coordinateToPixel(lnglat, w, h, bounds):
-    west = math.radians(bounds[0])
-    south = math.radians(bounds[1])
-    east = math.radians(bounds[2])
-    north = math.radians(bounds[3])
-
-    ymin = mercator(south)
-    ymax = mercator(north)
-    xFactor = 1.0 * w / (east - west)
-    yFactor = 1.0 * h / (ymax - ymin)
-
-    x = math.radians(lnglat[0])
-    y = mercator(math.radians(lnglat[1]))
-    x = (x - west) * xFactor
-    y = (ymax - y) * yFactor # y points south
-    return (x, y)
-
 def getGroup(value, groups):
     group = None
     for g in groups:
@@ -110,14 +66,6 @@ def getGroup(value, groups):
             break
         group = g
     return group
-
-def withinCoordinates(coords, p):
-    within = False
-    for c in coords:
-        if mu.containsPoint(c, p):
-            within = True
-            break
-    return within
 
 data = []
 # read csv
@@ -129,13 +77,15 @@ with open(args.INPUT_FILE, 'rb') as f:
     i = 0
     for _lat, _lon, _value in r:
         v = float(_value)
+        y = i / LONS
+        x = i % LONS
         if v >= 0:
             data.append({
                 "index": i,
+                "x": x,
+                "y": y,
                 "lat": float(_lat),
                 "lon": float(_lon),
-                "row": LATS - (i / LONS) - 1,
-                "col": i % LONS,
                 "value": v
             })
         i += 1
@@ -160,19 +110,22 @@ for feature in geodata["features"]:
             coordinates.append(coordinate)
         break # only show biggest shape
 
+def withinCoordinates(coords, p):
+    within = False
+    for c in coords:
+        if mu.containsPoint(c, p):
+            within = True
+            break
+    return within
+
 # only use data that's within coordinates
 data = [d for d in data if withinCoordinates(coordinates, (d["lon"], d["lat"]))]
 print "%s data points found in %s" % (len(data), args.GEO_FILE)
 
-# get bounds, ratio
-bounds = getBounds(coordinates)
-print "Bounds: (%s, %s) (%s, %s)" % bounds
-(rw, rh) = getRatio(coordinates)
-print "Ratio: %s x %s" % (rw, rh)
-
-# add groups
+# add groups, invert y
 for i, d in enumerate(data):
     data[i]["group"] = getGroup(d["value"], GROUPS)
+    data[i]["y"] = LATS - d["y"] - 1
 
 # give groups stats
 groupValues = [d["group"]["key"] for d in data]
@@ -182,29 +135,33 @@ for k,v in C.items():
     print "Group: %s, Size: %s" % (k, v)
 
 # get the bounds
-cols = [d["col"] for d in data]
-minCols = min(cols)
-maxCols = max(cols)
-colDiff = maxCols - minCols
-rows = [d["row"] for d in data]
-minRows = min(rows)
-maxRows = max(rows)
-rowDiff = maxRows - minRows
-# normalize row/col
-for i, d in enumerate(data):
-    data[i]["row"] = d["row"] - minRows
-    data[i]["col"] = d["col"] - minCols
+xs = [d["x"] for d in data]
+ys = [d["y"] for d in data]
+minX = min(xs)
+maxX = max(xs)
+minY = min(ys)
+maxY = max(ys)
+print "Bounds: (%s, %s) (%s, %s)" % (minX, minY, maxX, maxY)
 
 # calculate dimensions
-
-width = 1.0 * WIDTH
-height = width * rh / rw
-cellW = width / (colDiff+1)
-cellH = height / (rowDiff+1)
+xDiff = maxX - minX
+yDiff = maxY - minY
+aspect_ratio = 1.0 * abs(xDiff) / abs(yDiff)
+width = WIDTH
+height = width / aspect_ratio
+offsetX = 0
+offsetY = 0
+if height > HEIGHT:
+    scale = HEIGHT / height
+    width *= scale
+    height = HEIGHT
+    offsetX = (WIDTH - width) * 0.5
+else:
+    offsetY = (HEIGHT - height) * 0.5
+cellW = 1.0 * width / (xDiff+1)
+cellH = cellW
 halfW = cellW * 0.5
 halfH = cellH * 0.5
-offsetX = PAD
-offsetY = PAD + (HEIGHT - height) * 0.667
 
 # init svg
 prefix = args.GEO_FILE.split("/")[1].split(".")[0]
@@ -230,15 +187,14 @@ labelsGroups = {}
 for g in GROUPS:
     labelsGroups[g["key"]] = labelsGroup.add(dwg.g(id="labels%s" % g["key"]))
 for d in data:
-    # (x, y) = coordinateToPixel((d["lon"], d["lat"]), width, height, bounds)
-    x = d["col"] * cellW + offsetX
-    y = d["row"] * cellH + offsetY
+    x = (d["x"]-minX) * cellW + PAD + offsetX
+    y = (d["y"]-minY) * cellH + PAD + offsetY + Y_OFFSET
     color = "none"
     if SHOW_COLOR:
         # color = d["group"]["color"]
         color = "url(#pattern%s)" % d["group"]["key"]
     # cellsGroup.add(dwg.rect(insert=(x, y), size=(cellW, cellH), fill=color, stroke="#000000", stroke_width=1))
-    cellsGroup.add(dwg.ellipse(center=(x+halfW, y+halfH), r=(halfW, halfH), fill=color, stroke="#000000", stroke_width=1))
+    cellsGroup.add(dwg.circle(center=(x+halfW, y+halfH), r=halfW, fill=color, stroke="#000000", stroke_width=1))
     labelsGroups[d["group"]["key"]].add(dwg.text(d["group"]["key"], insert=(x+halfW, y+halfH), text_anchor="middle", alignment_baseline="middle", font_size=11))
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
