@@ -75,7 +75,7 @@ for key in data:
 print "Writing to file..."
 with open(OUTPUT_FILE, 'wb') as f:
     w = csv.writer(f, delimiter=',')
-    w.writerow(['lng', 'lat', 'wind_class_50m'])
+    w.writerow(['lng', 'lat', 'value'])
     for row in rows:
         w.writerow(row)
 

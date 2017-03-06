@@ -9,6 +9,7 @@ import sys
 INPUT_FILE = 'data/solar_summaries_ghi_zip_code.csv'
 ZIPCODE_FILE = 'data/zipcodes_latlng.csv'
 OUTPUT_FILE = 'data/lat_lng_ghi.csv'
+EXCLUDE = ['HI', 'AK']
 
 # Mean of list
 def mean(data):
@@ -31,9 +32,6 @@ with open(ZIPCODE_FILE, 'rb') as f:
     header = next(r, None)
     for zipcode, lat, lng in r:
         zipcodes[zipcode] = (int(float(lng)), int(float(lat)))
-        print zipcode
-        break
-sys.exit(1)
 
 data = {}
 with open(INPUT_FILE, 'rb') as f:
@@ -41,6 +39,9 @@ with open(INPUT_FILE, 'rb') as f:
     header = next(r, None)
     for line in r:
         zipcode = str(int(float(line[0]))).zfill(5)
+        state = line[1]
+        if state in EXCLUDE:
+            continue
         # Annual Average (kWh/m2/day)
         value = round(parseNumber(line[2]), 3)
         if zipcode in zipcodes:
@@ -62,7 +63,7 @@ for key in data:
 
 with open(OUTPUT_FILE, 'wb') as f:
     w = csv.writer(f, delimiter=',')
-    w.writerow(['lng', 'lat', 'avg_kwh_m2_day'])
+    w.writerow(['lng', 'lat', 'value'])
     for row in rows:
         w.writerow(row)
 

@@ -26,7 +26,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
-import lib.mathutils as mu
+import lib.geoutils as gu
 
 # input
 parser = argparse.ArgumentParser()
@@ -58,51 +58,6 @@ GROUPS = [
     {"key": "6", "min": 1000, "label": "Over 1000 metric tons", "color": "#7c139e", "image": "data/black.png"}
 ]
 
-def mercator(radians):
-    return math.log(math.tan(radians*0.5 + math.pi*0.25))
-
-def getBounds(coordinates):
-    lngs = []
-    lats = []
-    for coords in coordinates:
-        for p in coords:
-            lngs.append(p[0])
-            lats.append(p[1])
-    minLng = min(lngs)
-    maxLng = max(lngs)
-    minLat = min(lats)
-    maxLat = max(lats)
-    return (minLng, minLat, maxLng, maxLat)
-
-def getRatio(coordinates):
-    bounds = getBounds(coordinates)
-    west = math.radians(bounds[0])
-    south = math.radians(bounds[1])
-    east = math.radians(bounds[2])
-    north = math.radians(bounds[3])
-    ymin = mercator(south)
-    ymax = mercator(north)
-    width = (east - west)
-    height = (ymax - ymin)
-    return (width, height)
-
-def coordinateToPixel(lnglat, w, h, bounds):
-    west = math.radians(bounds[0])
-    south = math.radians(bounds[1])
-    east = math.radians(bounds[2])
-    north = math.radians(bounds[3])
-
-    ymin = mercator(south)
-    ymax = mercator(north)
-    xFactor = 1.0 * w / (east - west)
-    yFactor = 1.0 * h / (ymax - ymin)
-
-    x = math.radians(lnglat[0])
-    y = mercator(math.radians(lnglat[1]))
-    x = (x - west) * xFactor
-    y = (ymax - y) * yFactor # y points south
-    return (x, y)
-
 def getGroup(value, groups):
     group = None
     for g in groups:
@@ -110,14 +65,6 @@ def getGroup(value, groups):
             break
         group = g
     return group
-
-def withinCoordinates(coords, p):
-    within = False
-    for c in coords:
-        if mu.containsPoint(c, p):
-            within = True
-            break
-    return within
 
 data = []
 # read csv
@@ -161,13 +108,13 @@ for feature in geodata["features"]:
         break # only show biggest shape
 
 # only use data that's within coordinates
-data = [d for d in data if withinCoordinates(coordinates, (d["lon"], d["lat"]))]
+data = [d for d in data if gu.withinCoordinates(coordinates, (d["lon"], d["lat"]))]
 print "%s data points found in %s" % (len(data), args.GEO_FILE)
 
 # get bounds, ratio
-bounds = getBounds(coordinates)
+bounds = gu.getBounds(coordinates)
 print "Bounds: (%s, %s) (%s, %s)" % bounds
-(rw, rh) = getRatio(coordinates)
+(rw, rh) = gu.getRatio(coordinates)
 print "Ratio: %s x %s" % (rw, rh)
 
 # add groups
@@ -230,7 +177,7 @@ labelsGroups = {}
 for g in GROUPS:
     labelsGroups[g["key"]] = labelsGroup.add(dwg.g(id="labels%s" % g["key"]))
 for d in data:
-    # (x, y) = coordinateToPixel((d["lon"], d["lat"]), width, height, bounds)
+    # (x, y) = gu.coordinateToPixel((d["lon"], d["lat"]), width, height, bounds)
     x = d["col"] * cellW + offsetX
     y = d["row"] * cellH + offsetY
     color = "none"
