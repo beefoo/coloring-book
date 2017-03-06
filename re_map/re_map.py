@@ -45,11 +45,13 @@ HEIGHT = args.HEIGHT * DPI - PAD * 2
 CONFIG = {
     "solar": {
         "file": "data/lat_lng_ghi.csv",
-        "pattern": "star"
+        "patterns": ["honeycomb1", "honeycomb2"],
+        "alternate": "row"
     },
     "wind": {
         "file": "data/lat_lng_wind.csv",
-        "pattern": "wave"
+        "patterns": ["wave-up", "wave-down"],
+        "alternate": "col"
     }
 }
 LABELS = {
@@ -127,15 +129,20 @@ def makeMap(name, coordinates):
     global LABELS
 
     filename = CONFIG[name]["file"]
-    pattern = CONFIG[name]["pattern"]
+    patterns = CONFIG[name]["patterns"]
+    alternate = CONFIG[name]["alternate"]
     labels = LABELS[name]
     data = readCSV(filename)
 
-    # Init svg
+    # init svg
     outfilename = args.OUTPUT_FILE % name
     dwg = svgwrite.Drawing(outfilename, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
     dwgCells = dwg.add(dwg.g(id="cells"))
     dwgLabels = dwg.add(dwg.g(id="labels"))
+
+    labelsGroups = {}
+    for l in labels:
+        labelsGroups[l["display"]] = dwgLabels.add(dwg.g(id="labels%s" % l["display"]))
 
     # get bounds, ratio
     bounds = gu.getBounds(coordinates)
@@ -153,7 +160,51 @@ def makeMap(name, coordinates):
     halfW = cellW * 0.5
     halfH = cellH * 0.5
     offsetX = PAD
-    offsetY = PAD + HEIGHT - height
+    offsetY = PAD + HEIGHT - height - cellH
+
+    # define patterns
+    x1 = cellW
+    y1 = cellW
+    xc = halfW
+    yc = halfW
+
+    # diamond
+    diamond = [(xc,0), (x1,yc), (xc,y1), (0,yc), (xc,0)]
+    diamondRef = dwg.g(id="diamond")
+    diamondRef.add(dwg.polygon(points=diamond, fill="none", stroke="#000000", stroke_width=1))
+    dwg.defs.add(diamondRef)
+
+    # honeycomb
+    hh = cellW * 0.25
+    honeycomb1 = [(0,0), (xc,-hh), (x1,0), (x1,y1), (xc,y1+hh), (0,y1), (0,0)]
+    honeycomb2 = [(p[0]+xc, p[1]) for p in honeycomb1]
+    honeycombs = {
+        "honeycomb1": honeycomb1,
+        "honeycomb2": honeycomb2
+    }
+    for honeycomb in honeycombs:
+        poly = honeycombs[honeycomb]
+        honeycombRef = dwg.g(id=honeycomb)
+        honeycombRef.add(dwg.polygon(points=poly, fill="none", stroke="#000000", stroke_width=1))
+        dwg.defs.add(honeycombRef)
+
+    # wave
+    ch = cellW * 0.25
+    waveUp =   ["M0,0", "Q%s,%s %s,%s" % (xc, -ch, x1, 0),
+                "L%s,%s" % (x1, y1),
+                "Q%s,%s %s,%s" % (xc, y1-ch, 0, y1), "Z"]
+    waveDown = ["M0,0", "Q%s,%s %s,%s" % (xc, ch, x1, 0),
+                "L%s,%s" % (x1, y1),
+                "Q%s,%s %s,%s" % (xc, y1+ch, 0, y1), "Z"]
+    waves = {
+        "wave-up": waveUp,
+        "wave-down": waveDown
+    }
+    for wave in waves:
+        path = waves[wave]
+        waveRef = dwg.g(id=wave)
+        waveRef.add(dwg.path(d=path, fill="none", stroke="#000000", stroke_width=1))
+        dwg.defs.add(waveRef)
 
     # make a value matrix
     valueMatrix = [[-1 for i in xrange(cols)] for j in xrange(rows)]
@@ -167,16 +218,30 @@ def makeMap(name, coordinates):
     lnglats = []
     for c in coordinates:
         (lng, lat) = c
+        col = int(lng - bounds[0])
+        row = int(lat - bounds[1])
+        i = row * cols + col
         dp = next((d for d in data if d["lng"]==lng and d["lat"]==lat), None)
-        (x, y) = gu.coordinateToPixel((lng+0.5, lat+0.5), width-cellW, height-cellH, bounds)
-        x += offsetX
-        y += offsetY
+
+        patternI = i % len(patterns)
+        if alternate == "row":
+            patternI = row % len(patterns)
+        pattern = patterns[patternI]
+
+        # (x, y) = gu.coordinateToPixel((lng, lat), width-cellW, height-cellH, bounds)
+        # x += offsetX
+        # y += offsetY
+        x = col * cellW + offsetX
+        y = height - (row * cellH) + offsetY
+        scaleX = 1
+
+        if "honeycomb" in pattern:
+            scaleX = (width / (width+halfW))
+            x = col * cellW * scaleX + offsetX
 
         # data point not found; guess
         if dp is None:
-            nx = int(lng - bounds[0])
-            ny = int(lat - bounds[1])
-            nnValue = nearestNeighborsValue((nx, ny), valueMatrix)
+            nnValue = nearestNeighborsValue((col, row), valueMatrix)
             label = getLabel(labels, nnValue)
             # label["color"] = "red"
 
@@ -185,8 +250,19 @@ def makeMap(name, coordinates):
             label = getLabel(labels, dp["value"])
 
         color = label["color"]
-        points = [(x,y-halfW), (x+halfW,y), (x,y+halfW), (x-halfW,y), (x,y-halfW)]
-        dwgCells.add(dwg.polygon(id="l%s_%s" % c, points=points, fill=color, stroke="#000000", stroke_width=1))
+        dwgCells.add(dwg.use("#"+pattern, transform="translate(%s, %s) scale(%s,1)" % (x, y, scaleX)))
+        tx = x+halfW*scaleX
+        ty = y+halfH
+        if "wave" in pattern:
+            delta = ch * 0.25
+            ty = y+halfH-delta
+            if patternI > 0:
+                ty = y+halfH+delta
+        elif "honeycomb" in pattern:
+            if patternI > 0:
+                tx = x+cellW*scaleX
+
+        labelsGroups[label["display"]].add(dwg.text(label["display"], insert=(tx, ty), text_anchor="middle", alignment_baseline="middle", font_size=9))
         lnglats.append("%s,%s" % c)
 
     dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
