@@ -64,7 +64,7 @@ def mean(data):
     if n < 1:
         return 0
     else:
-        return sum(data) / n
+        return 1.0 * sum(data) / n
 
 def norm(value, a, b):
     return 1.0 * (value - a) / (b - a)

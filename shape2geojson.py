@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+# Usage
+#   python shape2geojson.py -in tmp/data/shapfile -out tmp/output/out.json
+
 import argparse
 import json
 import shapefile # https://github.com/GeospatialPython/pyshp
