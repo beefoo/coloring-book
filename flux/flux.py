@@ -111,10 +111,16 @@ for feature in geodata["features"]:
 data = [d for d in data if gu.withinCoordinates(coordinates, (d["lon"], d["lat"]))]
 print "%s data points found in %s" % (len(data), args.GEO_FILE)
 
+# flatten coordinates
+flattenedCoordinates = []
+for coords in coordinates:
+    for p in coords:
+        flattenedCoordinates.append(p)
+
 # get bounds, ratio
-bounds = gu.getBounds(coordinates)
+bounds = gu.getBounds(flattenedCoordinates)
 print "Bounds: (%s, %s) (%s, %s)" % bounds
-(rw, rh) = gu.getRatio(coordinates)
+(rw, rh) = gu.getRatio(flattenedCoordinates)
 print "Ratio: %s x %s" % (rw, rh)
 
 # add groups

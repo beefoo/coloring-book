@@ -26,12 +26,8 @@ def coordinateToPixel(lnglat, w, h, bounds):
     return (x, y)
 
 def getBounds(coordinates):
-    lngs = []
-    lats = []
-    for coords in coordinates:
-        for p in coords:
-            lngs.append(p[0])
-            lats.append(p[1])
+    lngs = [c[0] for c in coordinates]
+    lats = [c[1] for c in coordinates]
     minLng = min(lngs)
     maxLng = max(lngs)
     minLat = min(lats)
