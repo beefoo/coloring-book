@@ -66,6 +66,10 @@ def mean(data):
     else:
         return 1.0 * sum(data) / n
 
+# Mean of list
+def median(data):
+    return np.median(np.array(data))
+
 def norm(value, a, b):
     return 1.0 * (value - a) / (b - a)
 
