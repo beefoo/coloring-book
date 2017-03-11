@@ -31,12 +31,18 @@ PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
 
-MAX_RADIUS = 0.275 * WIDTH
+MAX_RADIUS = 0.25 * WIDTH
 MAX_AREA = math.pi * math.pow(MAX_RADIUS, 2)
-LABEL_MARGIN = 0.333 * DPI
-LABEL_MARGIN_RIGHT = 0.25 * DPI
+LABEL_W_LEFT = 0.18 * WIDTH
+LABEL_W_RIGHT = 0.16 * WIDTH
 MIN_Y_MARGIN = 0.45 * DPI
-cx = PAD + WIDTH * 0.533
+MARGIN_X = (1.0 * WIDTH - LABEL_W_LEFT - LABEL_W_RIGHT - MAX_RADIUS * 2) / 3
+TIMELINE_X = PAD + LABEL_W_LEFT + MARGIN_X
+cx = TIMELINE_X + MARGIN_X + MAX_RADIUS
+
+if MARGIN_X <= 0:
+    print "Radius is too big!"
+    sys.exit(1)
 
 def parseNumber(string):
     try:
@@ -79,8 +85,8 @@ for i, d in enumerate(data):
     data[i]["label"] = d["Name"] + add
 
 # labels should be right aligned to largest circle
-labelX0 = cx - data[0]["radius"] - LABEL_MARGIN
-labelX1 = cx + data[0]["radius"] + LABEL_MARGIN_RIGHT
+labelX0 = PAD + LABEL_W_LEFT
+labelX1 = PAD + WIDTH - LABEL_W_RIGHT
 
 # sort by year
 data = sorted(data, key=lambda k: k["Year"])
@@ -99,7 +105,7 @@ dwgCircles = dwg.add(dwg.g(id="circles"))
 dwgLabels = dwg.add(dwg.g(id="labels"))
 
 # Draw timeline
-dwgLines.add(dwg.line(start=(cx, yStart), end=(cx, yEnd), stroke="#000000", stroke_width=1))
+dwgLines.add(dwg.line(start=(TIMELINE_X, yStart), end=(TIMELINE_X, yEnd), stroke="#000000", stroke_width=1))
 
 # Draw data
 prevLY = MIN_Y_MARGIN * -1
@@ -107,10 +113,12 @@ for i, d in enumerate(data):
     radius = d["radius"]
     py = mu.norm(d["Year"], startYear, endYear)
     cy = mu.lerp(yStart, yEnd, py)
-    center = (cx, cy)
+
     # draw circle
-    dwgCircles.add(dwg.circle(center=center, r=3, fill="#000000"))
-    dwgCircles.add(dwg.circle(center=center, r=radius, stroke="#000000", stroke_width=2, fill="none"))
+    dwgCircles.add(dwg.circle(center=(cx, cy), r=radius, stroke="#000000", stroke_width=2, fill="none"))
+
+    # draw circle on timeline
+    dwgCircles.add(dwg.circle(center=(TIMELINE_X, cy), r=3, fill="#000000"))
 
     # name of typhoon
     lx = labelX0
@@ -126,8 +134,10 @@ for i, d in enumerate(data):
 
     # draw label line
     p1 = (lx + lPad, ly)
-    p2 = (cx, cy)
+    p2 = (TIMELINE_X, cy)
+    p3 = (cx-radius, cy)
     dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
+    dwgLines.add(dwg.line(start=p2, end=p3, stroke="#000000", stroke_width=1))
 
     # dead or missing
     if i <=0 or i >= len(data)-1:
@@ -142,21 +152,6 @@ for i, d in enumerate(data):
         dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
 
     prevLY = ly
-
-def getGuideRadius(amt):
-    p = 1.0 * amt / maxValue
-    area = MAX_AREA * p
-    return math.sqrt(area / math.pi)
-
-# make a circle for scale
-gx = 0.2 * WIDTH + PAD
-gy = 0.25 * HEIGHT + PAD
-# dwgGuide = dwg.add(dwg.g(id="guide"))
-# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(100), stroke="#000000", stroke_width=2, fill="none"))
-# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(500), stroke="#000000", stroke_width=2, fill="none"))
-# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(1000), stroke="#000000", stroke_width=2, fill="none"))
-# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(2500), stroke="#000000", stroke_width=2, fill="none"))
-# dwgGuide.add(dwg.circle(center=(gx, gy), r=getGuideRadius(5000), stroke="#000000", stroke_width=2, fill="none"))
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 

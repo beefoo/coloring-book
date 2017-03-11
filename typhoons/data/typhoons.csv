@@ -1,11 +1,11 @@
-Type,Name,PhilName,Year,Fatalities,Missing,Combined,Ref,Ref URL
-Typhoon,Haiyan,Yolanda,2013,6300,1061,7361,"Effects of Typhoon ""Yolanda"" (Haiyan) (Report). The Philippine National Disaster Risk Reduction and Management Council.",http://ndrrmc.gov.ph/attachments/article/1329/FINAL_REPORT_re_Effects_of_Typhoon_YOLANDA_%28HAIYAN%29_06-09NOV2013.pdf
-Typhoon,Fengshen,Frank,2008,1392,87,1479,International Federation of Red Cross and Red Crescent Societies ,http://www.ifrc.org/docs/appeals/08/MDRPH00404.pdf
-Typhoon,Bopha,Pablo,2012,1146,834,1980,OCHA,http://reliefweb.int/sites/reliefweb.int/files/resources/OCHA%20Philippines%20TyphoonBopha%20Situation%20Report%20No.19%2013February2013.pdf
-Typhoon,Durian,Reming,2006,720,762,1482,"OCD Regional Centers, LGUs, DOTC, DPWH, DSWD, DOH-HEMS, DFA, BFP, PDCC Catanduanes",http://reliefweb.int/sites/reliefweb.int/files/resources/0C6B2DAA83185D7DC12572D70020BD46-Full_Report.pdf
-Tropical Storm,Washi,Sendong,2011,1268,181,1449,NDRRMC,http://www.ndrrmc.gov.ph/attachments/article/1347/Final_Report_on_the_Effects_and_Emergency_Management_re_Tropical_Storm_SENDONG_(WASHI)_Status_of_Early_Recovery_Programs_in_Region_X_issued_10FEB2014.pdf
-Tropical Storm,Thelma,Uring,1991,5101,1450,6551,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
-Typhoon,Ike,Nitang,1984,1363,819,2182,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
-Typhoon,Amy,,1951,991,0,991,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
-Typhoon,Nina,Sisang,1987,979,0,979,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
-Typhoon,Trix,,1952,995,0,995,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
+Type,Name,PhilName,Year,Date,Fatalities,Missing,Combined,Ref,Ref URL
+Typhoon,Haiyan,Yolanda,2013,2013-11-02,6300,1061,7361,NDRRMC,http://ndrrmc.gov.ph/attachments/article/1329/FINAL_REPORT_re_Effects_of_Typhoon_YOLANDA_%28HAIYAN%29_06-09NOV2013.pdf
+Tropical Storm,Thelma,Uring,1991,1991-11-02,5101,1450,6551,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
+Typhoon,Ike,Nitang,1984,1984-08-31,1363,819,2182,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
+Typhoon,Bopha,Pablo,2012,2012-11-25,1146,834,1980,OCHA,http://reliefweb.int/sites/reliefweb.int/files/resources/OCHA%20Philippines%20TyphoonBopha%20Situation%20Report%20No.19%2013February2013.pdf
+Typhoon,Durian,Reming,2006,2006-11-26,720,762,1482,NDRRMC,http://reliefweb.int/sites/reliefweb.int/files/resources/0C6B2DAA83185D7DC12572D70020BD46-Full_Report.pdf
+Typhoon,Fengshen,Frank,2008,2008-06-18,1392,87,1479,IFRC,http://www.ifrc.org/docs/appeals/08/MDRPH00404.pdf
+Tropical Storm,Washi,Sendong,2011,2011-12-13,1268,181,1449,NDRRMC,http://www.ndrrmc.gov.ph/attachments/article/1347/Final_Report_on_the_Effects_and_Emergency_Management_re_Tropical_Storm_SENDONG_(WASHI)_Status_of_Early_Recovery_Programs_in_Region_X_issued_10FEB2014.pdf
+Typhoon,Trix,,1952,1952-10-16,995,0,995,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
+Typhoon,Amy,,1951,1951-12-06,991,0,991,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
+Typhoon,Nina,Sisang,1987,1987-11-23,979,0,979,WeatherPhilippines,http://www.typhoon2000.ph/stormstats/WPF_DeadliestTyphoonsPhilippines_2015Ed.pdf
