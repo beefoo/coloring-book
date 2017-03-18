@@ -177,6 +177,8 @@ offsetY = (HEIGHT - targetH) * 0.5
 # Draw contours
 xoffset = PAD + MARGIN + 10
 yoffset = PAD + offsetY
+referenceLines = []
+dwgRefrenceGroup = dwgLand.add(dwg.g(id="reference"))
 for i, contour in enumerate(contours):
     dwgGroup = dwgLand.add(dwg.g(id=contour["label"]))
     # image as bg
@@ -203,6 +205,8 @@ for i, contour in enumerate(contours):
             # add polygon
             line = dwg.polygon(id=contour["label"]+str(j), points=points, stroke="#000000", stroke_width=2, fill="#FFFFFF")
             dwgGroup.add(line)
+            if i <= 0:
+                referenceLines.append(points)
     # add label
     degrees = 0
     if i > 0:
@@ -210,6 +214,16 @@ for i, contour in enumerate(contours):
     labelX = xoffset + targetW * LABEL_X
     labelY = yoffset + targetH * LABEL_Y
     dwgLabels.add(dwg.text("+%s°C" % degrees, insert=(labelX, labelY), text_anchor="middle", font_size=28))
+    xoffset += MARGIN_X + targetW
+
+# draw references
+xoffset = MARGIN_X + targetW
+for d in DEGREES:
+    for points in referenceLines:
+        # add polygon
+        offsetPoints = [(p[0]+xoffset, p[1]) for p in points]
+        line = dwg.polygon(id="reference"+str(d), points=offsetPoints, stroke="#000000", stroke_width=1, fill="none", stroke_dasharray="5,2")
+        dwgGroup.add(line)
     xoffset += MARGIN_X + targetW
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
