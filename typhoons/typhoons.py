@@ -20,8 +20,8 @@ parser = argparse.ArgumentParser()
 # Source: http://cdiac.ornl.gov/trends/emis/tre_glob_2013.html
 # Unit: One million metric tons of carbon
 parser.add_argument('-in', dest="INPUT_FILE", default="data/typhoons.csv", help="Input file")
-parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
-parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
+parser.add_argument('-width', dest="WIDTH", type=float, default=11, help="Width of output file")
+parser.add_argument('-height', dest="HEIGHT", type=float, default=8.5, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-out', dest="OUTPUT_FILE", default="data/typhoons.svg", help="Path pattern to output svg file")
 
@@ -31,16 +31,16 @@ PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
 
-MAX_RADIUS = 0.25 * WIDTH
+MAX_RADIUS = 0.25 * HEIGHT
 MAX_AREA = math.pi * math.pow(MAX_RADIUS, 2)
-LABEL_W_LEFT = 0.18 * WIDTH
-LABEL_W_RIGHT = 0.16 * WIDTH
-MIN_Y_MARGIN = 0.45 * DPI
-MARGIN_X = (1.0 * WIDTH - LABEL_W_LEFT - LABEL_W_RIGHT - MAX_RADIUS * 2) / 3
-TIMELINE_X = PAD + LABEL_W_LEFT + MARGIN_X
-cx = TIMELINE_X + MARGIN_X + MAX_RADIUS
+LABEL_H_BTM = 0.16 * HEIGHT
+LABEL_H_TOP = 0.12 * HEIGHT
+MIN_X_MARGIN = 0.45 * DPI
+MARGIN_Y = (1.0 * HEIGHT - LABEL_H_BTM - LABEL_H_TOP - MAX_RADIUS * 2) / 3
+TIMELINE_Y = PAD + HEIGHT - LABEL_H_BTM - MARGIN_Y
+cy = TIMELINE_Y - MARGIN_Y - MAX_RADIUS
 
-if MARGIN_X <= 0:
+if MARGIN_Y <= 0:
     print "Radius is too big!"
     sys.exit(1)
 
@@ -85,18 +85,18 @@ for i, d in enumerate(data):
     data[i]["label"] = d["Name"] + add
 
 # labels should be right aligned to largest circle
-labelX0 = PAD + LABEL_W_LEFT
-labelX1 = PAD + WIDTH - LABEL_W_RIGHT
+labelY0 = PAD + HEIGHT - LABEL_H_BTM
+labelY1 = PAD + LABEL_H_TOP
 
 # sort by year
 data = sorted(data, key=lambda k: k["Year"])
 startYear = data[0]["Year"]
 endYear = data[-1]["Year"]
 totalYears = endYear - startYear
-yStart = PAD + data[0]["radius"]
-yEnd = PAD + HEIGHT - data[-1]["radius"]
-timelineH = yEnd - yStart
-yearH = 1.0 * timelineH / totalYears
+xStart = PAD + data[0]["radius"]
+xEnd = PAD + WIDTH - data[-1]["radius"]
+timelineW = xEnd - xStart
+yearW = 1.0 * timelineW / totalYears
 
 # Init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
@@ -105,53 +105,53 @@ dwgCircles = dwg.add(dwg.g(id="circles"))
 dwgLabels = dwg.add(dwg.g(id="labels"))
 
 # Draw timeline
-dwgLines.add(dwg.line(start=(TIMELINE_X, yStart), end=(TIMELINE_X, yEnd), stroke="#000000", stroke_width=1))
+dwgLines.add(dwg.line(start=(xStart, TIMELINE_Y), end=(xEnd, TIMELINE_Y), stroke="#000000", stroke_width=1))
 
 # Draw data
-prevLY = MIN_Y_MARGIN * -1
+prevLX = MIN_X_MARGIN * -1
 for i, d in enumerate(data):
     radius = d["radius"]
-    py = mu.norm(d["Year"], startYear, endYear)
-    cy = mu.lerp(yStart, yEnd, py)
+    px = mu.norm(d["Year"], startYear, endYear)
+    cx = mu.lerp(xStart, xEnd, px)
 
     # draw circle
     dwgCircles.add(dwg.circle(center=(cx, cy), r=radius, stroke="#000000", stroke_width=2, fill="none"))
 
     # draw circle on timeline
-    dwgCircles.add(dwg.circle(center=(TIMELINE_X, cy), r=3, fill="#000000"))
+    dwgCircles.add(dwg.circle(center=(cx, TIMELINE_Y), r=3, fill="#000000"))
 
     # name of typhoon
-    lx = labelX0
-    ly = cy
-    if ly < prevLY + MIN_Y_MARGIN:
-        ly = prevLY + MIN_Y_MARGIN
+    lx = cx
+    ly = labelY0
+    if lx < prevLX + MIN_X_MARGIN:
+        lx = prevLX + MIN_X_MARGIN
     lPad = 6
     labelString = d["label"]
     if i <= 0:
         labelString = d["Type"] + " " + labelString
-    dwgLabels.add(dwg.text(labelString, insert=(lx, ly-lPad), text_anchor="end", alignment_baseline="middle", font_size=12))
-    dwgLabels.add(dwg.text(str(d["Year"]), insert=(lx, ly+lPad), text_anchor="end", alignment_baseline="middle", font_size=12))
+    dwgLabels.add(dwg.text(labelString, insert=(lx, ly-lPad), text_anchor="start", font_size=12, dominant_baseline="central", transform="rotate(60,%s,%s)" % (lx, ly)))
+    dwgLabels.add(dwg.text(str(d["Year"]), insert=(lx, ly+lPad), text_anchor="start", font_size=12, dominant_baseline="central", transform="rotate(60,%s,%s)" % (lx, ly)))
 
     # draw label line
-    p1 = (lx + lPad, ly)
-    p2 = (TIMELINE_X, cy)
-    p3 = (cx-radius, cy)
+    p1 = (lx, ly-lPad)
+    p2 = (cx, TIMELINE_Y)
+    p3 = (cx, cy+radius)
     dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
     dwgLines.add(dwg.line(start=p2, end=p3, stroke="#000000", stroke_width=1))
 
     # dead or missing
     if i <=0 or i >= len(data)-1:
-        lx = labelX1
+        ly = labelY1
         labelString = "{:,}".format(d["Combined"])
-        dwgLabels.add(dwg.text(labelString, insert=(lx, cy-lPad), text_anchor="start", alignment_baseline="middle", font_size=12))
-        dwgLabels.add(dwg.text("dead or missing", insert=(lx, cy+lPad), text_anchor="start", alignment_baseline="middle", font_size=12))
+        dwgLabels.add(dwg.text(labelString, insert=(cx, ly-lPad), text_anchor="start", alignment_baseline="after-edge", font_size=12))
+        dwgLabels.add(dwg.text("dead or missing", insert=(cx, ly+lPad), text_anchor="start", alignment_baseline="after-edge", font_size=12))
 
         # draw label line
-        p1 = (lx - lPad, cy)
-        p2 = (cx + radius, cy)
+        p1 = (cx, ly + lPad * 2)
+        p2 = (cx, cy-radius)
         dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
 
-    prevLY = ly
+    prevLX = lx
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
 
