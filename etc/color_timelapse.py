@@ -7,9 +7,10 @@ import sys
 
 # Usage:
 #   python color_timelapse.py -output "output/flux-diagonal/frame-%s.jpg" -sort diagonal
-#   ffmpeg -f image2 -framerate 6 -i output/flux-diagonal/frame-%02d.jpg -vf scale=600x464 output/flux-diagonal.gif
-#   python color_timelapse.py -output "output/flux-horizontal/frame-%s.jpg" -sort horizontal
-#   ffmpeg -f image2 -framerate 6 -i output/flux-horizontal/frame-%02d.jpg -vf scale=600x464 output/flux-horizontal.gif
+#   ffmpeg -f image2 -framerate 6 -i output/flux-diagonal/frame-%02d.jpg -vf scale=480x301 output/flux-diagonal.gif
+
+#   python color_timelapse.py -from "data/air_pollution-01.png" -to "data/air_pollution_color-01.png" -output "output/pollution-horizontal/frame-%s.jpg" -sort horizontal
+#   ffmpeg -f image2 -framerate 6 -i output/pollution-horizontal/frame-%02d.jpg -vf scale=368x420 output/pollution-horizontal.gif
 
 # input
 parser = argparse.ArgumentParser()
