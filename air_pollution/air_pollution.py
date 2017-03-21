@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import base64
 import csv
 import datetime
 import glob
@@ -31,6 +32,7 @@ parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding o
 parser.add_argument('-osc', dest="OSCILLATE", type=float, default=24.0, help="Amount to oscillate")
 parser.add_argument('-daypad', dest="DAY_PAD", type=int, default=0, help="Padding around each day")
 parser.add_argument('-rowpad', dest="ROW_PAD", type=int, default=6, help="Padding around each row")
+parser.add_argument('-color', dest="SHOW_COLOR", type=bool, default=False, help="Whether or not to display color")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/Beijing_2015_DailyPM25.svg", help="Path to output svg file")
 
 # init input
@@ -43,18 +45,19 @@ HEIGHT = args.HEIGHT * DPI - PAD * 2 - OSCILLATE * 2
 DAYS_PER_ROW = args.DAYS_PER_ROW
 DAY_PAD = args.DAY_PAD
 ROW_PAD = args.ROW_PAD
+SHOW_COLOR = args.SHOW_COLOR
 
 # Config Air Quality Index
 # https://www.airnow.gov/index.cfm?action=aqibasics.aqi
 # http://ec.europa.eu/environment/integration/research/newsalert/pdf/24si_en.pdf
 AQI = [
-    {"max": 50, "label": "Good", "color": "Green", "meaning": "Air quality is considered satisfactory, and air pollution poses little or no risk."},
-    {"max": 100, "label": "Moderate", "color": "Yellow", "meaning": "Air quality is acceptable; however, for some pollutants there may be a moderate health concern for a very small number of people who are unusually sensitive to air pollution."},
-    {"max": 150, "label": "Unhealthy for Sensitive Groups", "color": "Orange", "meaning": "Members of sensitive groups may experience health effects. The general public is not likely to be affected."},
-    {"max": 200, "label": "Unhealthy", "color": "Red", "meaning": "Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects."},
-    {"max": 300, "label": "Very Unhealthy", "color": "Purple", "meaning": "Health alert: everyone may experience more serious health effects."},
-    {"max": 500, "label": "Hazardous", "color": "Maroon", "meaning": "Health warnings of emergency conditions. The entire population is more likely to be affected."},
-    {"max": 9999, "label": "Beyond Index", "color": "Black", "meaning": "Air quality is so bad it exceeds the maximum defined value on the Air Quality Index."}
+    {"max": 50, "label": "Good", "color": "Green", "meaning": "Air quality is considered satisfactory, and air pollution poses little or no risk.", "image": "data/lime.png"},
+    {"max": 100, "label": "Moderate", "color": "Yellow", "meaning": "Air quality is acceptable; however, for some pollutants there may be a moderate health concern for a very small number of people who are unusually sensitive to air pollution.", "image": "data/yellow.png"},
+    {"max": 150, "label": "Unhealthy for Sensitive Groups", "color": "Orange", "meaning": "Members of sensitive groups may experience health effects. The general public is not likely to be affected.", "image": "data/orange.png"},
+    {"max": 200, "label": "Unhealthy", "color": "Red", "meaning": "Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.", "image": "data/red.png"},
+    {"max": 300, "label": "Very Unhealthy", "color": "Purple", "meaning": "Health alert: everyone may experience more serious health effects.", "image": "data/violet.png"},
+    {"max": 500, "label": "Hazardous", "color": "Maroon", "meaning": "Health warnings of emergency conditions. The entire population is more likely to be affected.", "image": "data/brown.png"},
+    {"max": 9999, "label": "Beyond Index", "color": "Black", "meaning": "Air quality is so bad it exceeds the maximum defined value on the Air Quality Index.", "image": "data/black.png"}
 ]
 
 def dayOfWeek(date):
@@ -77,6 +80,14 @@ def getValue(value, index):
             v = i + 1
             break
     return v
+
+def getGroup(value, index):
+    group = index[-1]
+    for r in index:
+        if value < r["max"]:
+            group = r
+            break
+    return group
 
 # Read file
 readings = []
@@ -142,6 +153,18 @@ xOffset = (WIDTH - (cell_l * offsetDaysPerRow)) * 0.5
 yOffset = (HEIGHT - (cell_l * rows) - ROW_PAD * (rows-1)) * 0.5
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2+OSCILLATE*2), profile='full')
 
+# define color patterns
+if SHOW_COLOR:
+    for g in AQI:
+        imageSize = (300, 300)
+        imageData = ""
+        with open(g["image"], "rb") as f:
+            imageData = base64.b64encode(f.read())
+        dwgImage = dwg.image(href="data:image/png;base64,%s" % imageData, insert=(0, 0), size=imageSize)
+        dwgPattern = dwg.pattern(id="pattern%s" % g["max"], patternUnits="userSpaceOnUse", size=imageSize)
+        dwgPattern.add(dwgImage)
+        dwg.defs.add(dwgPattern)
+
 # add days to svg
 day_r = (cell_l - DAY_PAD * 2) * 0.5
 dwgShapes = dwg.add(dwg.g(id="shapes"))
@@ -167,8 +190,12 @@ for i, r in enumerate(readings):
         x += cell_l * 0.1
         dwgMonths.add(dwg.text(r["label"], insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=12))
     else:
+        color = "none"
+        if SHOW_COLOR:
+            group = getGroup(r['value'], AQI)
+            color = "url(#pattern%s)" % group["max"]
         # add circle
-        dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=2, fill="none"))
+        dwgShapes.add(dwg.circle(center=(x, y), r=day_r, stroke="#000000", stroke_width=2, fill=color))
         # add value as label
         value = getValue(r['value'], AQI)
         dwgLabels.add(dwg.text(str(value), insert=(x, y), text_anchor="middle", alignment_baseline="middle", font_size=12))
