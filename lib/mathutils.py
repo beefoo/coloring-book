@@ -6,12 +6,19 @@ import numpy as np
 from polysimplify import VWSimplifier
 from scipy.ndimage import gaussian_filter1d
 
+def angleBetweenPoints(p1, p2):
+    rad = radiansBetweenPoints(p1, p2)
+    return math.degrees(rad)
+
 def ceilToNearest(x, nearest):
     return math.ceil(1.0 * x / nearest) * nearest
 
 def containsPoint(points, point):
     bbPath = mplPath.Path(np.array(points))
     return bbPath.contains_point(point)
+
+def distanceBetweenPoints(p1, p2):
+    return math.hypot(p2[0] - p1[0], p2[1] - p1[1])
 
 def ellipseCircumference(a, b):
     t = ((a-b)/(a+b))**2
