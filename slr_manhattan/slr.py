@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import base64
 import colorsys
 import inspect
 import matplotlib.pyplot as plt
@@ -27,6 +28,7 @@ parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Heig
 parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-mpa', dest="MIN_POLY_AREA", type=float, default=0.002, help="Minimum polygon area to match")
 parser.add_argument('-image', dest="SHOW_IMAGE", type=bool, default=False, help="Show image")
+parser.add_argument('-color', dest="SHOW_COLOR", type=bool, default=False, help="Whether or not to display color")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/manhattan_slr.svg", help="Path to output svg file")
 
 # init input
@@ -41,6 +43,7 @@ MIN_POLY_AREA = args.MIN_POLY_AREA
 DEGREES = [2, 4]
 ALPHA_THRESHOLD = 0.5
 SHOW_IMAGE = args.SHOW_IMAGE
+SHOW_COLOR = args.SHOW_COLOR
 MARGIN = 0.25 * DPI
 MARGIN_X = -0.175 * DPI
 WATER_STEP_X = 0.1 * DPI
@@ -57,6 +60,17 @@ dwg = svgwrite.Drawing(OUTPUT_FILE, size=(WIDTH + PAD*2, HEIGHT + PAD*2), profil
 dwgWater = dwg.add(dwg.g(id="water"))
 dwgLand = dwg.add(dwg.g(id="land"))
 dwgLabels = dwg.add(dwg.g(id="labels"))
+
+if SHOW_COLOR:
+    imageSize = (300, 300)
+    imageData = ""
+    for color in ["lime","red"]:
+        with open("data/%s.png" % color, "rb") as f:
+            imageData = base64.b64encode(f.read())
+        dwgImage = dwg.image(href="data:image/png;base64,%s" % imageData, insert=(0, 0), size=imageSize)
+        dwgPattern = dwg.pattern(id="%spattern" % color, patternUnits="userSpaceOnUse", size=imageSize)
+        dwgPattern.add(dwgImage)
+        dwg.defs.add(dwgPattern)
 
 # Draw water
 maxWave = max(WATER_OSCILLATE_Y[0], WATER_OSCILLATE_Y[1])
@@ -202,8 +216,11 @@ for i, contour in enumerate(contours):
             # scale and translate
             points = mu.scalePoints(points, scale)
             points = mu.translatePoints(points, xoffset, yoffset)
+            fillColor = "#FFFFFF"
+            if SHOW_COLOR:
+                fillColor = "url(#limepattern)"
             # add polygon
-            line = dwg.polygon(id=contour["label"]+str(j), points=points, stroke="#000000", stroke_width=2, fill="#FFFFFF")
+            line = dwg.polygon(id=contour["label"]+str(j), points=points, stroke="#000000", stroke_width=2, fill=fillColor)
             dwgGroup.add(line)
             if i <= 0:
                 referenceLines.append(points)
@@ -222,8 +239,11 @@ for d in DEGREES:
     for points in referenceLines:
         # add polygon
         offsetPoints = [(p[0]+xoffset, p[1]) for p in points]
-        line = dwg.polygon(id="reference"+str(d), points=offsetPoints, stroke="#000000", stroke_width=1, fill="none", stroke_dasharray="5,2")
-        dwgGroup.add(line)
+        fillColor = "none"
+        if SHOW_COLOR:
+            fillColor = "url(#redpattern)"
+        line = dwg.polygon(id="reference"+str(d), points=offsetPoints, stroke="#000000", stroke_width=1, fill=fillColor, stroke_dasharray="5,2")
+        dwgRefrenceGroup.add(line)
     xoffset += MARGIN_X + targetW
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
