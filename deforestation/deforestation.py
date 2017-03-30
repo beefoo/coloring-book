@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import base64
 import inspect
 import math
 import os
@@ -19,6 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
+parser.add_argument('-color', dest="SHOW_COLOR", type=bool, default=False, help="Whether or not to display color")
 parser.add_argument('-output', dest="OUTPUT_FILE", default="data/deforestation.svg", help="Path to output svg file")
 
 # init input
@@ -27,6 +29,7 @@ DPI = 72
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
+SHOW_COLOR = args.SHOW_COLOR
 
 # source: http://www.fao.org/3/a-i4793e.pdf, pg. 3
 # 1990: million hectares of forest globally
@@ -72,13 +75,26 @@ fieldW = fieldH * (fieldRatioW / fieldRatioH)
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
 # dwg.add(dwg.line(start=(PAD, 0), end=(PAD, HEIGHT+PAD*2), stroke="#000000"))
 
+if SHOW_COLOR:
+    imageSize = (300, 300)
+    imageData = ""
+    with open("data/lime.png", "rb") as f:
+        imageData = base64.b64encode(f.read())
+    dwgImage = dwg.image(href="data:image/png;base64,%s" % imageData, insert=(0, 0), size=imageSize)
+    dwgPattern = dwg.pattern(id="colorpattern", patternUnits="userSpaceOnUse", size=imageSize)
+    dwgPattern.add(dwgImage)
+    dwg.defs.add(dwgPattern)
+
 # field reference
 fieldStrokeW = 1.5
 goalH = fieldH * 0.5
 goalW = fieldW * 0.2
 goalY = (fieldH - goalH) * 0.5
 dwgField = dwg.g(id="field")
-dwgField.add(dwg.rect(insert=(0,0), size=(fieldW, fieldH), stroke_width=(fieldStrokeW*2), stroke="#000000", fill="none")) # outline
+color = "none"
+if SHOW_COLOR:
+    color = "url(#colorpattern)"
+dwgField.add(dwg.rect(insert=(0,0), size=(fieldW, fieldH), stroke_width=(fieldStrokeW*2), stroke="#000000", fill=color)) # outline
 dwgField.add(dwg.line(start=(fieldW*0.5, 0), end=(fieldW*0.5, fieldH), stroke_width=fieldStrokeW, stroke="#000000")) # half line
 dwgField.add(dwg.circle(center=(fieldW*0.5, fieldH*0.5), r=fieldH*0.15, stroke_width=fieldStrokeW, stroke="#000000", fill="none")) # center circle
 dwgField.add(dwg.rect(insert=(0,goalY), size=(goalW, goalH), stroke_width=fieldStrokeW, stroke="#000000", fill="none")) # left goal
