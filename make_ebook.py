@@ -20,6 +20,7 @@ parser.add_argument('-inputdir', dest="INPUT_DIR", default="print/", help="Direc
 parser.add_argument('-outputdir', dest="OUTPUT_DIR", default="compiled/", help="Directory for output files")
 parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of pdf")
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11.0, help="Height of pdf")
+parser.add_argument('-printing', dest="FOR_PRINTING", type=bool, default=True, help="Include other printable pdfs")
 
 # init input
 args = parser.parse_args()
@@ -28,6 +29,7 @@ MANIFEST_DIR = BASE_DIR + args.MANIFEST_DIR
 INPUT_MANIFEST_FILES = [MANIFEST_DIR + f + '.csv' for f in args.INPUT_MANIFEST_FILES.split(",")]
 INPUT_DIR = BASE_DIR + args.INPUT_DIR
 OUTPUT_DIR = BASE_DIR + args.OUTPUT_DIR
+FOR_PRINTING = args.FOR_PRINTING
 
 # config page
 WIDTH = args.WIDTH
@@ -75,14 +77,16 @@ for f in manifest_files:
     filename =  directory + "/" + f["name"]
     makePDF(pages, filename + ".pdf")
 
-    # covers
-    covers = [pages.pop(0), pages.pop()]
-    makePDF(covers, filename + "-covers.pdf")
+    if FOR_PRINTING:
 
-    # even pages
-    evens = [p for i, p in enumerate(pages) if i % 2 <= 0]
-    makePDF(evens, filename + "-evens.pdf")
+        # covers
+        covers = [pages.pop(0), pages.pop()]
+        makePDF(covers, filename + "-covers.pdf")
 
-    # odd pages
-    odds = [p for i, p in enumerate(pages) if i % 2 > 0]
-    makePDF(odds, filename + "-odds.pdf")
+        # even pages
+        evens = [p for i, p in enumerate(pages) if i % 2 <= 0]
+        makePDF(evens, filename + "-evens.pdf")
+
+        # odd pages
+        odds = [p for i, p in enumerate(pages) if i % 2 > 0]
+        makePDF(odds, filename + "-odds.pdf")
