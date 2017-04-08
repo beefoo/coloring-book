@@ -1,2 +1,4 @@
 output/*
 !output/.keep
+input/*
+!input/.keep
