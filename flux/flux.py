@@ -17,6 +17,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from pyproj import Proj
 from scipy.cluster.vq import kmeans, vq
 import svgwrite
 import sys
@@ -27,6 +28,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 import lib.geoutils as gu
+import lib.mathutils as mu
 
 # input
 parser = argparse.ArgumentParser()
@@ -57,6 +59,16 @@ GROUPS = [
     {"key": "5", "min": 500, "label": "500 to 1000 metric tons", "color": "#a82222", "image": "data/brown.png"},
     {"key": "6", "min": 1000, "label": "Over 1000 metric tons", "color": "#7c139e", "image": "data/black.png"}
 ]
+
+# Specify the parameters of the USA Contiguous Conformal spatial ref.system
+# using Lambert's Conformal Conic projection method
+CM = '-96.0'    # central meridian
+LOO = '39.0'    # latitude or origin
+SP1 = '33.0'    # 1st standard parallel
+SP2 = '45.0'    # 2nd standard parallel
+FE = '0.0'      # false easting
+FN = '0.0'      # false northing
+lccProj = Proj(ellps='GRS80',proj='lcc',lon_0=CM,lat_0=LOO,lat_1=SP1,lat_2=SP2,x_0=FE,y_0=FN)
 
 def getGroup(value, groups):
     group = None
@@ -117,6 +129,23 @@ for coords in coordinates:
     for p in coords:
         flattenedCoordinates.append(p)
 
+# project lon,lat using LCC
+for i,d in enumerate(data):
+    x,y = lccProj(d["lon"], d["lat"])
+    data[i]["x"] = x
+    data[i]["y"] = y
+
+# get x,y bounds
+xs = [d["x"] for d in data]
+ys = [d["y"] for d in data]
+xBound = (min(xs), max(xs))
+yBound = (max(ys), min(ys))
+
+# normalize x,y
+for i,d in enumerate(data):
+    data[i]["xn"] = mu.norm(d["x"], xBound[0], xBound[1])
+    data[i]["yn"] = mu.norm(d["y"], yBound[0], yBound[1])
+
 # get bounds, ratio
 bounds = gu.getBounds(flattenedCoordinates)
 print "Bounds: (%s, %s) (%s, %s)" % bounds
@@ -154,6 +183,8 @@ width = 1.0 * WIDTH
 height = width * rh / rw
 cellW = width / (colDiff+1)
 cellH = height / (rowDiff+1)
+innerWidth = width - cellW
+innerHeight = height - cellH
 halfW = cellW * 0.5
 halfH = cellH * 0.5
 offsetX = PAD
@@ -183,9 +214,16 @@ labelsGroups = {}
 for g in GROUPS:
     labelsGroups[g["key"]] = labelsGroup.add(dwg.g(id="labels%s" % g["key"]))
 for d in data:
+    # Mercator proj
     # (x, y) = gu.coordinateToPixel((d["lon"], d["lat"]), width, height, bounds)
-    x = d["col"] * cellW + offsetX
-    y = d["row"] * cellH + offsetY
+
+    # No proj
+    # x = d["col"] * cellW + offsetX
+    # y = d["row"] * cellH + offsetY
+
+    # LCC proj
+    x = d["xn"] * innerWidth + offsetX
+    y = d["yn"] * innerHeight + offsetY
     color = "none"
     if SHOW_COLOR:
         # color = d["group"]["color"]
