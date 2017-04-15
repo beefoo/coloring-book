@@ -50,6 +50,8 @@ SHOW_COLOR = args.SHOW_COLOR
 Y_OFFSET = 0.1 * HEIGHT
 LATS = 180
 LONS = 360
+CELL_PAD_X = 0.4
+CELL_PAD_Y = 0.8
 
 GROUPS = [
     {"key": "1", "min": 0, "label": "Under 1 metric ton", "color": "#90b272", "image": "data/white.png"},
@@ -185,8 +187,8 @@ cellW = width / (colDiff+1)
 cellH = height / (rowDiff+1)
 innerWidth = width - cellW
 innerHeight = height - cellH
-halfW = cellW * 0.5
-halfH = cellH * 0.5
+halfW = cellW * 0.5 - CELL_PAD_X
+halfH = cellH * 0.5 - CELL_PAD_Y
 offsetX = PAD
 offsetY = PAD + (HEIGHT - height) * 0.667
 
