@@ -19,6 +19,7 @@ DPI = 72
 PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
+CIRCLE_MARGIN = 10
 
 # conversion between BTU and Watt Hour
 BTU_PER_WH = 3.412141633
@@ -81,7 +82,7 @@ print "Solar potential: %s (%s%%)" % (solarPotential,  round(1.0*solarPotential/
 
 def writeSvg(filename, data):
     # sort data
-    data = sorted(data, key=lambda k: -k['value'])
+    data = sorted(data, key=lambda k: k['value'])
 
     # init svg
     dwg = svgwrite.Drawing(filename, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
@@ -115,17 +116,21 @@ def writeSvg(filename, data):
     wavesPattern.add(dwg.path(d="M27 32c0-3.314 2.686-6 6-6 5.523 0 10-4.477 10-10S38.523 6 33 6c-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 6.627 0 12 5.373 12 12s-5.373 12-12 12c-2.21 0-4 1.79-4 4h-2zm-6 0c0-3.314-2.686-6-6-6-5.523 0-10-4.477-10-10S9.477 6 15 6c3.314 0 6-2.686 6-6h-2c0 2.21-1.79 4-4 4C8.373 4 3 9.373 3 16s5.373 12 12 12c2.21 0 4 1.79 4 4h2z", fill="#000000"))
     dwg.defs.add(wavesPattern)
 
-    shapes = dwg.add(dwg.g(id="shapes"))
-    radius = WIDTH * 0.5
+    # calculate radius
+    totalHeight = 1.0 * HEIGHT - CIRCLE_MARGIN * (len(data)-1)
+    diameter = totalHeight / (sum([math.sqrt(d["value"]) for d in data]))
+    radius = diameter * 0.5
     area = math.pi * math.pow(radius, 2)
+
+    y = 0
+    shapes = dwg.add(dwg.g(id="shapes"))
     for i, item in enumerate(data):
         itemArea = area * item["value"]
         itemRadius = math.sqrt(itemArea / math.pi)
-        offsetY = radius - itemRadius
+        y += itemRadius
         x = WIDTH*0.5
-        y = HEIGHT*0.5 - offsetY
-        y += i * 10
         shapes.add(dwg.circle(center=(x+PAD, y+PAD), r=itemRadius, fill="url(#%s)" % item["pattern"], stroke="#000000", stroke_width=item["width"]))
+        y += itemRadius + CIRCLE_MARGIN
     dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
     dwg.save()
     print "Saved svg: %s" % filename
