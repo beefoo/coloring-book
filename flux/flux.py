@@ -2,7 +2,9 @@
 
 # Usage:
 #   python flux.py
-#   python flux.py -geo data/CHN.geo.json -color True
+#   python flux.py -color True -out data/flux_%s_color.svg
+#   python flux.py -geo data/CHN.geo.json -color True -out data/flux_%s_color.svg -proj Asia
+#   python flux.py -geo data/BRA.geo.json -color True -out data/flux_%s_color.svg -proj SA
 
 # Data source:
 # https://www.esrl.noaa.gov/gmd/ccgg/carbontracker/fluxes.php
@@ -38,6 +40,7 @@ parser.add_argument('-width', dest="WIDTH", type=float, default=11, help="Width 
 parser.add_argument('-height', dest="HEIGHT", type=float, default=8.5, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
 parser.add_argument('-color', dest="SHOW_COLOR", type=bool, default=False, help="Whether or not to display color")
+parser.add_argument('-proj', dest="PROJECTION", default="USA", help="For projection parameters: USA, Asia, Europe, SA")
 parser.add_argument('-out', dest="OUTPUT_FILE", default="data/flux_%s.svg", help="Path to output svg file")
 
 # init input
@@ -47,6 +50,7 @@ PAD = args.PAD * DPI
 WIDTH = args.WIDTH * DPI - PAD * 2
 HEIGHT = args.HEIGHT * DPI - PAD * 2
 SHOW_COLOR = args.SHOW_COLOR
+PROJECTION = args.PROJECTION
 Y_OFFSET = 0.1 * HEIGHT
 LATS = 180
 LONS = 360
@@ -62,15 +66,16 @@ GROUPS = [
     {"key": "6", "min": 1000, "label": "Over 1000 metric tons", "color": "#7c139e", "image": "data/black.png"}
 ]
 
-# Specify the parameters of the USA Contiguous Conformal spatial ref.system
-# using Lambert's Conformal Conic projection method
-CM = '-96.0'    # central meridian
-LOO = '39.0'    # latitude or origin
-SP1 = '33.0'    # 1st standard parallel
-SP2 = '45.0'    # 2nd standard parallel
-FE = '0.0'      # false easting
-FN = '0.0'      # false northing
-lccProj = Proj(ellps='GRS80',proj='lcc',lon_0=CM,lat_0=LOO,lat_1=SP1,lat_2=SP2,x_0=FE,y_0=FN)
+# Specify the parameters of the Regional Conformal spatial ref.system using Lambert's Conformal Conic projection method
+# Format: [central meridian, latitude or origin, 1st standard parallel, 2nd standard parallel, false easting, false northing]
+PROJ_PARAMS = {
+    "USA": ['-96.0','39.0','33.0','45.0','0.0','0.0'],
+    "Asia": ['105.0','0.0','30.0','62.0','0.0','0.0'],
+    "Europe": ['10.0','30.0','43.0','62.0','0.0','0.0'],
+    "SA": ['-60.0','-32.0','-5.0','-42.0','0.0','0.0']
+}
+proj = PROJ_PARAMS[PROJECTION]
+lccProj = Proj(ellps='GRS80',proj='lcc',lon_0=proj[0],lat_0=proj[1],lat_1=proj[2],lat_2=proj[3],x_0=proj[4],y_0=proj[5])
 
 def getGroup(value, groups):
     group = None
