@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# Usage:
+#   python air_pollution.py
+#   python air_pollution.py -input data/delhi_openaq_formatted.csv -color True -output data/air_pollution_delhi_color.svg
+
 import argparse
 import base64
 import csv
@@ -102,7 +106,7 @@ with open(args.INPUT_FILE, 'rb') as f:
     currentMonth = -1
     sort = 0
     for _site,_parameter,_date,_year,_month,_day,_hour,_value,_unit,_duration,_qc in r:
-        value = int(_value)
+        value = int(round(float(_value)))
         date = datetime.date(int(_year), int(_month), int(_day))
         sort = 10000*int(_year) + 100*int(_month) + int(_day)
         if currentMonth != date.month:
