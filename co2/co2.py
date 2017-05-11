@@ -78,7 +78,7 @@ for entry in CONFIG:
     gy = ty + LABEL_H * 0.5
 
     # draw label
-    dwgLabels.add(dwg.text(entry["label"], insert=(tx, ty), text_anchor="middle", alignment_baseline="middle", font_size=14))
+    dwgLabels.add(dwg.text(entry["label"], insert=(tx, ty), text_anchor="middle", alignment_baseline="middle", font_size=13))
 
     # draw rectangle
     group.add(dwg.rect(insert=(gx, gy), size=(gw, gh), fill="none", stroke="#000000", stroke_width=2))
