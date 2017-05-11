@@ -72,7 +72,7 @@ DATA_CURVE_WIDTH = 3
 
 # config
 SLR_KEY_PRIORITY = ["Jason-2", "Jason-1", "TOPEX/Poseidon", "GMSL (mm)"]
-COLORS = ["B", "G", "Y", "O", "R", "V"]
+COLORS = ["W", "Y", "O", "R", "V", "B"]
 AXIS_ROUND_TO_NEAREST = 10
 colorCount = len(COLORS)
 
