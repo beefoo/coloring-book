@@ -28,9 +28,9 @@ WH_PER_BTU = 1.0 / BTU_PER_WH
 # Total energy consumption / U.S. / 2015 / Trillion Btu:
 # http://www.eia.gov/totalenergy/data/annual/
 totalEnergyConsumption = 0
-YYYYMM = "201513"
+YYYYMM = "201613"
 MSN = "TETCBUS"
-filename = "data/energy_consumption.csv"
+filename = "data/energy_consumption_2016.csv"
 with open(filename, 'rb') as f:
     r = csv.reader(f, delimiter=',')
     next(r, None)
@@ -47,8 +47,9 @@ print "Total energy consumption: %s" % totalEnergyConsumption
 # Renewable energy production / U.S. / 2015 / Trillion Btu:
 # http://www.eia.gov/totalenergy/data/annual/
 totalREProduction = 0
-YYYYMM = "201513"
+YYYYMM = "201613"
 MSN = "REPRBUS"
+filename = "data/energy_production_2016.csv"
 with open(filename, 'rb') as f:
     r = csv.reader(f, delimiter=',')
     next(r, None)
