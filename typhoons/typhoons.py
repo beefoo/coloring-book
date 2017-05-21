@@ -36,6 +36,8 @@ MAX_AREA = math.pi * math.pow(MAX_RADIUS, 2)
 LABEL_H_BTM = 0.16 * HEIGHT
 LABEL_H_TOP = 0.12 * HEIGHT
 MIN_X_MARGIN = 0.45 * DPI
+LABEL_H_STEP = 24
+MAX_YEAR_STEP = 5
 MARGIN_Y = (1.0 * HEIGHT - LABEL_H_BTM - LABEL_H_TOP - MAX_RADIUS * 2) / 3
 TIMELINE_Y = PAD + HEIGHT - LABEL_H_BTM - MARGIN_Y
 cy = TIMELINE_Y - MARGIN_Y - MAX_RADIUS
@@ -97,6 +99,7 @@ xStart = PAD + data[0]["radius"]
 xEnd = PAD + WIDTH - data[-1]["radius"]
 timelineW = xEnd - xStart
 yearW = 1.0 * timelineW / totalYears
+data = sorted(data, key=lambda k: -k["Year"])
 
 # Init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
@@ -109,6 +112,7 @@ dwgLines.add(dwg.line(start=(xStart, TIMELINE_Y), end=(xEnd, TIMELINE_Y), stroke
 
 # Draw data
 prevLX = MIN_X_MARGIN * -1
+labelH = LABEL_H_STEP
 for i, d in enumerate(data):
     radius = d["radius"]
     px = mu.norm(d["Year"], startYear, endYear)
@@ -120,24 +124,31 @@ for i, d in enumerate(data):
     # draw circle on timeline
     dwgCircles.add(dwg.circle(center=(cx, TIMELINE_Y), r=3, fill="#000000"))
 
-    # name of typhoon
-    lx = cx
-    ly = labelY0
-    if lx < prevLX + MIN_X_MARGIN:
-        lx = prevLX + MIN_X_MARGIN
-    lPad = 6
-    labelString = d["label"]
-    if i <= 0:
-        labelString = d["Type"] + " " + labelString
-    dwgLabels.add(dwg.text(labelString, insert=(lx, ly-lPad), text_anchor="start", font_size=12, dominant_baseline="central", transform="rotate(60,%s,%s)" % (lx, ly)))
-    dwgLabels.add(dwg.text(str(d["Year"]), insert=(lx, ly+lPad), text_anchor="start", font_size=12, dominant_baseline="central", transform="rotate(60,%s,%s)" % (lx, ly)))
+    # draw line from circle to timeline
+    p1 = (cx, cy+radius)
+    p2 = (cx, TIMELINE_Y)
+    dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1))
+
+    if i > 0:
+        prevYear = data[i-1]["Year"]
+        if prevYear - d["Year"] > MAX_YEAR_STEP:
+            labelH = LABEL_H_STEP
+        else:
+            labelH += LABEL_H_STEP
 
     # draw label line
-    p1 = (lx, ly-lPad)
-    p2 = (cx, TIMELINE_Y)
-    p3 = (cx, cy+radius)
-    dwgLines.add(dwg.line(start=p1, end=p2, stroke="#000000", stroke_width=1, stroke_dasharray="5,2"))
-    dwgLines.add(dwg.line(start=p2, end=p3, stroke="#000000", stroke_width=1))
+    lPad = 6
+    p3 = (cx, TIMELINE_Y + labelH)
+    p4 = (cx + lPad, TIMELINE_Y + labelH)
+    dwgLines.add(dwg.polyline([p2, p3, p4], stroke="#000000", stroke_width=1, stroke_dasharray="5,2", fill="none"))
+
+    # draw label
+    labelString = d["label"] + " " + str(d["Year"])
+    if i >= len(data)-1:
+        labelString = d["Type"] + " " + labelString
+    lx = p4[0] + lPad
+    ly = p4[1]
+    dwgLabels.add(dwg.text(labelString, insert=(lx, ly), text_anchor="start", font_size=12, alignment_baseline="middle"));
 
     # dead or missing
     if i <=0 or i >= len(data)-1:
