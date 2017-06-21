@@ -45,10 +45,10 @@ AXES_W = 70
 TICK_LEN = 5
 PAD_TOP = 10
 FORCING_HEADERS = [
-    {"name": "Orbital changes", "label": "Earth's orbital changes"},
-    {"name": "Solar", "label": "Solar temperature"},
-    {"name": "Volcanic", "label": "Volcanic activity"},
-    {"name": "Greenhouse gases", "label": "Greenhouse gases"}
+    {"name": "Orbital changes", "label": "Effect of Earth's orbital changes on global temperature"},
+    {"name": "Solar", "label": "Effect of solar temperature on global temperature""},
+    {"name": "Volcanic", "label": "Effect of volcanic activity on global temperature""},
+    {"name": "Greenhouse gases", "label": "Effect of greenhouse gases on global temperature"}
 ]
 
 def parseNumber(string):
@@ -140,6 +140,12 @@ for ri, r in enumerate(rows):
 
     # draw axes
     dwgData.add(dwg.line(start=(x0, y0), end=(x0, y1), stroke_width=1, stroke="#000000"))
+
+    if ri <= 0:
+        yp = mu.norm(0, RANGE[0], RANGE[1])
+        y = y0 - rowHeight * yp
+        dwgLabels.add(dwg.text(str(START_YEAR), insert=(x0+1, y+1), text_anchor="start", alignment_baseline="before-edge", font_size=11))
+        dwgLabels.add(dwg.text(str(END_YEAR), insert=(x1, y+1), text_anchor="end", alignment_baseline="before-edge", font_size=11))
 
     # draw axes labels
     r0 = RANGE[0]
