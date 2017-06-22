@@ -67,7 +67,7 @@ def readCSV(filename):
 
 # Retrieve data
 data = readCSV(args.INPUT_FILE)
-dataKey = "B2N_lc_co2"
+dataKey = "B2N_co2"
 count = len(data)
 
 # Normalize data
@@ -255,7 +255,7 @@ for i, d in enumerate(data):
 
     print len(footprints)
     numbersToAdd = d["value"] - len(valueNumbers)
-    valueNumbers += [i+1] * numbersToAdd
+    valueNumbers += [i] * numbersToAdd
     # draw path
     for k, footprint in enumerate(footprints):
         dwgFootprints.add(dwg.polygon(points=footprint, stroke_width=1, stroke="#000000", fill="none"))
