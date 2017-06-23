@@ -1,0 +1,8 @@
+Label,Passengers,g_co2_pkm,BosToNycKm,B2N_co2,Svg
+Bicycle,1,0,346,0,lines_bicycle.svg
+Train,156,14,346,5,lines_train.svg
+Car pool,4,55,346,19,lines_carpool.svg
+Bus,12.7,68,346,24,lines_bus.svg
+Scooter,1.2,72,346,25,lines_scooter.svg
+Car,1.5,158,346,55,lines_car.svg
+Plane,88,285,306,87,lines_plane.svg
