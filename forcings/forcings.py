@@ -45,10 +45,10 @@ AXES_W = 70
 TICK_LEN = 5
 PAD_TOP = 10
 FORCING_HEADERS = [
-    {"name": "Orbital changes", "label": "Earth's orbital changes"},
-    {"name": "Solar", "label": "Solar temperature"},
-    {"name": "Volcanic", "label": "Volcanic activity"},
-    {"name": "Greenhouse gases", "label": "Greenhouse gases"}
+    {"name": "Orbital changes", "label": "Effect of Earth's orbital changes on global temperature"},
+    {"name": "Solar", "label": "Effect of solar temperature variation on global temperature"},
+    {"name": "Volcanic", "label": "Effect of volcanic activity on global temperature"},
+    {"name": "Greenhouse gases", "label": "Effect of greenhouse gases on global temperature"}
 ]
 
 def parseNumber(string):
@@ -105,12 +105,12 @@ def getData(rows, colName, startYear, endYear, baseline):
     return d
 
 rows = []
-rows.append({"label": "Observed land and ocean temperature (%s - %s)" % (START_YEAR, END_YEAR), "data": getData(observed, "Annual_Mean", START_YEAR, END_YEAR, oBaseline)})
+rows.append({"label": "Observed global land and ocean temperature (%s - %s)" % (START_YEAR, END_YEAR), "data": getData(observed, "Annual_Mean", START_YEAR, END_YEAR, oBaseline)})
 for header in FORCING_HEADERS:
     rows.append({"label": header["label"], "data": getData(forcings, header["name"], START_YEAR, END_YEAR, fBaseline)})
 
 rowCount = len(rows)
-rowHeight = (HEIGHT - MARGIN * (rowCount-1)) / rowCount - 1.0 * PAD_TOP / rowCount
+rowHeight = (HEIGHT - MARGIN * (rowCount-1)) / rowCount - 2.0 * PAD_TOP / rowCount
 
 # Init svg
 dwg = svgwrite.Drawing(args.OUTPUT_FILE, size=(WIDTH+PAD*2, HEIGHT+PAD*2), profile='full')
@@ -164,7 +164,8 @@ for ri, r in enumerate(rows):
             offsetY = 5
             dwgLabels.add(dwg.text("%s-%s" % (BASELINE_YEAR_START, BASELINE_YEAR_END), insert=(x0-TICK_LEN*2, y-offsetY), text_anchor="end", alignment_baseline="middle", font_size=11))
             dwgLabels.add(dwg.text("average", insert=(x0-TICK_LEN*2, y+offsetY), text_anchor="end", alignment_baseline="middle", font_size=11))
-
+        elif len(label):
+            dwgLabels.add(dwg.text(label, insert=(x0-TICK_LEN*2, y), text_anchor="end", alignment_baseline="middle", font_size=11))
 
     # end line
     p1 = points[-1]
@@ -172,7 +173,7 @@ for ri, r in enumerate(rows):
         dwgData.add(dwg.line(start=(x1, yc), end=(x1, p1[1]), stroke_width=1, stroke="#000000", stroke_dasharray="5,2"))
 
     # draw label
-    dwgLabels.add(dwg.text(r["label"], insert=(x0 + 10, y1), text_anchor="start", alignment_baseline="before-edge", font_size=16))
+    dwgLabels.add(dwg.text(r["label"], insert=(x0 + 10, y1), text_anchor="start", alignment_baseline="before-edge", font_size=14))
     y0 += MARGIN + rowHeight
 
 dwg.add(dwg.rect(insert=(PAD,PAD), size=(WIDTH, HEIGHT), stroke_width=1, stroke="#000000", fill="none"))
