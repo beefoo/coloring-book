@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Sources:
-# https://docs.google.com/spreadsheets/d/1TAMZLvUrMlxAR4RdDOs928-yoU5RxMrDKIb8tXuOKsc/
-# https://www.rita.dot.gov/bts/sites/rita.dot.gov.bts/files/publications/national_transportation_statistics/html/table_04_20.html
+# https://www.eea.europa.eu/media/infographics/co2-emissions-from-passenger-transport/view
+# https://www.eea.europa.eu/publications/term-report-2014
 
 # Icons:
 # Freepik: http://www.flaticon.com/packs/vehicles
@@ -25,7 +25,7 @@ import lib.svgutils as svgu
 
 # input
 parser = argparse.ArgumentParser()
-parser.add_argument('-in', dest="INPUT_FILE", default="data/emissions_by_mode_of_transport_subset.csv", help="Input file")
+parser.add_argument('-in', dest="INPUT_FILE", default="data/emissions_by_mode_of_transport_eea.csv", help="Input file")
 parser.add_argument('-width', dest="WIDTH", type=float, default=8.5, help="Width of output file")
 parser.add_argument('-height', dest="HEIGHT", type=float, default=11, help="Height of output file")
 parser.add_argument('-pad', dest="PAD", type=float, default=0.5, help="Padding of output file")
@@ -41,6 +41,7 @@ ARC_W = 0.25 * DPI
 CENTER_W = 0.1 * WIDTH
 FOOTPRINT_MARGIN = 0.025 * DPI
 ICON_W = 0.625 * DPI
+FOOTPRINT_W_ADJUST = 0.9
 
 def parseNumber(string):
     try:
@@ -67,7 +68,7 @@ def readCSV(filename):
 
 # Retrieve data
 data = readCSV(args.INPUT_FILE)
-dataKey = "B2N_lc_co2"
+dataKey = "B2N_co2"
 count = len(data)
 
 # Normalize data
@@ -159,7 +160,7 @@ mrx2 = rx1 - j * (ARC_MARGIN + ARC_W)
 mry2 = ry1 - j * (ARC_MARGIN + ARC_W)
 maxArcLen = CENTER_W * (arcs + 1) + mu.ellipseCircumference(mrx1, mry1) * 0.5 * halfArcs + mu.ellipseCircumference(mrx2, mry2) * halfArcs
 stepY = halfTurnH - arcsW + ARC_W
-footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * 0.933
+footprintW = 1.0 * (maxArcLen - FOOTPRINT_MARGIN * (maxTransport["value"]-1)) / maxTransport["value"] * FOOTPRINT_W_ADJUST
 
 # Check for arc validity
 if footprintW <= 0:
@@ -255,7 +256,7 @@ for i, d in enumerate(data):
 
     print len(footprints)
     numbersToAdd = d["value"] - len(valueNumbers)
-    valueNumbers += [i+1] * numbersToAdd
+    valueNumbers += [i] * numbersToAdd
     # draw path
     for k, footprint in enumerate(footprints):
         dwgFootprints.add(dwg.polygon(points=footprint, stroke_width=1, stroke="#000000", fill="none"))
