@@ -63,8 +63,8 @@ INUNDATION_LABELS = [
     {"value": 10, "label": "6 to 10", "key": "Y", "color": "yellow"},
     {"value": 20, "label": "11 to 20", "key": "O", "color": "orange"},
     {"value": 40, "label": "21 to 40", "key": "R", "color": "red"},
-    {"value": 60, "label": "41 to 60", "key": "M", "color": "maroon"},
-    {"value": 100, "label": "Over 60", "key": "B", "color": "brown"}
+    {"value": 60, "label": "41 to 60", "key": "B", "color": "brown"},
+    {"value": 100, "label": "Over 60", "key": "K", "color": "black"}
 ]
 
 stationData = {}
