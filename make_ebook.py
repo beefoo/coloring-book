@@ -3,6 +3,7 @@
 # Description: generates set of images that can be printed as a book
 # Example usage:
 #   python make_ebook.py -basedir ../../Dropbox/coloring_book/book/
+#   python make_ebook.py -basedir ../../Dropbox/coloring_book/book/ -printing False -manifests sequence_default_text
 
 import argparse
 import csv
